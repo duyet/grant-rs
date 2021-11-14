@@ -17,8 +17,8 @@ enum Command {
     /// Generate project
     Gen {
         /// The target folder
-        #[structopt(short, long, default_value = ".")]
-        target: String,
+        #[structopt(short, long, default_value = ".", parse(from_os_str))]
+        target: PathBuf,
     },
 
     /// Apply changes
@@ -40,7 +40,7 @@ enum Command {
 fn main() -> Result<()> {
     match Cli::from_args().cmd {
         Command::Gen { target } => {
-            println!("Generated to {}", target);
+            grant::gen::gen(&target);
         }
 
         Command::Apply { file, dryrun, conn } => {
