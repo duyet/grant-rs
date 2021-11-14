@@ -1,10 +1,6 @@
-name: Build & Test
+name: Release
 
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+on: [release]
 
 env:
   CARGO_TERM_COLOR: always
@@ -21,7 +17,15 @@ jobs:
           toolchain: stable
 
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --release --all-features --verbose
 
       - name: Run tests
         run: cargo test --verbose
+
+      - name: Crate login
+        run: cargo login ${CRATES_IO_TOKEN}
+        env:
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+
+      - name: Publish
+        run: cargo publish
