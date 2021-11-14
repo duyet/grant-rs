@@ -5,7 +5,7 @@ use structopt::StructOpt;
 #[derive(Debug)]
 struct CustomError(String);
 
-/// Search for a pattern in a file and display the lines that contain it.
+/// Manage database roles and privileges in GitOps style
 #[derive(Debug, StructOpt)]
 struct Cli {
     #[structopt(subcommand)]
@@ -30,6 +30,10 @@ enum Command {
         /// Dry run
         #[structopt(short, long)]
         dryrun: bool,
+
+        /// Connection string
+        #[structopt(short, long)]
+        conn: Option<String>,
     },
 }
 
@@ -37,12 +41,14 @@ fn main() -> Result<()> {
     match Cli::from_args().cmd {
         Command::Gen { target } => {
             println!("Generated to {}", target);
-        },
+        }
 
-        Command::Apply { file, dryrun } => {
-            println!("Applying from {:?}, dry-run = {}", file, dryrun);
-        },
-
+        Command::Apply { file, dryrun, conn } => {
+            println!(
+                "Applying from {:?}, dry-run = {}, conn = {:?}",
+                file, dryrun, conn
+            );
+        }
     }
 
     Ok(())

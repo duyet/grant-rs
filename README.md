@@ -13,7 +13,21 @@ cargo install grant
 Using `grant` tool:
 
 ```bash
-grant --help
+$ grant --help
+
+Manage database roles and privileges in GitOps style
+
+USAGE:
+    grant <SUBCOMMAND>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+SUBCOMMANDS:
+    apply    Apply changes
+    gen      Generate project
+    help     Prints this message or the help of the given subcommand(s)
 ```
 
 ## Generate project structure

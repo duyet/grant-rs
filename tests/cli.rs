@@ -3,13 +3,38 @@ use predicates::prelude::*; // Used for writing assertions
 use std::process::Command; // Run programs
 
 #[test]
-fn file_doesnt_exists() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("grant")?;
+fn missing_arguments() {
+    let mut cmd = Command::main_binary().unwrap();
+    cmd.assert().failure();
+}
 
-    cmd.arg("test/file/doesnt/exist");
-    cmd.assert()
+#[test]
+/// `./grant apply` must have --file or -f args
+fn apply_missing_arguments() {
+    let mut cmd = Command::main_binary().unwrap();
+    cmd.arg("apply")
+        .assert()
         .failure()
-        .stderr(predicate::str::contains("No such file or directory"));
+        .stderr(predicate::str::contains("--file"));
+}
 
-    Ok(())
+#[test]
+/// `./grant gen` without any args can generate project in current folder
+fn gen_without_any_args() {
+    let mut cmd = Command::main_binary().unwrap();
+    cmd.arg("gen")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Generated"));
+}
+
+#[test]
+fn gen_target_args() {
+    let mut cmd = Command::main_binary().unwrap();
+    cmd.arg("gen")
+        .arg("--target")
+        .arg("/tmp")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("/tmp"));
 }
