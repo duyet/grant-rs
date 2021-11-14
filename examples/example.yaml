@@ -1,0 +1,36 @@
+roles:
+  - name: role_database_level
+    level: DATABASE
+    grants:
+      - CREATE
+      - TEMP
+    databases:
+      - db1
+      - db2
+  - name: role_schema_level
+    level: SCHEMA
+    grants:
+      - CREATE
+      - USAGE
+    databases:
+      - db1
+      - db2
+    schemas:
+      - common
+      - dwh1
+      - dwh2
+  - name: role_all_schema
+    level: SCHEMA
+    grants:
+      - CREATE
+      - USAGE
+    databases:
+      - d1
+      - db2
+
+users:
+  - name: duyet
+    roles:
+      - name: role_database_level
+      - name: role_all_schema
+      - name: role_schema_level
