@@ -1,272 +1,180 @@
-extern crate yaml_rust;
-
-use anyhow::{Context, Result};
-use indoc::indoc;
-use std::fs;
+use crate::util;
+use anyhow::{Context, Error, Result, *};
+use log::{debug, info};
 use std::path::PathBuf;
-use yaml_rust::{Yaml, YamlLoader};
-use yaml_validator::{Context as C, Validate};
+use yaml_rust::yaml::Hash;
+use yaml_rust::Yaml;
 
-/// Get file content
-pub fn get_content(path: &PathBuf) -> Result<String> {
-    let content =
-        fs::read_to_string(path).with_context(|| format!("could not read file `{:?}`", path))?;
+pub fn apply(file: &PathBuf, dryrun: bool, conn: Option<String>) {
+    info!(
+        "Try to apply definition from {:?}, dryrun={}, conn={:?}",
+        file, dryrun, conn
+    );
 
-    Ok(content)
+    let config = util::read_config(file).unwrap();
+    // debug!("Roles: {:#?}", &config["roles"][0]);
+
+    for user in config["users"].as_vec().expect("must have users").iter() {
+        let _current_user = user.as_hash().unwrap();
+
+        let _name = _current_user
+            .get(&Yaml::from_str("name"))
+            .expect("users[*].name is required")
+            .as_str()
+            .unwrap();
+
+        let _current_roles: Vec<_> = _current_user
+            .get(&Yaml::from_str("roles"))
+            .expect("users[*].roles is required")
+            .as_vec()
+            .unwrap()
+            .iter()
+            .map(|role_name| {
+                role_name
+                    .as_hash()
+                    .unwrap()
+                    .get(&Yaml::from_str("name"))
+                    .expect("roles[*].name is required")
+                    .as_str()
+                    .unwrap()
+                    .to_string()
+            })
+            .map(|role_name| lookup_role(&config, role_name).unwrap())
+            .collect();
+
+        for role in _current_roles.iter() {
+            let sql = format!(
+                "GRANT {} TO {};",
+                generate_sql_by_role(&role).unwrap(),
+                _name
+            );
+            debug!("SQL = {}", sql);
+        }
+    }
 }
 
-/// Read yaml config file and assert schema
-pub fn read_config(path: &PathBuf) -> Result<Yaml> {
-    let content = get_content(path)?;
-    let config = YamlLoader::load_from_str(&content)
-        .expect("could not parse YAML")
-        .remove(0);
+fn lookup_role<'a>(config: &'a Yaml, name: String) -> Result<&'a Hash> {
+    for role in config["roles"].as_vec().unwrap().iter() {
+        let role_name = role
+            .as_hash()
+            .unwrap()
+            .get(&Yaml::from_str("name"))
+            .unwrap()
+            .as_str()
+            .unwrap();
+        if role_name == name {
+            return Ok(role.as_hash().unwrap());
+        }
+    }
 
-    validate_schema(&config);
-
-    Ok(config)
+    Err(anyhow!("role {} not found", name))
 }
 
-/// Validate YAML with schema
-pub fn validate_schema(yaml: &Yaml) {
-    let schema_yaml = YamlLoader::load_from_str(indoc! { r#"
-        ---
-        uri: root
-        schema:
-          type: object
-          items:
-            roles:
-              type: array
-              # items:
-              #   anyOf:
-              #     $ref: role-database
-              #     $ref: role-schema
-              #     $ref: role-table
-              #     $ref: role-func-or-procn
-              #     $ref: role-language
-            users:
-              type: array
-              items:
-                $ref: user
+fn generate_sql_by_role(role: &Hash) -> Result<String> {
+    // debug!("Role: {:#?}", role);
 
-        ---
-        uri: role-database
-        schema:
-          type: object
-          items:
-            name:
-              type: string
-            level:
-              type: string
-            grants:
-              $ref: type-array-string
-            databases:
-              $ref: type-array-string
-        ---
-        uri: role-schema
-        schema:
-          type: object
-          items:
-            name:
-              type: string
-            level:
-              type: string
-            grants:
-              $ref: type-array-string
-            databases:
-              $ref: type-array-string
-            schemas:
-              $ref: type-array-string
-        ---
-        uri: role-table
-        schema:
-          type: object
-          items:
-            name:
-              type: string
-            level:
-              type: string
-            grants:
-              $ref: type-array-string
-            databases:
-              $ref: type-array-string
-            schemas:
-              $ref: type-array-string
-            tables:
-              $ref: type-array-string
-        ---
-        uri: role-func-or-proc
-        schema:
-          type: object
-          items:
-            name:
-              type: string
-            level:
-              type: string
-            grants:
-              $ref: type-array-string
-            databases:
-              $ref: type-array-string
-            schemas:
-              $ref: type-array-string
-            functions:
-              $ref: type-array-string
-        ---
-        uri: role-language
-        schema:
-          type: object
-          items:
-            name:
-              type: string
-            level:
-              type: string
-            grants:
-              $ref: type-array-string
-            languages:
-              $ref: type-array-string
-        ---
-        uri: type-array-string
-        schema:
-          type: array
-          items:
-            type: string
-        ---
-        uri: user
-        schema:
-          type: object
-          items:
-            name:
-              type: string
-            roles:
-              type: array
-              items:
-                type: object
-                items:
-                  name:
-                    type: string
-        "#})
-    .unwrap();
+    let level = role
+        .get(&Yaml::from_str("level"))
+        .expect("level is required")
+        .as_str()
+        .unwrap();
 
-    // println!("{:#?}", schema_yaml);
+    let grants: Vec<_> = role
+        .get(&Yaml::from_str("grants"))
+        .expect("grants is required")
+        .as_vec()
+        .unwrap()
+        .iter()
+        .map(|x| x.as_str().unwrap())
+        .collect();
 
-    let context = C::try_from(&schema_yaml).unwrap();
-    let schema = context.get_schema("root").unwrap();
-    schema.validate(&context, &yaml).unwrap();
+    let databases: Vec<_> = role
+        .get(&Yaml::from_str("databases"))
+        .expect("databases is required")
+        .as_vec()
+        .unwrap()
+        .iter()
+        .map(|x| x.as_str().unwrap())
+        .collect();
+
+    let default_schemas = Yaml::Array(Vec::new());
+    let schemas: Vec<_> = role
+        .get(&Yaml::from_str("schemas"))
+        .unwrap_or(&default_schemas)
+        .as_vec()
+        .unwrap()
+        .iter()
+        .map(|x| x.as_str().unwrap())
+        .collect();
+
+    let default_tables = Yaml::Array(Vec::new());
+    let tables: Vec<_> = role
+        .get(&Yaml::from_str("tables"))
+        .unwrap_or(&default_tables)
+        .as_vec()
+        .unwrap()
+        .iter()
+        .map(|x| x.as_str().unwrap())
+        .collect();
+
+    match level {
+        "DATABASE" => Ok(grant_database(&grants, &databases).unwrap()),
+        "SCHEMA" => Ok(grant_schema(&grants, &schemas).unwrap()),
+        "TABLE" => Ok(grant_table(&grants, &schemas, &tables).unwrap()),
+        _ => Err(anyhow!("Invalid `level`")),
+    }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::io::Write;
-    use tempfile::NamedTempFile;
+// GRANT { { CREATE | TEMPORARY | TEMP } [,...] | ALL [ PRIVILEGES ] }
+// ON DATABASE db_name [, ...]
+// TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
+fn grant_database(grants: &Vec<&str>, databases: &Vec<&str>) -> Result<String> {
+    // TODO: print Vec<&str>
+    let grants_str = if grants.iter().any(|&i| i == "ALL" || i == "*") {
+        "ALL PRIVILEGES".to_string()
+    } else {
+        grants.join(", ")
+    };
+    let databases_str = databases.join(", ");
+    let sql = format!("{} ON DATABASE {}", grants_str, databases_str);
 
-    #[test]
-    fn test_get_content() {
-        let _text = "content";
-        let mut file = NamedTempFile::new().expect("failed to create temp file");
-        file.write(_text.as_bytes())
-            .expect("failed to write to temp file");
-        let path = PathBuf::from(file.path().to_str().unwrap());
+    Ok(sql)
+}
 
-        let content = get_content(&path).expect("failed to get content");
-        assert_eq!(_text, content);
-    }
+// GRANT { { CREATE | USAGE } [,...] | ALL [ PRIVILEGES ] }
+// ON SCHEMA schema_name [, ...]
+// TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
+fn grant_schema(grants: &Vec<&str>, schemas: &Vec<&str>) -> Result<String> {
+    let grants_str = if grants.iter().any(|&i| i == "ALL" || i == "*") {
+        "ALL PRIVILEGES".to_string()
+    } else {
+        grants.join(", ")
+    };
+    let schemas_str = schemas.join(", ");
 
-    // Test config with valid YAML
-    #[test]
-    fn test_read_config_basic_config() {
-        let _text = indoc! {"
-            roles: []
-            users: []
-        "};
+    let sql = format!("{} ON SCHEMA {:?}", grants_str, schemas_str);
 
-        let mut file = NamedTempFile::new().expect("failed to create temp file");
-        file.write(_text.as_bytes())
-            .expect("failed to write to temp file");
-        let path = PathBuf::from(file.path().to_str().unwrap());
+    Ok(sql)
+}
 
-        let config = read_config(&path).unwrap();
+// GRANT { { SELECT | INSERT | UPDATE | DELETE | DROP | REFERENCES } [,...] | ALL [ PRIVILEGES ] }
+// ON { [ TABLE ] table_name [, ...] | ALL TABLES IN SCHEMA schema_name [, ...] }
+// TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
+fn grant_table(grants: &Vec<&str>, schemas: &Vec<&str>, tables: &Vec<&str>) -> Result<String> {
+    let grants_str = if grants.iter().any(|&i| i == "ALL" || i == "*") {
+        "ALL PRIVILEGES".to_string()
+    } else {
+        grants.join(", ")
+    };
 
-        assert!(config["roles"].as_vec().unwrap().len() == 0);
-        assert!(config["users"].as_vec().unwrap().len() == 0);
-    }
+    let schemas_str = schemas.join(", ");
+    let tables_str = if tables.iter().any(|&i| i == "ALL" || i == "*") {
+        format!("ALL TABLES IN SCHEMA {}", schemas_str)
+    } else {
+        format!("TABLE {} IN SCHEMA {}", tables.join(", "), schemas_str)
+    };
 
-    #[test]
-    fn test_read_config_full_config() {
-        let _text = indoc! {"
-            roles:
-              - name: role_database_level
-                level: DATABASE
-                grants:
-                  - CREATE
-                  - TEMP
-                databases:
-                  - db1
-                  - db2
-              - name: role_schema_level
-                level: SCHEMA
-                grants:
-                  - CREATE
-                  - USAGE
-                databases:
-                  - db1
-                  - db2
-                schemas:
-                  - common
-                  - dwh1
-                  - dwh2
-              - name: role_all_schema
-                level: SCHEMA
-                grants:
-                  - CREATE
-                  - USAGE
-                databases:
-                  - db1
-                  - db2
+    let sql = format!("{} ON {}", grants_str, tables_str);
 
-            users:
-              - name: duyet
-                roles:
-                  - name: role_database_level
-                  - name: role_all_schema
-                  - name: role_schema_level
-        "};
-
-        let mut file = NamedTempFile::new().expect("failed to create temp file");
-        file.write(_text.as_bytes())
-            .expect("failed to write to temp file");
-        let path = PathBuf::from(file.path().to_str().unwrap());
-
-        let config = read_config(&path).unwrap();
-
-        assert!(config["roles"].as_vec().unwrap().len() == 3);
-        assert!(config["users"].as_vec().unwrap().len() == 1);
-    }
-
-    // Test read_config with invalid YAML
-    #[test]
-    #[should_panic]
-    fn test_read_config_invalid_config() {
-        let _text = indoc! {"
-            a: 1
-            b: str
-            c:
-            d:
-              - x1
-              - x2
-            e:
-              x: 1
-              y: 2
-            f:
-              x: 1
-              y: 2"};
-
-        let mut file = NamedTempFile::new().expect("failed to create temp file");
-        file.write(_text.as_bytes())
-            .expect("failed to write to temp file");
-        let path = PathBuf::from(file.path().to_str().unwrap());
-
-        // should panic
-        read_config(&path).unwrap();
-    }
+    Ok(sql)
 }

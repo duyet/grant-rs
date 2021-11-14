@@ -25,7 +25,7 @@ fn gen_without_any_args() {
     cmd.arg("gen")
         .assert()
         .success()
-        .stdout(predicate::str::contains("Generated"));
+        .stderr(predicate::str::contains("Generated"));
 }
 
 #[test]
@@ -36,5 +36,5 @@ fn gen_target_args() {
         .arg("/tmp")
         .assert()
         .success()
-        .stdout(predicate::str::contains("/tmp"));
+        .stderr(predicate::str::contains("/tmp"));
 }

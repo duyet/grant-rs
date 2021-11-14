@@ -7,6 +7,7 @@ roles:
     databases:
       - db1
       - db2
+
   - name: role_schema_level
     level: SCHEMA
     grants:
@@ -19,6 +20,7 @@ roles:
       - common
       - dwh1
       - dwh2
+
   - name: role_all_schema
     level: SCHEMA
     grants:

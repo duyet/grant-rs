@@ -1,4 +1,5 @@
 use anyhow::Result;
+use env_logger::Env;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -38,16 +39,17 @@ enum Command {
 }
 
 fn main() -> Result<()> {
+    // Logger config, for debugger export RUST_LOG=debug
+    let env = Env::new().default_filter_or("info");
+    env_logger::init_from_env(env);
+
     match Cli::from_args().cmd {
         Command::Gen { target } => {
             grant::gen::gen(&target);
         }
 
         Command::Apply { file, dryrun, conn } => {
-            println!(
-                "Applying from {:?}, dry-run = {}, conn = {:?}",
-                file, dryrun, conn
-            );
+            grant::apply::apply(&file, dryrun, conn);
         }
     }
 
