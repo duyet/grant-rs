@@ -1,3 +1,5 @@
+cluster:
+
 roles:
   - name: role_database_level
     level: DATABASE
@@ -32,6 +34,11 @@ roles:
 
 users:
   - name: duyet
+    roles:
+      - name: role_database_level
+      - name: role_all_schema
+      - name: role_schema_level
+  - name: duyet2
     roles:
       - name: role_database_level
       - name: role_all_schema

@@ -22,6 +22,13 @@ enum Command {
         target: PathBuf,
     },
 
+    /// Generate random password
+    GenPass {
+        /// The target folder
+        #[structopt(short, long, default_value = "16")]
+        length: u8,
+    },
+
     /// Apply changes
     Apply {
         /// The path to the file to read
@@ -46,6 +53,10 @@ fn main() -> Result<()> {
     match Cli::from_args().cmd {
         Command::Gen { target } => {
             grant::gen::gen(&target);
+        }
+
+        Command::GenPass { length } => {
+            grant::gen::gen_password(length);
         }
 
         Command::Apply { file, dryrun, conn } => {

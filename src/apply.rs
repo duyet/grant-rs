@@ -1,6 +1,6 @@
 use crate::util;
-use anyhow::{Context, Error, Result, *};
-use log::{debug, info};
+use anyhow::{Result, *};
+use log::info;
 use std::path::PathBuf;
 use yaml_rust::yaml::Hash;
 use yaml_rust::Yaml;
@@ -48,7 +48,7 @@ pub fn apply(file: &PathBuf, dryrun: bool, conn: Option<String>) {
                 generate_sql_by_role(&role).unwrap(),
                 _name
             );
-            debug!("SQL = {}", sql);
+            info!("SQL = {}", sql);
         }
     }
 }
@@ -152,7 +152,7 @@ fn grant_schema(grants: &Vec<&str>, schemas: &Vec<&str>) -> Result<String> {
     };
     let schemas_str = schemas.join(", ");
 
-    let sql = format!("{} ON SCHEMA {:?}", grants_str, schemas_str);
+    let sql = format!("{} ON SCHEMA {}", grants_str, schemas_str);
 
     Ok(sql)
 }
