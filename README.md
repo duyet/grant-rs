@@ -35,7 +35,7 @@ SUBCOMMANDS:
 ```bash
 grant gen --target duyet-cluster
 
-# or 
+# or
 mkdir duyet-cluster && cd $_
 grant gen --target .
 ```
@@ -45,13 +45,29 @@ grant gen --target .
 Dry run:
 
 ```bash
-grant apply --dryrun -f ./duyet-cluster/roles.yaml
+grant apply --dryrun -f ./examples/example.yaml
 ```
 
 Apply to cluster:
 
 ```bash
-grant apply -f ./duyet-cluster/roles.yaml --conn postgres://localhost:5432
+grant apply -f ./examples/example.yaml
+
+# [2021-11-15T03:37:38Z INFO  grant::apply] Try to apply definition from "./examples/example.yaml", dryrun=false, conn=None
+# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, TEMP ON DATABASE db1, db2 TO duyet;
+# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, USAGE ON SCHEMA  TO duyet;
+# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, USAGE ON SCHEMA common, dwh1, dwh2 TO duyet;
+# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, TEMP ON DATABASE db1, db2 TO duyet2;
+# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, USAGE ON SCHEMA  TO duyet2;
+# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, USAGE ON SCHEMA common, dwh1, dwh2 TO duyet2;
+```
+
+## Generate random password
+
+```bash
+$ grant gen-pass
+
+Generated password: q)ItTjN$EXlkF@Tl
 ```
 
 # Developement
@@ -59,8 +75,11 @@ grant apply -f ./duyet-cluster/roles.yaml --conn postgres://localhost:5432
 Clone the repo:
 
 ```bash
-git clone https://github.com/duyet/grant.rs && cd grant.rs 
+git clone https://github.com/duyet/grant.rs && cd grant.rs
 cargo test
 cargo build
 ```
 
+# LICENSE
+
+MIT

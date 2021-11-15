@@ -1,5 +1,3 @@
-cluster:
-
 roles:
   - name: role_database_level
     level: DATABASE
