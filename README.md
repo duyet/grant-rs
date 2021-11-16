@@ -1,6 +1,6 @@
 # grant.rs
 
-Manage database roles and privileges in GitOps style.
+Manage Redshift database roles and privileges in GitOps style.
 
 # Usage
 
@@ -79,6 +79,12 @@ git clone https://github.com/duyet/grant.rs && cd grant.rs
 cargo test
 cargo build
 ```
+
+# TODO
+
+- [ ] Support store encrypted password in Git
+- [ ] Support Postgres
+- [ ] Visuallization (who can see what?)
 
 # LICENSE
 

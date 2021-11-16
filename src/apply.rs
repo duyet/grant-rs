@@ -12,16 +12,21 @@ pub fn apply(file: &PathBuf, dryrun: bool, conn: Option<String>) {
     );
 
     let config = util::read_config(file).unwrap();
-    // debug!("Roles: {:#?}", &config["roles"][0]);
 
     for user in config["users"].as_vec().expect("must have users").iter() {
         let _current_user = user.as_hash().unwrap();
 
-        let _name = _current_user
+        let _user_name = _current_user
             .get(&Yaml::from_str("name"))
             .expect("users[*].name is required")
             .as_str()
             .unwrap();
+
+        // Get current roles from Database
+        // and describe roles from Yaml
+        // Detect changes
+        //   - None -> True => GRANT
+        //   - True -> None => REVOKE
 
         let _current_roles: Vec<_> = _current_user
             .get(&Yaml::from_str("roles"))
@@ -46,7 +51,7 @@ pub fn apply(file: &PathBuf, dryrun: bool, conn: Option<String>) {
             let sql = format!(
                 "GRANT {} TO {};",
                 generate_sql_by_role(&role).unwrap(),
-                _name
+                _user_name
             );
             info!("SQL = {}", sql);
         }
@@ -118,10 +123,16 @@ fn generate_sql_by_role(role: &Hash) -> Result<String> {
         .collect();
 
     match level {
-        "DATABASE" => Ok(grant_database(&grants, &databases).unwrap()),
-        "SCHEMA" => Ok(grant_schema(&grants, &schemas).unwrap()),
-        "TABLE" => Ok(grant_table(&grants, &schemas, &tables).unwrap()),
-        _ => Err(anyhow!("Invalid `level`")),
+        "DATABASE" => Ok(grant_database(&grants, &databases)
+            .unwrap_or_else(|err| panic!("error on {:?}: {:#?}", role, err))),
+        "SCHEMA" => Ok(grant_schema(&grants, &schemas)
+            .unwrap_or_else(|err| panic!("error on {:?}: {:#?}", role, err))),
+        "TABLE" => Ok(grant_table(&grants, &schemas, &tables)
+            .unwrap_or_else(|err| panic!("error on {:?}: {:#?}", role, err))),
+        "FUNCTION" | "PROCEDURE" | "LANGUAGE" => Err(anyhow!("Not implemented yet")),
+        _ => Err(anyhow!(
+            "Invalid `level`, should be: DATABASE, SCHEMA or TABLE"
+        )),
     }
 }
 
@@ -145,6 +156,10 @@ fn grant_database(grants: &Vec<&str>, databases: &Vec<&str>) -> Result<String> {
 // ON SCHEMA schema_name [, ...]
 // TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
 fn grant_schema(grants: &Vec<&str>, schemas: &Vec<&str>) -> Result<String> {
+    if schemas.len() == 0 {
+        return Err(anyhow!("schemas is required"));
+    }
+
     let grants_str = if grants.iter().any(|&i| i == "ALL" || i == "*") {
         "ALL PRIVILEGES".to_string()
     } else {

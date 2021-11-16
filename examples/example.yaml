@@ -12,7 +12,6 @@ roles:
     level: SCHEMA
     grants:
       - CREATE
-      - USAGE
     databases:
       - db1
       - db2
@@ -22,13 +21,17 @@ roles:
       - dwh2
 
   - name: role_all_schema
-    level: SCHEMA
+    level: TABLE
     grants:
-      - CREATE
-      - USAGE
+      - SELECT
+      - INSERT
+      - UPDATE
     databases:
-      - d1
-      - db2
+      - db1
+    schemas:
+      - common
+    tables:
+      - ALL
 
 users:
   - name: duyet
