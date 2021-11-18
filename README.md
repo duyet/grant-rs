@@ -45,7 +45,8 @@ grant gen --target .
 Dry run:
 
 ```bash
-grant apply --dryrun -f ./examples/example.yaml
+export DB_URL="postgres://postgres:postgres@localhost:5439/postgres"
+grant apply --dryrun -f ./examples/example.yaml --conn=$DB_URL
 ```
 
 Apply to cluster:
@@ -76,8 +77,20 @@ Clone the repo:
 
 ```bash
 git clone https://github.com/duyet/grant.rs && cd grant.rs
+```
+
+Postgres is required for testing, you might need to use the `docker-compose.yaml`:
+
+```bash
+docker-compose up -d
+```
+
+Make sure you have connection to `postgres://postgres:postgres@localhost:5432/postgres`.
+
+To run the unittest:
+
+```bash
 cargo test
-cargo build
 ```
 
 # TODO

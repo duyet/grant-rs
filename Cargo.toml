@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Duyet Le <me@duyet.net>"]
 license = "MIT"
-description = "A tool to search files"
+description = "Manage database roles and privileges in GitOps style"
 readme = "README.md"
 
 
