@@ -1,6 +1,8 @@
 # grant.rs
 
-Manage Redshift database roles and privileges in GitOps style.
+An open-source project that aims to manage Redshift database roles and privileges in GitOps style, written in Rust.
+
+*This project is still in the early stages of development and is not ready for any kind of production use or any alpha/beta testing.*
 
 # Usage
 
