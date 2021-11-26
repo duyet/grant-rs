@@ -30,7 +30,7 @@ pub struct UserSchemaRole {
 impl DbConnection {
     /// A convenience function which store the connection string into `connection_info` and then connects to the database.
     ///
-    /// Refer to https://rust-lang-nursery.github.io/rust-cookbook/database/postgres.html
+    /// Refer to <https://rust-lang-nursery.github.io/rust-cookbook/database/postgres.html>
     pub fn connect(conn: &str) -> Self {
         let connection_info = conn.to_string();
         let client = Client::connect(conn, NoTls)

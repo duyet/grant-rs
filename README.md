@@ -87,6 +87,8 @@ docker-compose up -d
 
 Make sure you have connection to `postgres://postgres:postgres@localhost:5432/postgres`.
 
+On the MacOS, the easiest way is install [Postgres.app](https://postgresapp.com).
+
 To run the unittest:
 
 ```bash

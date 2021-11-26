@@ -9,26 +9,6 @@ fn missing_arguments() {
 }
 
 #[test]
-/// `./grant apply` must have --file or -f args
-fn apply_missing_arguments() {
-    let mut cmd = Command::main_binary().unwrap();
-    cmd.arg("apply")
-        .assert()
-        .failure()
-        .stderr(predicate::str::contains("--file"));
-}
-
-#[test]
-/// Test gen-pass
-fn gen_pass() {
-    let mut cmd = Command::main_binary().unwrap();
-    cmd.arg("gen-pass")
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("Generated"));
-}
-
-#[test]
 /// `./grant gen` without any args can generate project in current folder
 fn gen_without_any_args() {
     let mut cmd = Command::main_binary().unwrap();
@@ -47,4 +27,14 @@ fn gen_with_target_args() {
         .assert()
         .success()
         .stderr(predicate::str::contains("/tmp"));
+}
+
+#[test]
+/// Test gen-pass
+fn gen_pass() {
+    let mut cmd = Command::main_binary().unwrap();
+    cmd.arg("gen-pass")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Generated"));
 }
