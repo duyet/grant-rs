@@ -529,7 +529,7 @@ impl Config {
         let mut role_names = HashSet::new();
         for role in &self.roles {
             if role_names.contains(&role.get_name()) {
-                return Err(anyhow!("role name {} is not unique", role.get_name()));
+                return Err(anyhow!("duplicated role name: {}", role.get_name()));
             }
             role_names.insert(role.get_name());
         }
@@ -542,7 +542,7 @@ impl Config {
         let mut user_names: HashSet<String> = HashSet::new();
         for user in &self.users {
             if user_names.contains(&user.name) {
-                return Err(anyhow!("user name {} is not unique", user.name));
+                return Err(anyhow!("duplicated user: {}", user.name));
             }
             user_names.insert(user.name.clone());
         }
@@ -573,7 +573,7 @@ mod tests {
     use tempfile::NamedTempFile;
 
     #[test]
-    #[should_panic(message = "failed to parse config file")]
+    #[should_panic(expected = "failed to parse yaml")]
     fn test_with_basic_config() {
         let _text = "bad yaml content";
         let mut file = NamedTempFile::new().expect("failed to create temp file");
@@ -605,7 +605,7 @@ mod tests {
 
     // Test config with invalid connection type
     #[test]
-    #[should_panic(message = "Unsupported connection type: invalid")]
+    #[should_panic(expected = "Unsupported connection type: invalid")]
     fn test_read_config_invalid_connection_type() {
         let _text = indoc! {"
                  connection:
@@ -699,7 +699,7 @@ mod tests {
 
     // Test config role type database level with invalid grants
     #[test]
-    #[should_panic(message = "Invalid grants: invalid")]
+    #[should_panic(expected = "invalid grant: invalid")]
     fn test_read_config_role_type_database_level_invalid_grants() {
         let _text = indoc! {"
                  connection:
@@ -801,7 +801,7 @@ mod tests {
 
     // Test config role type schema level with invalid grants
     #[test]
-    #[should_panic(message = "Invalid grants: invalid")]
+    #[should_panic(expected = "invalid grant: invalid")]
     fn test_read_config_role_type_schema_level_invalid_grants() {
         let _text = indoc! {"
                  connection:
@@ -911,7 +911,7 @@ mod tests {
 
     // Test config role type table level with invalid grants
     #[test]
-    #[should_panic(message = "Invalid grants: invalid")]
+    #[should_panic(expected = "invalid grant: invalid")]
     fn test_read_config_role_type_table_level_invalid_grants() {
         let _text = indoc! {"
                  connection:
@@ -941,7 +941,7 @@ mod tests {
 
     // Test two role duplicated name error
     #[test]
-    #[should_panic(message = "Duplicated role name: role_table_level")]
+    #[should_panic(expected = "duplicated role name: role_table_level")]
     fn test_read_config_two_role_duplicated_name() {
         let _text = indoc! {"
                  connection:
