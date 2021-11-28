@@ -26,6 +26,12 @@ fn main() -> Result<()> {
             let value = Config::new(&file)?;
             apply::apply(&value, dryrun)?;
         }
+
+        Command::Validate { file } => {
+            let value = Config::new(&file)?;
+            value.validate()?;
+            println!("{:?} OK", file);
+        }
     }
 
     Ok(())

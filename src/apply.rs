@@ -33,6 +33,7 @@ pub fn apply(config: &Config, dryrun: bool) -> Result<()> {
     Ok(())
 }
 
+
 // Lookup role from config::Config by role_name
 // Return role::Role variant if found or None if not found
 fn lookup_role(config: &Config, name: String) -> Result<Role> {

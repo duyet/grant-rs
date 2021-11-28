@@ -41,6 +41,13 @@ pub enum Command {
         #[structopt(short, long)]
         conn: Option<String>,
     },
+
+    /// Validate target file
+    Validate {
+        /// The path to the file to read
+        #[structopt(short, long, parse(from_os_str))]
+        file: PathBuf,
+    },
 }
 
 // Parse the command line arguments
