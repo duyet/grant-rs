@@ -12,7 +12,7 @@ pub struct DbConnection {
     pub client: Client,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct User {
     pub name: String,
     pub user_createdb: bool,
@@ -133,22 +133,22 @@ impl DbConnection {
     /// Get the list of users
     pub fn get_users(&mut self) -> Result<Vec<User>> {
         let mut users = vec![];
-        let sql = "SELECT usename, usecreatedb, usesuper FROM pg_user";
+        let sql = "SELECT usename, usecreatedb, usesuper, passwd FROM pg_user";
         for row in self.client.query(sql, &[])? {
-            match (row.get(0), row.get(1), row.get(2)) {
-                (Some(name), Some(user_createdb), Some(user_super)) => users.push(User {
+            match (row.get(0), row.get(1), row.get(2), row.get(3)) {
+                (Some(name), Some(user_createdb), Some(user_super), Some(password)) => users.push(User {
                     name,
                     user_createdb,
                     user_super,
-                    password: String::from(""),
+                    password,
                 }),
-                (Some(name), _, _) => users.push(User {
+                (Some(name), _, _, _) => users.push(User {
                     name,
                     user_createdb: false,
                     user_super: false,
                     password: String::from(""),
                 }),
-                (_, _, _) => (),
+                (_, _, _, _) => (),
             }
         }
 

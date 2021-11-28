@@ -3,6 +3,7 @@ mod cli;
 mod config;
 mod connection;
 mod gen;
+mod inspect;
 
 use crate::config::Config;
 use anyhow::Result;
@@ -32,6 +33,11 @@ fn main() -> Result<()> {
             let value = Config::new(&file)?;
             value.validate()?;
             println!("{:?} OK", file);
+        }
+
+        Command::Inspect { file } => {
+            let value = Config::new(&file)?;
+            inspect::inspect(&value)?;
         }
     }
 

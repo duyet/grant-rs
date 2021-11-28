@@ -92,7 +92,16 @@ fn validate_file_valid() {
     let path = PathBuf::from(file.path().to_str().unwrap());
 
     let mut cmd = Command::main_binary().unwrap();
-    cmd.arg("apply").arg("--file").arg(path).assert().success();
+    cmd.arg("apply")
+        .arg("--file")
+        .arg(path)
+        .arg("--dryrun")
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("Summary"))
+        .stderr(predicate::str::contains("postgres"))
+        .stderr(predicate::str::contains("duyet"))
+        .stderr(predicate::str::contains("duyet2"));
 }
 
 /// Test `grant validate --file <file>` with invalid role (type: schema)

@@ -1,3 +1,4 @@
+use crate::config::Config;
 use log::info;
 use rand::Rng;
 use std::fs;
@@ -5,8 +6,23 @@ use std::path::PathBuf;
 
 /// Generate project template to given target
 pub fn gen(target: &PathBuf) {
+    // Skip if target already exists
+    if target.exists() {
+        info!("Target already exists");
+        return;
+    }
+
     fs::create_dir_all(target).unwrap_or_else(|_| panic!("failed to generate {:?}", target));
-    info!("Generated to {:?}", target);
+    info!("Creating path: {:?}", target);
+
+    let config = Config::default();
+    let config_str = serde_yaml::to_string(&config).unwrap();
+
+    // Write config_str to target/config.yml
+    let config_path = target.join("config.yml");
+    fs::write(config_path.clone(), config_str)
+        .unwrap_or_else(|_| panic!("failed to write {:?}", config_path));
+    info!("Generated: {:?}", config_path);
 }
 
 /// Generated password with given length

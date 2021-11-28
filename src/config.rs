@@ -42,6 +42,16 @@ impl Connection {
     }
 }
 
+// Implement default values for connection type and url.
+impl Default for Connection {
+    fn default() -> Self {
+        Self {
+            type_: ConnectionType::Postgres,
+            url: "postgres://postgres:postgres@localhost:5432/postgres".to_string(),
+        }
+    }
+}
+
 /// Level type for role.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(tag = "level")]
@@ -571,6 +581,17 @@ impl Config {
 impl fmt::Display for Config {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", serde_yaml::to_string(&self).unwrap())
+    }
+}
+
+// Implement default values for Config
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            connection: Connection::default(),
+            roles: vec![],
+            users: vec![],
+        }
     }
 }
 

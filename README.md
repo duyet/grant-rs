@@ -2,7 +2,7 @@
 
 An open-source project that aims to manage Redshift database roles and privileges in GitOps style, written in Rust.
 
-*This project is still in the early stages of development and is not ready for any kind of production use or any alpha/beta testing.*
+_This project is still in the early stages of development and is not ready for any kind of production use or any alpha/beta testing._
 
 # Usage
 
@@ -16,7 +16,7 @@ Using `grant` tool:
 
 ```bash
 $ grant --help
-
+grant 0.0.1-beta.1
 Manage database roles and privileges in GitOps style
 
 USAGE:
@@ -27,9 +27,12 @@ FLAGS:
     -V, --version    Prints version information
 
 SUBCOMMANDS:
-    apply    Apply changes
-    gen      Generate project
-    help     Prints this message or the help of the given subcommand(s)
+    apply       Apply changes
+    gen         Generate project
+    gen-pass    Generate random password
+    help        Prints this message or the help of the given subcommand(s)
+    inspect     Inspect current database cluster by config file
+    validate    Validate target file
 ```
 
 ## Generate project structure

@@ -48,6 +48,13 @@ pub enum Command {
         #[structopt(short, long, parse(from_os_str))]
         file: PathBuf,
     },
+
+    /// Inspect current database cluster by config file
+    Inspect {
+        /// The path to the file to read
+        #[structopt(short, long, parse(from_os_str))]
+        file: PathBuf,
+    },
 }
 
 // Parse the command line arguments
