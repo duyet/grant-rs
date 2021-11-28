@@ -1,6 +1,10 @@
+connection:
+  type: "postgres"
+  url: "postgres://localhost:5432/postgres"
+
 roles:
   - name: role_database_level
-    level: DATABASE
+    type: database
     grants:
       - CREATE
       - TEMP
@@ -9,7 +13,7 @@ roles:
       - db2
 
   - name: role_schema_level
-    level: SCHEMA
+    type: schema
     grants:
       - CREATE
     databases:
@@ -21,7 +25,7 @@ roles:
       - dwh2
 
   - name: role_all_schema
-    level: TABLE
+    type: table
     grants:
       - SELECT
       - INSERT
@@ -35,12 +39,14 @@ roles:
 
 users:
   - name: duyet
+    password: 1234567890
     roles:
-      - name: role_database_level
-      - name: role_all_schema
-      - name: role_schema_level
+      - role_database_level
+      - role_all_schema
+      - role_schema_level
   - name: duyet2
+    password: 1234567890
     roles:
-      - name: role_database_level
-      - name: role_all_schema
-      - name: role_schema_level
+      - role_database_level
+      - role_all_schema
+      - role_schema_level
