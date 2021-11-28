@@ -1,6 +1,7 @@
 mod apply;
 mod cli;
 mod config;
+mod connection;
 mod gen;
 
 use crate::config::Config;

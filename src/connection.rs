@@ -1,3 +1,4 @@
+use crate::config::{Config, ConnectionType};
 use anyhow::Result;
 use log::debug;
 use postgres::row::Row;
@@ -7,21 +8,38 @@ use postgres::{Client, NoTls, ToStatement};
 // TODO: support multiple adapters
 
 pub struct DbConnection {
-    connection_info: String,
-    client: Client,
+    pub connection_info: String,
+    pub client: Client,
 }
 
 #[derive(Debug)]
 pub struct User {
-    user_name: String,
-    user_createdb: bool,
-    user_super: bool,
-    passwd: String,
+    pub name: String,
+    pub user_createdb: bool,
+    pub user_super: bool,
+    pub password: String,
+}
+
+impl User {
+    pub fn new(name: String, user_createdb: bool, user_super: bool, password: String) -> User {
+        User {
+            name,
+            user_createdb,
+            user_super,
+            password,
+        }
+    }
+
+    pub fn set_password(&mut self, password: &str) -> &mut Self {
+        self.password = password.to_string();
+
+        self
+    }
 }
 
 #[derive(Debug)]
 pub struct UserSchemaRole {
-    user_name: String,
+    name: String,
     schema_name: String,
     has_create: bool,
     has_usage: bool,
@@ -31,12 +49,24 @@ impl DbConnection {
     /// A convenience function which store the connection string into `connection_info` and then connects to the database.
     ///
     /// Refer to <https://rust-lang-nursery.github.io/rust-cookbook/database/postgres.html>
-    pub fn connect(conn: &str) -> Self {
-        let connection_info = conn.to_string();
-        let client = Client::connect(conn, NoTls)
-            .unwrap_or_else(|err| panic!("could not connect to {}: {:?}", conn, err));
+    pub fn connect(config: &Config) -> Self {
+        match config.connection.type_ {
+            ConnectionType::Postgres => {
+                let connection_info = config.connection.url.clone();
+                let client = Client::connect(&connection_info, NoTls).unwrap();
+                DbConnection {
+                    connection_info,
+                    client,
+                }
+            }
+            _ => panic!("Unsupported connection type: {:?}", config.connection.type_),
+        }
+    }
 
-        Self {
+    /// Connection by a connection string.
+    pub fn connect_by_string(connection_info: String) -> Self {
+        let client = Client::connect(&connection_info, NoTls).unwrap();
+        DbConnection {
             connection_info,
             client,
         }
@@ -58,7 +88,7 @@ impl DbConnection {
 
     /// Drop a user
     pub fn drop_user(&mut self, user: &User) {
-        let sql: String = format!("DROP USER IF EXISTS {}", user.user_name).to_owned();
+        let sql: String = format!("DROP USER IF EXISTS {}", user.name).to_owned();
         debug!("drop_user: {}", sql);
 
         self.client.execute(&sql, &[]).expect("could not drop user");
@@ -66,7 +96,7 @@ impl DbConnection {
 
     /// Try to drop a user, this fn will not panic
     pub fn try_drop_user(&mut self, user: &User) {
-        let sql: String = format!("DROP USER IF EXISTS {}", user.user_name).to_owned();
+        let sql: String = format!("DROP USER IF EXISTS {}", user.name).to_owned();
         debug!("try_drop_user: {}", sql);
 
         self.client.execute(&sql, &[]).unwrap_or_else(|_| 1);
@@ -74,12 +104,12 @@ impl DbConnection {
 
     /// Create user
     pub fn create_user(&mut self, user: &User) {
-        let mut sql: String = format!("CREATE USER {} ", user.user_name).to_owned();
+        let mut sql: String = format!("CREATE USER {} ", user.name).to_owned();
         if user.user_createdb {
             sql += "CREATEDB"
         }
-        if !user.passwd.is_empty() {
-            sql += &format!(" PASSWORD '{}'", user.passwd).to_string()
+        if !user.password.is_empty() {
+            sql += &format!(" PASSWORD '{}'", user.password).to_string()
         }
 
         debug!("create user: {}", sql);
@@ -89,23 +119,34 @@ impl DbConnection {
             .expect("could not create user");
     }
 
+    /// Update user password
+    pub fn update_user_password(&mut self, user: &User) {
+        let sql: String =
+            format!("ALTER USER {} PASSWORD '{}'", user.name, user.password).to_owned();
+        debug!("update user password: {}", sql);
+        let stmt = self.client.prepare(&sql).unwrap();
+        self.client
+            .execute(&stmt, &[])
+            .expect("could not update user password");
+    }
+
     /// Get the list of users
     pub fn get_users(&mut self) -> Result<Vec<User>> {
         let mut users = vec![];
         let sql = "SELECT usename, usecreatedb, usesuper FROM pg_user";
         for row in self.client.query(sql, &[])? {
             match (row.get(0), row.get(1), row.get(2)) {
-                (Some(user_name), Some(user_createdb), Some(user_super)) => users.push(User {
-                    user_name,
+                (Some(name), Some(user_createdb), Some(user_super)) => users.push(User {
+                    name,
                     user_createdb,
                     user_super,
-                    passwd: String::from(""),
+                    password: String::from(""),
                 }),
-                (Some(user_name), _, _) => users.push(User {
-                    user_name,
+                (Some(name), _, _) => users.push(User {
+                    name,
                     user_createdb: false,
                     user_super: false,
-                    passwd: String::from(""),
+                    password: String::from(""),
                 }),
                 (_, _, _) => (),
             }
@@ -121,7 +162,7 @@ impl DbConnection {
         // FIXME it will be empty if the schema doesn't have any tables
         let sql = "
             SELECT
-              u.usename AS user_name,
+              u.usename AS name,
               s.schemaname AS schema_name,
               has_schema_privilege(u.usename, s.schemaname, 'create') AS has_create,
               has_schema_privilege(u.usename, s.schemaname, 'usage') AS has_usage
@@ -137,9 +178,9 @@ impl DbConnection {
         let mut user_schema_roles = vec![];
         for row in self.client.query(sql, &[])? {
             match (row.get(0), row.get(1), row.get(2), row.get(3)) {
-                (Some(user_name), Some(schema_name), Some(has_create), Some(has_usage)) => {
+                (Some(name), Some(schema_name), Some(has_create), Some(has_usage)) => {
                     user_schema_roles.push(UserSchemaRole {
-                        user_name,
+                        name,
                         schema_name,
                         has_create,
                         has_usage,
@@ -168,23 +209,39 @@ mod tests {
     use rand::{thread_rng, Rng};
 
     #[test]
-    fn test_connect() {
-        let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::connect(url);
-        db.ping().expect("cannot ping");
+    fn test_connect_from_config() {
+        let config = Config::from_str(
+            r#"
+            connection:
+              type: postgres
+              url: "postgresql://postgres@localhost:5432/postgres"
+            roles: []
+            users: []
+            "#,
+        )
+        .unwrap();
+        let mut db = DbConnection::connect(&config);
+        db.ping().unwrap();
+    }
+
+    #[test]
+    fn test_connect_from_string() {
+        let url = "postgres://postgres@localhost:5432/postgres".to_string();
+        let mut db = DbConnection::connect_by_string(url);
+        db.ping().unwrap();
     }
 
     #[test]
     fn test_drop_user() {
-        let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::connect(url);
+        let url = "postgres://postgres@localhost:5432/postgres".to_string();
+        let mut db = DbConnection::connect_by_string(url);
 
-        let user_name = random_username();
+        let name = random_username();
         let user = User {
-            user_name: user_name.to_owned(),
+            name: name.to_owned(),
             user_createdb: false,
             user_super: false,
-            passwd: "duyet".to_string(),
+            password: "duyet".to_string(),
         };
         db.drop_user(&user);
         db.create_user(&user);
@@ -192,7 +249,7 @@ mod tests {
 
         let users = db.get_users().unwrap();
 
-        assert_eq!(users.iter().any(|u| u.user_name == user_name), false);
+        assert_eq!(users.iter().any(|u| u.name == name), false);
 
         // Clean up
         db.drop_user(&user);
@@ -201,21 +258,21 @@ mod tests {
     #[test]
     fn test_drop_create_user() {
         let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::connect(url);
+        let mut db = DbConnection::connect_by_string(url.to_string());
 
-        let user_name = random_username();
+        let name = random_username();
         let user = User {
-            user_name: user_name.to_owned(),
+            name: name.to_owned(),
             user_createdb: false,
             user_super: false,
-            passwd: "duyet".to_string(),
+            password: "duyet".to_string(),
         };
         db.drop_user(&user);
         db.create_user(&user);
 
         let users = db.get_users().unwrap();
 
-        assert_eq!(users.iter().any(|u| u.user_name == user_name), true);
+        assert_eq!(users.iter().any(|u| u.name == name), true);
 
         // Clean up
         db.drop_user(&user);
@@ -224,14 +281,14 @@ mod tests {
     #[test]
     fn test_get_schema_roles() {
         let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::connect(url);
+        let mut db = DbConnection::connect_by_string(url.to_string());
 
-        let user_name = random_username();
+        let name = random_username();
         let user = User {
-            user_name: user_name.to_owned(),
+            name: name.to_owned(),
             user_createdb: false,
             user_super: false,
-            passwd: "duyet".to_string(),
+            password: "duyet".to_string(),
         };
         db.drop_user(&user);
         db.create_user(&user);
@@ -244,7 +301,7 @@ mod tests {
         if user_schema_roles.len() > 0 {
             // new user, that user will don't have any priviledge
             assert_eq!(
-                user_schema_roles.iter().any(|u| u.user_name == user_name
+                user_schema_roles.iter().any(|u| u.name == name
                     && u.has_usage == false
                     && u.has_create == false),
                 true
@@ -259,7 +316,7 @@ mod tests {
     #[test]
     fn test_query() {
         let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::connect(url);
+        let mut db = DbConnection::connect_by_string(url.to_string());
         let rows = db.query("SELECT 1 as t", &[]).unwrap();
         debug!("test_query: {:?}", rows);
 
@@ -274,13 +331,13 @@ mod tests {
         const CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
         let mut rng = thread_rng();
 
-        let user_name: String = (0..10)
+        let name: String = (0..10)
             .map(|_| {
                 let idx = rng.gen_range(0..CHARSET.len());
                 CHARSET[idx] as char
             })
             .collect();
 
-        user_name
+        name
     }
 }

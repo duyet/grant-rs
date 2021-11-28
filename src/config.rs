@@ -25,19 +25,19 @@ pub enum ConnectionType {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Connection {
     #[serde(rename = "type")]
-    pub type_: String,
+    pub type_: ConnectionType,
     pub url: String,
 }
 
 impl Connection {
-    pub fn new(type_: String, url: String) -> Self {
+    pub fn new(type_: ConnectionType, url: String) -> Self {
         Self { type_, url }
     }
 
     pub fn validate(&self) -> Result<()> {
-        match self.type_.as_str() {
-            "postgres" => Ok(()),
-            _ => Err(anyhow!("Unsupported connection type: {}", self.type_)),
+        match self.type_ {
+            ConnectionType::Postgres => Ok(()),
+            _ => Err(anyhow!("Unsupported connection type: {:?}", self.type_)),
         }
     }
 }
@@ -517,6 +517,15 @@ impl Config {
         Ok(config)
     }
 
+    pub fn from_str(config_str: &str) -> Result<Self> {
+        let config: Config =
+            serde_yaml::from_str(config_str).context("failed to parse yaml content")?;
+
+        config.validate()?;
+
+        Ok(config)
+    }
+
     pub fn validate(&self) -> Result<()> {
         // Validate connection
         self.connection.validate()?;
@@ -605,12 +614,12 @@ mod tests {
 
     // Test config with invalid connection type
     #[test]
-    #[should_panic(expected = "Unsupported connection type: invalid")]
+    #[should_panic(expected = "connection.type: unknown variant `invalid`")]
     fn test_read_config_invalid_connection_type() {
         let _text = indoc! {"
                  connection:
                    type: invalid
-                   url: postgres://localhost:5432/postgres
+                   url: postgres://postgres@localhost:5432/postgres
                  roles: []
                  users: []
              "};
