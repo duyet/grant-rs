@@ -263,17 +263,16 @@ impl DbConnection {
               u.usename AS name,
               t.schemaname AS schema_name,
               t.tablename AS table_name,
-              has_table_privilege(u.usename, CONCAT(t.schemaname, '.', t.tablename), 'select') AS has_select,
-              has_table_privilege(u.usename, CONCAT(t.schemaname, '.', t.tablename), 'insert') AS has_insert,
-              has_table_privilege(u.usename, CONCAT(t.schemaname, '.', t.tablename), 'update') AS has_update,
-              has_table_privilege(u.usename, CONCAT(t.schemaname, '.', t.tablename), 'delete') AS has_delete,
-              has_table_privilege(u.usename, CONCAT(t.schemaname, '.', t.tablename), 'references') AS has_references
+              has_table_privilege(u.usename, t.schemaname || '.' || t.tablename, 'select') AS has_select,
+              has_table_privilege(u.usename, t.schemaname || '.' || t.tablename, 'insert') AS has_insert,
+              has_table_privilege(u.usename, t.schemaname || '.' || t.tablename, 'update') AS has_update,
+              has_table_privilege(u.usename, t.schemaname || '.' || t.tablename, 'delete') AS has_delete,
+              has_table_privilege(u.usename, t.schemaname || '.' || t.tablename, 'references') AS has_references
             FROM
-                pg_user u
-                CROSS JOIN (SELECT DISTINCT schemaname, tablename FROM pg_tables) t
-                WHERE
-                1 = 1
-                AND t.schemaname != 'pg_catalog'
+              pg_user u
+              CROSS JOIN (SELECT DISTINCT schemaname, tablename FROM pg_tables) t
+              WHERE 1 = 1
+                AND t.schemaname NOT LIKE 'pg_%'
                 AND t.schemaname != 'information_schema';
         ";
 
