@@ -34,7 +34,7 @@ fn validate_file_valid() {
     let _text = indoc! {"
         connection:
           type: postgres
-          url: postgres://postgres@localhost:5432/postgres
+          url: postgres://postgres:postgres@localhost:5432/postgres
 
         roles:
           - name: role_database_level
@@ -111,7 +111,7 @@ fn validate_file_invalid_role_type_schema() {
     let _text = indoc! {"
          connection:
            type: postgres
-           url: postgres://postgres@localhost:5432/postgres
+           url: postgres://postgres:postgres@localhost:5432/postgres
          roles:
          - type: schema
            name: role_schema_level
@@ -144,7 +144,7 @@ fn validate_file_invalid_role_type_database() {
     let _text = indoc! {"
          connection:
            type: postgres
-           url: postgres://postgres@localhost:5432/postgres
+           url: postgres://postgres:postgres@localhost:5432/postgres
          roles:
          - type: database
            name: role_database_level
@@ -177,7 +177,7 @@ fn validate_file_invalid_role_type_table() {
     let _text = indoc! {"
          connection:
            type: postgres
-           url: postgres://postgres@localhost:5432/postgres
+           url: postgres://postgres:postgres@localhost:5432/postgres
          roles:
          - type: table
            name: role_table_level
@@ -212,7 +212,7 @@ fn validate_file_invalid_role_type_table_missing_schemas() {
     let _text = indoc! {"
          connection:
            type: postgres
-           url: postgres://postgres@localhost:5432/postgres
+           url: postgres://postgres:postgres@localhost:5432/postgres
          roles:
          - type: table
            name: role_table_level
@@ -246,7 +246,7 @@ fn validate_file_invalid_role_type_table_missing_tables() {
     let _text = indoc! {"
          connection:
            type: postgres
-           url: postgres://postgres@localhost:5432/postgres
+           url: postgres://postgres:postgres@localhost:5432/postgres
          roles:
          - type: table
            name: role_table_level
@@ -277,7 +277,7 @@ fn validate_file_invalid_role_type() {
     let _text = indoc! {"
          connection:
            type: postgres
-           url: postgres://postgres@localhost:5432/postgres
+           url: postgres://postgres:postgres@localhost:5432/postgres
          roles:
          - type: invalid
            name: role_invalid
@@ -312,7 +312,7 @@ fn validate_file_user_role_not_existing() {
     let _text = indoc! {"
          connection:
            type: postgres
-           url: postgres://postgres@localhost:5432/postgres
+           url: postgres://postgres:postgres@localhost:5432/postgres
          roles:
          - type: table
            name: role_table_1
