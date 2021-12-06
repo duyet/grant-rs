@@ -59,13 +59,62 @@ Apply to cluster:
 ```bash
 grant apply -f ./examples/example.yaml
 
-# [2021-11-15T03:37:38Z INFO  grant::apply] Try to apply definition from "./examples/example.yaml", dryrun=false, conn=None
-# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, TEMP ON DATABASE db1, db2 TO duyet;
-# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, USAGE ON SCHEMA  TO duyet;
-# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, USAGE ON SCHEMA common, dwh1, dwh2 TO duyet;
-# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, TEMP ON DATABASE db1, db2 TO duyet2;
-# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, USAGE ON SCHEMA  TO duyet2;
-# [2021-11-15T03:37:38Z INFO  grant::apply] SQL = GRANT CREATE, USAGE ON SCHEMA common, dwh1, dwh2 TO duyet2;
+[2021-11-29T07:44:08Z INFO  grant::apply] Applying configuration:
+    ---
+    connection:
+      type: postgres
+      url: "postgres://postgres@localhost:5432/postgres"
+    roles:
+      - type: database
+        name: role_database_level
+        databases:
+          - db1
+          - db2
+        grants:
+          - CREATE
+          - TEMP
+      - type: schema
+        name: role_schema_level
+        grants:
+          - CREATE
+        schemas:
+          - common
+          - dwh1
+          - dwh2
+      - type: table
+        name: role_all_schema
+        grants:
+          - SELECT
+          - INSERT
+          - UPDATE
+        schemas:
+          - common
+        tables:
+          - ALL
+    users:
+      - name: duyet
+        password: "1234567890"
+        roles:
+          - role_database_level
+          - role_all_schema
+          - role_schema_level
+      - name: duyet2
+        password: "1234567890"
+        roles:
+          - role_database_level
+          - role_all_schema
+          - role_schema_level
+
+[2021-11-29T07:44:08Z INFO  grant::apply] User duyet password updated
+[2021-11-29T07:44:08Z INFO  grant::apply] User duyet2 password updated
+[2021-11-29T07:44:08Z INFO  grant::apply] Summary:
+    ┌────────────┬───────────────────────────┐
+    │ User       │ Action                    │
+    │ ---        │ ---                       │
+    │ duyet      │ update password           │
+    │ duyet2     │ update password           │
+    │ postgres   │ no action (not in config) │
+    └────────────┴───────────────────────────┘
 ```
 
 ## Generate random password
@@ -74,6 +123,20 @@ grant apply -f ./examples/example.yaml
 $ grant gen-pass
 
 Generated password: q)ItTjN$EXlkF@Tl
+```
+
+## Inspect the current cluster
+
+```bash
+$ grant inspect -f examples/example.yaml
+
+[2021-11-29T07:46:44Z INFO  grant::inspect] Current users in postgres://postgres@localhost:5432/postgres:
+    ┌────────────┬──────────┬───────┬──────────┐
+    │ User       │ CreateDB │ Super │ Password │
+    │ ---        │ ---      │ ---   │ ---      │
+    │ postgres   │ true     │ true  │ ******** │
+    │ duyet      │ false    │ false │ ******** │
+    └────────────┴──────────┴───────┴──────────┘
 ```
 
 # Developement

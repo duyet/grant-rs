@@ -1,11 +1,11 @@
-use crate::config::{Config, Role, User as UserInConfig};
-use crate::connection::{DbConnection, User};
-use anyhow::{bail, Result};
+use crate::config::Config;
+use crate::connection::DbConnection;
+use anyhow::Result;
 use ascii_table::AsciiTable;
 use log::info;
 
 pub fn inspect(config: &Config) -> Result<()> {
-    let mut conn = DbConnection::connect(config);
+    let mut conn = DbConnection::new(config);
 
     let users_in_db = conn.get_users()?;
     let mut users = users_in_db
@@ -40,7 +40,7 @@ pub fn inspect(config: &Config) -> Result<()> {
     );
 
     // Print the table
-    let mut table = AsciiTable::default();
+    let table = AsciiTable::default();
     info!(
         "Current users in {}:\n{}",
         config.connection.url,

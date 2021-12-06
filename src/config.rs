@@ -291,9 +291,19 @@ impl RoleTableLevel {
 
         // grant to all tables if no tables are specified or if tables contains "ALL"
         let tables = if self.tables.is_empty() || self.tables.contains(&"ALL".to_string()) {
-            "ALL TABLES".to_string()
+            format!("ALL TABLES IN SCHEMA {}", self.schemas.join(", "))
         } else {
-            self.tables.join(", ")
+            self.schemas
+                .iter()
+                .map(|s| {
+                    self.tables
+                        .iter()
+                        .map(|t| format!("{}.{}", s, t))
+                        .collect::<Vec<String>>()
+                        .join(", ")
+                })
+                .collect::<Vec<_>>()
+                .join(", ")
         };
 
         let sql = format!("{} {} ON {} {} {};", sql, grants, tables, from_to, user);
@@ -911,11 +921,11 @@ mod tests {
         assert_eq!(config.roles[0].get_tables()[2], "table3");
         assert_eq!(
             config.roles[0].to_sql_grant("duyet".to_string()),
-            "GRANT SELECT, INSERT ON table1, table2, table3 TO duyet;"
+            "GRANT SELECT, INSERT ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
         );
         assert_eq!(
             config.roles[0].to_sql_revoke("duyet".to_string()),
-            "REVOKE SELECT, INSERT ON table1, table2, table3 FROM duyet;"
+            "REVOKE SELECT, INSERT ON schema1.table1, schema1.table2, schema1.table3 FROM duyet;"
         );
 
         // Test role 2
@@ -931,11 +941,11 @@ mod tests {
         assert_eq!(config.roles[1].get_tables()[2], "table3");
         assert_eq!(
             config.roles[1].to_sql_grant("duyet".to_string()),
-            "GRANT ALL PRIVILEGES ON table1, table2, table3 TO duyet;".to_string()
+            "GRANT ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 TO duyet;".to_string()
         );
         assert_eq!(
             config.roles[1].to_sql_revoke("duyet".to_string()),
-            "REVOKE ALL PRIVILEGES ON table1, table2, table3 FROM duyet;".to_string()
+            "REVOKE ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 FROM duyet;".to_string()
         );
     }
 
