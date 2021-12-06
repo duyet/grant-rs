@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Context, Result};
-
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use std::collections::HashSet;
@@ -941,11 +940,13 @@ mod tests {
         assert_eq!(config.roles[1].get_tables()[2], "table3");
         assert_eq!(
             config.roles[1].to_sql_grant("duyet".to_string()),
-            "GRANT ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 TO duyet;".to_string()
+            "GRANT ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
+                .to_string()
         );
         assert_eq!(
             config.roles[1].to_sql_revoke("duyet".to_string()),
-            "REVOKE ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 FROM duyet;".to_string()
+            "REVOKE ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 FROM duyet;"
+                .to_string()
         );
     }
 
