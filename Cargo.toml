@@ -19,7 +19,6 @@ postgres = "0.19"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
 ascii_table = "3"
-base64 = "0.13"
 
 [dev-dependencies]
 assert_cmd = "0.10"
