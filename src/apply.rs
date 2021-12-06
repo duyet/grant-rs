@@ -144,7 +144,7 @@ pub fn apply_database_privileges(
         for role in user_roles_in_config {
             match role {
                 Role::Database(role) => {
-                    println!("==> {:?}", role);
+                    info!("==> {:?}", role);
                     // revoke
                     if !privileges_on_db.is_none() {
                         let sql = role.to_sql_revoke(user.name.clone());
@@ -243,7 +243,7 @@ pub fn apply_schema_privileges(
         for role in user_roles_in_config {
             match role {
                 Role::Schema(role) => {
-                    println!("==> {:?}", role);
+                    info!("==> {:?}", role);
                     // revoke
                     if !privileges_on_db.is_none() {
                         let sql = role.to_sql_revoke(user.name.clone());
@@ -342,7 +342,7 @@ pub fn apply_table_privileges(
         for role in user_roles_in_config {
             match role {
                 Role::Table(role) => {
-                    println!("==> {:?}", role);
+                    info!("==> {:?}", role);
 
                     // revoke
                     if !privileges_on_db.is_none() {
