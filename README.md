@@ -47,74 +47,95 @@ grant gen --target .
 
 ## Apply privilege changes
 
-Dry run:
+Content of `./examples/example.yaml`:
 
-```bash
-export DB_URL="postgres://postgres:postgres@localhost:5439/postgres"
-grant apply --dryrun -f ./examples/example.yaml --conn=$DB_URL
+```yaml
+connection:
+  type: "postgres"
+  url: "postgres://postgres@localhost:5432/postgres"
+
+roles:
+  - name: role_database_level
+    type: database
+    grants:
+      - CREATE
+      - TEMP
+    databases:
+      - postgres
+
+  - name: role_schema_level
+    type: schema
+    grants:
+      - CREATE
+    databases:
+      - postgres
+    schemas:
+      - public
+  - name: role_all_schema
+    type: table
+    grants:
+      - SELECT
+      - INSERT
+      - UPDATE
+    databases:
+      - postgres
+    schemas:
+      - public
+    tables:
+      - ALL
+
+users:
+  - name: duyet
+    password: 1234567890
+    roles:
+      - role_database_level
+      - role_all_schema
+      - role_schema_level
+  - name: duyet2
+    password: 1234567890
+    roles:
+      - role_database_level
+      - role_all_schema
+      - role_schema_level
 ```
 
-Apply to cluster:
+Apply this config to cluster:
 
 ```bash
-grant apply -f ./examples/example.yaml
+grant apply --dryrun -f ./examples/example.yaml
 
-[2021-11-29T07:44:08Z INFO  grant::apply] Applying configuration:
-    ---
-    connection:
-      type: postgres
-      url: "postgres://postgres@localhost:5432/postgres"
-    roles:
-      - type: database
-        name: role_database_level
-        databases:
-          - db1
-          - db2
-        grants:
-          - CREATE
-          - TEMP
-      - type: schema
-        name: role_schema_level
-        grants:
-          - CREATE
-        schemas:
-          - common
-          - dwh1
-          - dwh2
-      - type: table
-        name: role_all_schema
-        grants:
-          - SELECT
-          - INSERT
-          - UPDATE
-        schemas:
-          - common
-        tables:
-          - ALL
-    users:
-      - name: duyet
-        password: "1234567890"
-        roles:
-          - role_database_level
-          - role_all_schema
-          - role_schema_level
-      - name: duyet2
-        password: "1234567890"
-        roles:
-          - role_database_level
-          - role_all_schema
-          - role_schema_level
-
-[2021-11-29T07:44:08Z INFO  grant::apply] User duyet password updated
-[2021-11-29T07:44:08Z INFO  grant::apply] User duyet2 password updated
-[2021-11-29T07:44:08Z INFO  grant::apply] Summary:
+[2021-12-06T14:37:03Z INFO  grant::connection] Connected to database: postgres://postgres@localhost:5432/postgres
+[2021-12-06T14:37:03Z INFO  grant::apply] Summary:
     ┌────────────┬───────────────────────────┐
     │ User       │ Action                    │
     │ ---        │ ---                       │
     │ duyet      │ update password           │
     │ duyet2     │ update password           │
-    │ postgres   │ no action (not in config) │
     └────────────┴───────────────────────────┘
+
+[2021-12-06T14:37:03Z INFO  grant::apply] Summary:
+    ┌────────┬───────────────────────────────────────────────────────────┬─────────┐
+    │ User   │ Database Privilege                                        │ Action  │
+    │ ---    │ ---                                                       │ ---     │
+    │ duyet  │ privileges `role_database_level` for database: ["postgre+ │ updated │
+    │ duyet2 │ privileges `role_database_level` for database: ["postgre+ │ updated │
+    └────────┴───────────────────────────────────────────────────────────┴─────────┘
+
+[2021-12-06T14:37:03Z INFO  grant::apply] Summary:
+    ┌────────┬───────────────────────────────────────────────────────┬─────────┐
+    │ User   │ Schema Privileges                                     │ Action  │
+    │ ---    │ ---                                                   │ ---     │
+    │ duyet  │ privileges `role_schema_level` for schema: ["public"] │ updated │
+    │ duyet2 │ privileges `role_schema_level` for schema: ["public"] │ updated │
+    └────────┴───────────────────────────────────────────────────────┴─────────┘
+
+[2021-12-06T14:37:03Z INFO  grant::apply] Summary:
+    ┌────────┬─────────────────────────────────────────────────┬─────────┐
+    │ User   │ Table Privileges                                │ Action  │
+    │ ---    │ ---                                             │ ---     │
+    │ duyet  │ privileges `role_all_schema` for table: ["ALL"] │ updated │
+    │ duyet2 │ privileges `role_all_schema` for table: ["ALL"] │ updated │
+    └────────┴─────────────────────────────────────────────────┴─────────┘
 ```
 
 ## Generate random password
@@ -166,7 +187,7 @@ cargo test
 # TODO
 
 - [ ] Support store encrypted password in Git
-- [ ] Support Postgres
+- [x] Support Postgres
 - [ ] Visuallization (who can see what?)
 
 # LICENSE
