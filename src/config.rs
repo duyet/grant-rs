@@ -36,7 +36,6 @@ impl Connection {
     pub fn validate(&self) -> Result<()> {
         match self.type_ {
             ConnectionType::Postgres => Ok(()),
-            _ => Err(anyhow!("Unsupported connection type: {:?}", self.type_)),
         }
     }
 }

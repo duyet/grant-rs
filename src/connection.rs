@@ -1,4 +1,4 @@
-use crate::config::{Config, ConnectionType, RoleDatabaseLevel};
+use crate::config::{Config, ConnectionType};
 use anyhow::Result;
 use log::{debug, error, info};
 use postgres::row::Row;
