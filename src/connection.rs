@@ -521,13 +521,14 @@ mod tests {
             name: name.to_owned(),
             user_createdb: false,
             user_super: false,
-            password: "duyet".to_string(),
+            password: password.to_owned(),
         };
         db.drop_user(&user);
         db.create_user(&user);
 
         // get user roles
         let user_schema_privileges = db.get_user_schema_privileges().unwrap_or(vec![]);
+        println!("{:?}", user_schema_privileges);
 
         // Check if user_schema_privileges contains current users
         // is empty if the user doesn't have any schema privileges

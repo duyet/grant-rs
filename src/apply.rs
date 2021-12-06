@@ -181,7 +181,7 @@ pub fn apply_database_privileges(
                     summary.push(vec![
                         user.name.clone(),
                         format!(
-                            "grant {} on database: {:?}",
+                            "privileges `{}` for database: {:?}",
                             role.name.clone(),
                             role.databases.clone()
                         ),
@@ -280,7 +280,7 @@ pub fn apply_schema_privileges(
                     summary.push(vec![
                         user.name.clone(),
                         format!(
-                            "grant {} on schema: {:?}",
+                            "privileges `{}` for schema: {:?}",
                             role.name.clone(),
                             role.schemas.clone()
                         ),
@@ -380,7 +380,7 @@ pub fn apply_table_privileges(
                     summary.push(vec![
                         user.name.clone(),
                         format!(
-                            "grant {} on table: {:?}",
+                            "privileges `{}` for table: {:?}",
                             role.name.clone(),
                             role.tables.clone()
                         ),

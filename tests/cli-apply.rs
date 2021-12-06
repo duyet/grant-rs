@@ -9,7 +9,7 @@ fn missing_arguments() {
 }
 
 #[test]
-/// `./grant apply` must have --file or -f args
+/// `grant apply` must have --file or -f args
 fn apply_missing_arguments() {
     let mut cmd = Command::main_binary().unwrap();
     cmd.arg("apply")
