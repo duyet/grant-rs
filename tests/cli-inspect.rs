@@ -13,7 +13,7 @@ fn inspect_grant() {
     let _text = indoc! {"
          connection:
            type: postgres
-           url: postgres://postgres@localhost:5432/postgres
+           url: postgres://postgres:postgres@localhost:5432/postgres
          roles: []
          users: []
     "};

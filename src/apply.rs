@@ -1,45 +1,23 @@
 use crate::config::{Config, Role, User as UserInConfig};
 use crate::connection::{DbConnection, User};
-use anyhow::{bail, Result};
+use anyhow::Result;
 use ascii_table::AsciiTable;
+use log::error;
 use log::info;
 
 pub fn apply(config: &Config, dryrun: bool) -> Result<()> {
-    info!("Applying configuration: {}", config);
-    let mut conn = DbConnection::connect(config);
+    info!("Applying configuration:\n{}", config);
+    let mut conn = DbConnection::new(config);
 
     let users_in_db = conn.get_users()?;
     let users_in_config = config.users.clone();
-    apply_users(&mut conn, &users_in_db, &users_in_config, dryrun)?;
 
-    //     for user in config.users.iter() {
-    //         let user_name = user.name.clone();
-    //
-    //         // Lookup roles for user, error if not found in config::Role
-    //         let user_roles: Vec<_> = user
-    //             .roles
-    //             .iter()
-    //             .map(|role| {
-    //                 lookup_role(config, role.to_string())
-    //                     .with_context(|| format!("Role {} not found", role))
-    //             })
-    //             .collect::<Result<Vec<_>>>()?;
-    //
-    //         // Get user's current permissions on database using config.connection.url
-    //         let user_permissions = connection::get_user_permissions(config, &user_name)?;
-    //
-    //         // Loop through roles and generate grant statement for current user
-    //         for role in user_roles {
-    //             let grant_statement = role.to_sql_grant(user_name.clone());
-    //
-    //             if dryrun {
-    //                 info!("Dry run: {}", grant_statement);
-    //             } else {
-    //                 info!("Granting: {}", grant_statement);
-    //             }
-    //         }
-    //     }
-    //
+    // TODO: Refactor these functions
+    apply_users(&mut conn, &users_in_db, &users_in_config, dryrun)?;
+    apply_database_privileges(&mut conn, &config, dryrun)?;
+    apply_schema_privileges(&mut conn, &config, dryrun)?;
+    apply_table_privileges(&mut conn, &config, dryrun)?;
+
     Ok(())
 }
 
@@ -62,7 +40,7 @@ fn apply_users(
 
     // Create or update users in database
     for user in users_in_config {
-        let mut user_in_db = users_in_db.iter().find(|&u| u.name == user.name);
+        let user_in_db = users_in_db.iter().find(|&u| u.name == user.name);
         match user_in_db {
             Some(user_in_db) => {
                 if user_in_db.password != user.password {
@@ -105,17 +83,324 @@ fn apply_users(
         }
     }
 
-    // Delete users in db that are not in config
+    // TODO: Support delete users in db that are not in config
     for user in users_in_db {
         if !users_in_config.iter().any(|u| u.name == user.name) {
             // Update summary
-            summary.push(vec![user.name.clone(), "no action (not in config)".to_string()]);
+            summary.push(vec![
+                user.name.clone(),
+                "no action (not in config)".to_string(),
+            ]);
         }
     }
 
     // Show summary
-    let ascii_table = AsciiTable::default();
-    info!("Summary:\n{}", ascii_table.format(summary));
+    print_summary(summary);
 
     Ok(())
+}
+
+/// Apply database privileges from config to database
+pub fn apply_database_privileges(
+    conn: &mut DbConnection,
+    config: &Config,
+    dryrun: bool,
+) -> Result<()> {
+    let mut summary = vec![vec![
+        "User".to_string(),
+        "Database Privilege".to_string(),
+        "Action".to_string(),
+    ]];
+    summary.push(vec![
+        "---".to_string(),
+        "---".to_string(),
+        "---".to_string(),
+    ]);
+
+    let user_privileges_on_db = conn.get_user_database_privileges()?;
+
+    // Loop through users in config
+    // Get the user Role object by the user.roles[*].name
+    // Apply the Role sql privileges to the cluster
+    for user in &config.users {
+        // Get roles for user from config
+        let user_roles_in_config: Vec<_> = user
+            .roles
+            .iter()
+            .map(|role_name| {
+                config
+                    .roles
+                    .iter()
+                    .find(|&r| r.get_name() == role_name.to_string())
+                    .unwrap()
+            })
+            .collect();
+
+        let privileges_on_db = user_privileges_on_db.iter().find(|&p| p.name == user.name);
+
+        // Compare privileges on config and db
+        // If privileges on config are not in db, add them
+        // If privileges on db are not in config, remove them
+        for role in user_roles_in_config {
+            match role {
+                Role::Database(role) => {
+                    println!("==> {:?}", role);
+                    // revoke
+                    if !privileges_on_db.is_none() {
+                        let sql = role.to_sql_revoke(user.name.clone());
+                        if !dryrun {
+                            conn.query(&sql, &[]).unwrap_or_else(|e| {
+                                error!("failed to run sql:\n{}", sql);
+                                panic!("{}", e);
+                            });
+                            info!("Revoking: {}", sql);
+                        } else {
+                            info!("Would revoke: {}", sql);
+                        }
+                    }
+
+                    // grant
+                    let sql = role.to_sql_grant(user.name.clone());
+                    if !dryrun {
+                        conn.query(&sql, &[]).unwrap_or_else(|e| {
+                            error!("failed to run sql:\n{}", sql);
+                            panic!("{}", e);
+                        });
+                        info!("Granting: {}", sql);
+                    } else {
+                        info!("Granting: {}", sql);
+                    }
+
+                    let action = if privileges_on_db.is_none() {
+                        "granted"
+                    } else {
+                        "updated"
+                    };
+
+                    // Update summary
+                    summary.push(vec![
+                        user.name.clone(),
+                        format!(
+                            "privileges `{}` for database: {:?}",
+                            role.name.clone(),
+                            role.databases.clone()
+                        ),
+                        action.to_string(),
+                    ]);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    // Show summary
+    print_summary(summary);
+
+    Ok(())
+}
+
+/// Apply schema privileges from config to database
+pub fn apply_schema_privileges(
+    conn: &mut DbConnection,
+    config: &Config,
+    dryrun: bool,
+) -> Result<()> {
+    let mut summary = vec![vec![
+        "User".to_string(),
+        "Schema Privileges".to_string(),
+        "Action".to_string(),
+    ]];
+    summary.push(vec![
+        "---".to_string(),
+        "---".to_string(),
+        "---".to_string(),
+    ]);
+
+    let user_privileges_on_db = conn.get_user_schema_privileges()?;
+
+    // Loop through users in config
+    // Get the user Role object by the user.roles[*].name
+    // Apply the Role sql privileges to the cluster
+    for user in &config.users {
+        // Get roles for user from config
+        let user_roles_in_config: Vec<_> = user
+            .roles
+            .iter()
+            .map(|role_name| {
+                config
+                    .roles
+                    .iter()
+                    .find(|&r| r.get_name() == role_name.to_string())
+                    .unwrap()
+            })
+            .collect();
+
+        let privileges_on_db = user_privileges_on_db.iter().find(|&p| p.name == user.name);
+
+        // Compare privileges on config and db
+        // If privileges on config are not in db, add them
+        // If privileges on db are not in config, remove them
+        for role in user_roles_in_config {
+            match role {
+                Role::Schema(role) => {
+                    println!("==> {:?}", role);
+                    // revoke
+                    if !privileges_on_db.is_none() {
+                        let sql = role.to_sql_revoke(user.name.clone());
+                        if !dryrun {
+                            conn.query(&sql, &[]).unwrap_or_else(|e| {
+                                error!("failed to run sql:\n{}", sql);
+                                panic!("{}", e);
+                            });
+                            info!("Revoking: {}", sql);
+                        } else {
+                            info!("Would revoke: {}", sql);
+                        }
+                    }
+
+                    // grant
+                    let sql = role.to_sql_grant(user.name.clone());
+                    if !dryrun {
+                        conn.query(&sql, &[]).unwrap_or_else(|e| {
+                            error!("failed to run sql:\n{}", sql);
+                            panic!("{}", e);
+                        });
+                        info!("Granting: {}", sql);
+                    } else {
+                        info!("Granting: {}", sql);
+                    }
+
+                    let action = if privileges_on_db.is_none() {
+                        "granted"
+                    } else {
+                        "updated"
+                    };
+
+                    // Update Summary
+                    summary.push(vec![
+                        user.name.clone(),
+                        format!(
+                            "privileges `{}` for schema: {:?}",
+                            role.name.clone(),
+                            role.schemas.clone()
+                        ),
+                        action.to_string(),
+                    ]);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    // Show Summary
+    print_summary(summary);
+
+    Ok(())
+}
+
+/// Apply table privileges from config to database
+pub fn apply_table_privileges(
+    conn: &mut DbConnection,
+    config: &Config,
+    dryrun: bool,
+) -> Result<()> {
+    let mut summary = vec![vec![
+        "User".to_string(),
+        "Table Privileges".to_string(),
+        "Action".to_string(),
+    ]];
+    summary.push(vec![
+        "---".to_string(),
+        "---".to_string(),
+        "---".to_string(),
+    ]);
+
+    let user_privileges_on_db = conn.get_user_table_privileges()?;
+
+    // Loop through users in config
+    // Get the user Role object by the user.roles[*].name
+    // Apply the Role sql privileges to the cluster
+    for user in &config.users {
+        // Get roles for user from config
+        let user_roles_in_config: Vec<_> = user
+            .roles
+            .iter()
+            .map(|role_name| {
+                config
+                    .roles
+                    .iter()
+                    .find(|&r| r.get_name() == role_name.to_string())
+                    .unwrap()
+            })
+            .collect();
+
+        let privileges_on_db = user_privileges_on_db.iter().find(|&p| p.name == user.name);
+
+        // Compare privileges on config and db
+        // If privileges on config are not in db, add them
+        // If privileges on db are not in config, remove them
+        for role in user_roles_in_config {
+            match role {
+                Role::Table(role) => {
+                    println!("==> {:?}", role);
+
+                    // revoke
+                    if !privileges_on_db.is_none() {
+                        let sql = role.to_sql_revoke(user.name.clone());
+                        if !dryrun {
+                            conn.query(&sql, &[]).unwrap_or_else(|e| {
+                                error!("failed to run sql:\n{}", sql);
+                                panic!("{}", e);
+                            });
+                            info!("Revoking: {}", sql);
+                        } else {
+                            info!("Would revoke: {}", sql);
+                        }
+                    }
+
+                    // grant
+                    let sql = role.to_sql_grant(user.name.clone());
+                    if !dryrun {
+                        conn.query(&sql, &[]).unwrap_or_else(|e| {
+                            error!("failed to run sql:\n{}", sql);
+                            panic!("{}", e);
+                        });
+                        info!("Granting: {}", sql);
+                    } else {
+                        info!("Granting: {}", sql);
+                    }
+
+                    let action = if privileges_on_db.is_none() {
+                        "granted"
+                    } else {
+                        "updated"
+                    };
+
+                    // Update summary
+                    summary.push(vec![
+                        user.name.clone(),
+                        format!(
+                            "privileges `{}` for table: {:?}",
+                            role.name.clone(),
+                            role.tables.clone()
+                        ),
+                        action.to_string(),
+                    ]);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    // Show Summary
+    print_summary(summary);
+
+    Ok(())
+}
+
+/// Print summary table
+/// TODO: Format the table, detect max size to console
+fn print_summary(summary: Vec<Vec<String>>) {
+    let ascii_table = AsciiTable::default();
+    info!("Summary:\n{}", ascii_table.format(summary));
 }

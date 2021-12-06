@@ -9,21 +9,16 @@ roles:
       - CREATE
       - TEMP
     databases:
-      - db1
-      - db2
+      - postgres
 
   - name: role_schema_level
     type: schema
     grants:
       - CREATE
     databases:
-      - db1
-      - db2
+      - postgres
     schemas:
-      - common
-      - dwh1
-      - dwh2
-
+      - public
   - name: role_all_schema
     type: table
     grants:
@@ -31,9 +26,9 @@ roles:
       - INSERT
       - UPDATE
     databases:
-      - db1
+      - postgres
     schemas:
-      - common
+      - public
     tables:
       - ALL
 

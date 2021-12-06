@@ -24,11 +24,6 @@ fn main() -> Result<()> {
             gen::gen_password(length);
         }
 
-        Command::Apply { file, dryrun, .. } => {
-            let value = Config::new(&file)?;
-            apply::apply(&value, dryrun)?;
-        }
-
         Command::Validate { file } => {
             let value = Config::new(&file)?;
             value.validate()?;
@@ -38,6 +33,11 @@ fn main() -> Result<()> {
         Command::Inspect { file } => {
             let value = Config::new(&file)?;
             inspect::inspect(&value)?;
+        }
+
+        Command::Apply { file, dryrun, .. } => {
+            let value = Config::new(&file)?;
+            apply::apply(&value, dryrun)?;
         }
     }
 
