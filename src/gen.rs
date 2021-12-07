@@ -1,5 +1,6 @@
 use crate::config::Config;
 use log::info;
+use md5::compute;
 use rand::Rng;
 use std::fs;
 use std::path::PathBuf;
@@ -25,31 +26,67 @@ pub fn gen(target: &PathBuf) {
     info!("Generated: {:?}", config_path);
 }
 
-/// Generated password with given length
-pub fn gen_password(length: u8) {
-    const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ\
+/// Generating password with given length
+pub fn gen_password(length: u8, username: Option<String>, password: Option<String>) {
+    // If not password is given, generate random password
+    let password = match password {
+        Some(p) => p,
+        None => {
+            const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ\
                             abcdefghijklmnopqrstuvwxyz\
                             0123456789)(*&^%$#@!~";
+            let mut rng = rand::thread_rng();
+            let password: String = (0..length)
+                .map(|_| {
+                    let idx = rng.gen_range(0..CHARS.len());
+                    CHARS[idx] as char
+                })
+                .collect();
 
-    let mut rng = rand::thread_rng();
-
-    let password: String = (0..length)
-        .map(|_| {
-            let idx = rng.gen_range(0..CHARSET.len());
-            CHARSET[idx] as char
-        })
-        .collect();
+            password
+        }
+    };
 
     println!("Generated password: {}", password);
+
+    if let Some(username) = username {
+        let password_hash = gen_md5_password(&password, &username);
+        println!("Generated MD5 (user: {}): {}", username, password_hash);
+    } else {
+        println!("Hint: Please provide --username to generate MD5");
+    }
+}
+
+/// Generate md5 password hash from username and password
+/// 1. Concatenate the password and username
+/// 2. Hash the concatenated string
+/// 3. Concatenate 'md5' in front of the MD5 hash string
+/// https://docs.aws.amazon.com/redshift/latest/dg/r_CREATE_USER.html
+fn gen_md5_password(password: &str, username: &str) -> String {
+    format!(
+        "md5{:x}",
+        compute(format!("{}{}", password, username).as_bytes())
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
     // Test gen_password
+    #[test]
     fn test_gen_password() {
-        gen_password(10);
+        gen_password(10, None, None);
+        gen_password(10, Some("test".to_string()), None);
+        gen_password(10, Some("test".to_string()), Some("test".to_string()));
+    }
+
+    // Test gen_md5_password
+    #[test]
+    fn test_gen_md5_password() {
+        assert_eq!(
+            gen_md5_password("test", "test"),
+            "md505a671c66aefea124cc08b76ea6d30bb"
+        );
     }
 }

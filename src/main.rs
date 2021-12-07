@@ -20,8 +20,12 @@ fn main() -> Result<()> {
             gen::gen(&target);
         }
 
-        Command::GenPass { length } => {
-            gen::gen_password(length);
+        Command::GenPass {
+            length,
+            username,
+            password,
+        } => {
+            gen::gen_password(length, username, password);
         }
 
         Command::Validate { file } => {
