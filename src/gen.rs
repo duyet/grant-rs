@@ -1,4 +1,5 @@
 use crate::config::Config;
+use ansi_term::Colour::Green;
 use log::info;
 use md5::compute;
 use rand::Rng;
@@ -47,13 +48,18 @@ pub fn gen_password(length: u8, username: Option<String>, password: Option<Strin
         }
     };
 
-    println!("Generated password: {}", password);
+    println!("Generated password: {}", Green.paint(password.clone()));
 
     if let Some(username) = username {
         let password_hash = gen_md5_password(&password, &username);
-        println!("Generated MD5 (user: {}): {}", username, password_hash);
+        println!(
+            "Generated MD5 (user: {}): {}",
+            username,
+            Green.paint(password_hash.clone())
+        );
+        println!("\nHint: https://docs.aws.amazon.com/redshift/latest/dg/r_CREATE_USER.html");
     } else {
-        println!("Hint: Please provide --username to generate MD5");
+        println!("\nHint: Please provide --username to generate MD5");
     }
 }
 

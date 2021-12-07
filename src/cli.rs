@@ -52,7 +52,7 @@ pub enum Command {
     Validate {
         /// The path to the file to read (optional)
         #[structopt(short, long, parse(from_os_str))]
-        file: PathBuf,
+        file: Option<PathBuf>,
     },
 
     /// Inspect current database cluster by config file

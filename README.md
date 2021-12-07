@@ -146,6 +146,13 @@ $ grant gen-pass
 Generated password: q)ItTjN$EXlkF@Tl
 ```
 
+```bash
+$ grant gen-pass --user duyet
+
+Generated password: o^b3aD1L$xLm%#~U
+Generated MD5 (user: duyet): md58243e8f5dfb84bbd851de920e28f596f
+```
+
 ## Inspect the current cluster
 
 ```bash

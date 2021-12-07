@@ -4,11 +4,13 @@ mod config;
 mod connection;
 mod gen;
 mod inspect;
+mod validate;
 
 use crate::config::Config;
 use anyhow::Result;
 use cli::Command;
 use env_logger::Env;
+use std::path::PathBuf;
 
 fn main() -> Result<()> {
     // Logger config, for debugger export RUST_LOG=debug
@@ -29,9 +31,13 @@ fn main() -> Result<()> {
         }
 
         Command::Validate { file } => {
-            let value = Config::new(&file)?;
-            value.validate()?;
-            println!("{:?} OK", file);
+            let target = if let Some(file) = file {
+                file
+            } else {
+                PathBuf::from(std::env::current_dir()?)
+            };
+
+            validate::validate_target(&target)?;
         }
 
         Command::Inspect { file } => {

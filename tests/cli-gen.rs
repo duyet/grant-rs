@@ -78,8 +78,6 @@ fn gen_pass_with_username_and_password() {
         .arg("123456")
         .assert()
         .success()
-        .stdout(predicate::str::contains("Generated password: 123456"))
-        .stdout(predicate::str::contains(
-            "Generated MD5 (user: duyet): md5de3331387913465470ce1772a279be8e",
-        ));
+        .stdout(predicate::str::contains("Generated password:"))
+        .stdout(predicate::str::contains("Generated MD5 (user: duyet):"));
 }

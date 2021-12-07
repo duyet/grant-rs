@@ -527,8 +527,7 @@ pub struct Config {
 impl Config {
     pub fn new(config_path: &PathBuf) -> Result<Self> {
         let config_str = fs::read_to_string(&config_path).context("failed to read config file")?;
-        let config: Config =
-            serde_yaml::from_str(&config_str).context("failed to parse yaml content")?;
+        let config: Config = serde_yaml::from_str(&config_str)?;
 
         config.validate()?;
 
@@ -536,8 +535,7 @@ impl Config {
     }
 
     pub fn from_str(config_str: &str) -> Result<Self> {
-        let config: Config =
-            serde_yaml::from_str(config_str).context("failed to parse yaml content")?;
+        let config: Config = serde_yaml::from_str(config_str)?;
 
         config.validate()?;
 
@@ -611,7 +609,7 @@ mod tests {
     use tempfile::NamedTempFile;
 
     #[test]
-    #[should_panic(expected = "failed to parse yaml")]
+    #[should_panic(expected = "failed to get content: invalid type: string")]
     fn test_with_basic_config() {
         let _text = "bad yaml content";
         let mut file = NamedTempFile::new().expect("failed to create temp file");
