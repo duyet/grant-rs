@@ -25,6 +25,12 @@ pub enum Command {
         /// The target folder
         #[structopt(short, long, default_value = "16")]
         length: u8,
+        /// The username, using to create md5 hash
+        #[structopt(short, long)]
+        username: Option<String>,
+        /// The password, using to create md5 hash
+        #[structopt(short, long)]
+        password: Option<String>,
     },
 
     /// Apply changes
@@ -44,7 +50,7 @@ pub enum Command {
 
     /// Validate target file
     Validate {
-        /// The path to the file to read
+        /// The path to the file to read (optional)
         #[structopt(short, long, parse(from_os_str))]
         file: PathBuf,
     },
