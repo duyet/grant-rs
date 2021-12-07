@@ -1,6 +1,6 @@
 connection:
   type: "postgres"
-  url: "postgres://postgres@localhost:5432/postgres"
+  url: "postgres://postgres:${PASSWORD:postgres}@localhost:5432/postgres"
 
 roles:
   - name: role_database_level

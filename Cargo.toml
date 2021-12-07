@@ -22,6 +22,7 @@ ascii_table = "3"
 md5 = "0.7"
 walkdir = "2"
 ansi_term = "0.12"
+envmnt = "0.9"
 
 [dev-dependencies]
 assert_cmd = "0.10"

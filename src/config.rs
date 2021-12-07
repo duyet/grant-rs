@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Context, Result};
+use envmnt::{ExpandOptions, ExpansionType};
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use std::collections::HashSet;
@@ -30,13 +31,29 @@ pub struct Connection {
 
 impl Connection {
     pub fn new(type_: ConnectionType, url: String) -> Self {
-        Self { type_, url }
+        let mut conn = Self { type_, url };
+        conn = conn.expand_env_vars().unwrap();
+
+        conn
     }
 
     pub fn validate(&self) -> Result<()> {
         match self.type_ {
             ConnectionType::Postgres => Ok(()),
         }
+    }
+
+    // xpaned environtment variables in the `url` field.
+    // Expand environment variables in the `url` field.
+    // For example: postgres://user:${PASSWORD}@host:port/database
+    pub fn expand_env_vars(&self) -> Result<Self> {
+        let mut connection = self.clone();
+
+        let mut options = ExpandOptions::new();
+        options.expansion_type = Some(ExpansionType::UnixBracketsWithDefaults);
+        connection.url = envmnt::expand(&self.url, Some(options));
+
+        Ok(connection)
     }
 }
 
@@ -531,6 +548,9 @@ impl Config {
 
         config.validate()?;
 
+        // expand env variables
+        let config = config.expand_env_vars()?;
+
         Ok(config)
     }
 
@@ -581,6 +601,16 @@ impl Config {
         }
 
         Ok(())
+    }
+
+    // Expand env variables in config
+    fn expand_env_vars(&self) -> Result<Self> {
+        let mut config = self.clone();
+
+        // expand connection
+        config.connection = config.connection.expand_env_vars()?;
+
+        Ok(config)
     }
 }
 
@@ -637,6 +667,52 @@ mod tests {
         let path = PathBuf::from(file.path().to_str().unwrap());
 
         Config::new(&path).expect("failed to get content");
+    }
+
+    // Test config with url contains environement variable
+    #[test]
+    fn test_read_config_with_env_var() {
+        envmnt::set("POSTGRES_HOST", "duyet");
+
+        let _text = indoc! {"
+                 connection:
+                   type: postgres
+                   url: postgres://${POSTGRES_HOST}:5432/postgres
+                 roles: []
+                 users: []
+             "};
+
+        let mut file = NamedTempFile::new().expect("failed to create temp file");
+        file.write(_text.as_bytes())
+            .expect("failed to write to temp file");
+        let path = PathBuf::from(file.path().to_str().unwrap());
+
+        let config = Config::new(&path).expect("failed to get content");
+
+        assert_eq!(config.connection.url, "postgres://duyet:5432/postgres");
+
+        envmnt::remove("POSTGRES_HOST");
+    }
+
+    // Test expand environement variables but not available
+    #[test]
+    fn test_read_config_with_env_var_not_available() {
+        let _text = indoc! {"
+                 connection:
+                   type: postgres
+                   url: postgres://${POSTGRES_HOST:duyet}:5432/${POSTGRES_ABC}
+                 roles: []
+                 users: []
+             "};
+
+        let mut file = NamedTempFile::new().expect("failed to create temp file");
+        file.write(_text.as_bytes())
+            .expect("failed to write to temp file");
+        let path = PathBuf::from(file.path().to_str().unwrap());
+
+        let config = Config::new(&path).expect("failed to get content");
+
+        assert_eq!(config.connection.url, "postgres://duyet:5432/");
     }
 
     // Test config with invalid connection type

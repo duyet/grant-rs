@@ -52,6 +52,7 @@ Content of `./examples/example.yaml`:
 ```yaml
 connection:
   type: "postgres"
+  # support environment variables, e.g. postgres://${HOSTNAME}:5432
   url: "postgres://postgres@localhost:5432/postgres"
 
 roles:
@@ -86,13 +87,13 @@ roles:
 
 users:
   - name: duyet
-    password: 1234567890
+    password: 1234567890 # password in plaintext
     roles:
       - role_database_level
       - role_all_schema
       - role_schema_level
   - name: duyet2
-    password: 1234567890
+    password: md58243e8f5dfb84bbd851de920e28f596f # support md5 style
     roles:
       - role_database_level
       - role_all_schema
@@ -193,6 +194,7 @@ cargo test
 
 # TODO
 
+- [ ] Support reading connection info from environment variables
 - [ ] Support store encrypted password in Git
 - [x] Support Postgres
 - [ ] Visuallization (who can see what?)
