@@ -16,7 +16,8 @@ Using `grant` tool:
 
 ```bash
 $ grant --help
-grant 0.0.1-beta.1
+
+grant 0.0.1-beta.2
 Manage database roles and privileges in GitOps style
 
 USAGE:
@@ -27,22 +28,21 @@ FLAGS:
     -V, --version    Prints version information
 
 SUBCOMMANDS:
-    apply       Apply changes
-    gen         Generate project
+    apply       Apply a configuration to a redshift by file name. Yaml format are accepted
+    gen         Generate sample configuration file
     gen-pass    Generate random password
     help        Prints this message or the help of the given subcommand(s)
-    inspect     Inspect current database cluster by config file
-    validate    Validate target file
+    inspect     Inspect current database cluster with connection info from configuration file
+    validate    Validate a configuration file or a target directory that contains configuration files
 ```
 
 ## Generate project structure
 
 ```bash
-grant gen --target duyet-cluster
+grant gen --target ./cluster
 
-# or
-mkdir duyet-cluster && cd $_
-grant gen --target .
+Creating path: "./cluster"
+Generated: "./cluster/config.yml"
 ```
 
 ## Apply privilege changes
@@ -103,7 +103,7 @@ users:
 Apply this config to cluster:
 
 ```bash
-grant apply --dryrun -f ./examples/example.yaml
+grant apply -f ./examples/example.yaml
 
 [2021-12-06T14:37:03Z INFO  grant::connection] Connected to database: postgres://postgres@localhost:5432/postgres
 [2021-12-06T14:37:03Z INFO  grant::apply] Summary:
@@ -194,7 +194,7 @@ cargo test
 
 # TODO
 
-- [ ] Support reading connection info from environment variables
+- [x] Support reading connection info from environment variables
 - [ ] Support store encrypted password in Git
 - [x] Support Postgres
 - [ ] Visuallization (who can see what?)

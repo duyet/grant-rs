@@ -13,7 +13,7 @@ pub struct Cli {
 
 #[derive(StructOpt, Debug)]
 pub enum Command {
-    /// Generate project
+    /// Generate sample configuration file
     Gen {
         /// The target folder
         #[structopt(short, long, default_value = ".", parse(from_os_str))]
@@ -33,29 +33,30 @@ pub enum Command {
         password: Option<String>,
     },
 
-    /// Apply changes
+    /// Apply a configuration to a redshift by file name.
+    /// Yaml format are accepted.
     Apply {
         /// The path to the file to read
         #[structopt(short, long, parse(from_os_str))]
         file: PathBuf,
 
-        /// Dry run
+        /// Dry run mode, only print what would be apply
         #[structopt(short, long)]
         dryrun: bool,
-
-        /// Connection string
-        #[structopt(short, long)]
-        conn: Option<String>,
     },
 
-    /// Validate target file
+    /// Validate a configuration file or
+    /// a target directory that contains configuration files
     Validate {
-        /// The path to the file to read (optional)
+        /// The path to the file or directory
+        /// If the target is not available, the current
+        /// directory will be used.
         #[structopt(short, long, parse(from_os_str))]
         file: Option<PathBuf>,
     },
 
-    /// Inspect current database cluster by config file
+    /// Inspect current database cluster
+    /// with connection info from configuration file
     Inspect {
         /// The path to the file to read
         #[structopt(short, long, parse(from_os_str))]
