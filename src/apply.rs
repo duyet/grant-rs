@@ -47,7 +47,7 @@ fn apply_users(
                 // TODO: Update password if needed, currently we can't compare the password
 
                 // Do nothing if user is not changed
-                summary.push(vec![user_in_db.name.clone(), "Already exists".to_string()]);
+                summary.push(vec![user_in_db.name.clone(), "no action (existing)".to_string()]);
             }
 
             // User in config but not in database
@@ -127,22 +127,9 @@ pub fn apply_database_privileges(
         for role in user_roles_in_config {
             match role {
                 Role::Database(role) => {
-                    info!("==> {:?}", role);
-                    // revoke
-                    if !privileges_on_db.is_none() {
-                        let sql = role.to_sql_revoke(user.name.clone());
-                        if !dryrun {
-                            conn.query(&sql, &[]).unwrap_or_else(|e| {
-                                error!("failed to run sql:\n{}", sql);
-                                panic!("{}", e);
-                            });
-                            info!("Revoking: {}", sql);
-                        } else {
-                            info!("Would revoke: {}", sql);
-                        }
-                    }
+                    // TODO: revoke if privileges on db are not in configuration
 
-                    // grant
+                    // grant privileges on config to db
                     let sql = role.to_sql_grant(user.name.clone());
                     if !dryrun {
                         conn.query(&sql, &[]).unwrap_or_else(|e| {
@@ -164,7 +151,7 @@ pub fn apply_database_privileges(
                     summary.push(vec![
                         user.name.clone(),
                         format!(
-                            "privileges `{}` for database: {:?}",
+                            "`{}` for database: {:?}",
                             role.name.clone(),
                             role.databases.clone()
                         ),
@@ -226,20 +213,7 @@ pub fn apply_schema_privileges(
         for role in user_roles_in_config {
             match role {
                 Role::Schema(role) => {
-                    info!("==> {:?}", role);
-                    // revoke
-                    if !privileges_on_db.is_none() {
-                        let sql = role.to_sql_revoke(user.name.clone());
-                        if !dryrun {
-                            conn.query(&sql, &[]).unwrap_or_else(|e| {
-                                error!("failed to run sql:\n{}", sql);
-                                panic!("{}", e);
-                            });
-                            info!("Revoking: {}", sql);
-                        } else {
-                            info!("Would revoke: {}", sql);
-                        }
-                    }
+                    // TODO: revoke if privileges on db are not in configuration
 
                     // grant
                     let sql = role.to_sql_grant(user.name.clone());
@@ -263,7 +237,7 @@ pub fn apply_schema_privileges(
                     summary.push(vec![
                         user.name.clone(),
                         format!(
-                            "privileges `{}` for schema: {:?}",
+                            "`{}` for schema: {:?}",
                             role.name.clone(),
                             role.schemas.clone()
                         ),
@@ -325,21 +299,7 @@ pub fn apply_table_privileges(
         for role in user_roles_in_config {
             match role {
                 Role::Table(role) => {
-                    info!("==> {:?}", role);
-
-                    // revoke
-                    if !privileges_on_db.is_none() {
-                        let sql = role.to_sql_revoke(user.name.clone());
-                        if !dryrun {
-                            conn.query(&sql, &[]).unwrap_or_else(|e| {
-                                error!("failed to run sql:\n{}", sql);
-                                panic!("{}", e);
-                            });
-                            info!("Revoking: {}", sql);
-                        } else {
-                            info!("Would revoke: {}", sql);
-                        }
-                    }
+                    // TODO: revoke if privileges on db are not in configuration
 
                     // grant
                     let sql = role.to_sql_grant(user.name.clone());
@@ -363,7 +323,7 @@ pub fn apply_table_privileges(
                     summary.push(vec![
                         user.name.clone(),
                         format!(
-                            "privileges `{}` for table: {:?}",
+                            "`{}` for table: {:?}",
                             role.name.clone(),
                             role.tables.clone()
                         ),

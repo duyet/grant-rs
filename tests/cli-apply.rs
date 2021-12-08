@@ -96,40 +96,40 @@ fn apply_with_config_file() {
         // ┌────────┬───────────────────────────────────────────────────────────┬─────────┐
         // │ User   │ Database Privilege                                        │ Action  │
         // │ ---    │ ---                                                       │ ---     │
-        // │ duyet  │ privileges `role_database_level` for database: ["postgre+ │ updated │
-        // │ duyet2 │ privileges `role_database_level` for database: ["postgre+ │ updated │
+        // │ duyet  │ `role_database_level` for database: ["postgre+ │ updated │
+        // │ duyet2 │ `role_database_level` for database: ["postgre+ │ updated │
         // └────────┴───────────────────────────────────────────────────────────┴─────────┘
         .stderr(predicate::str::contains(
-            "│ duyet  │ privileges `role_database_level` for database",
+            "│ duyet  │ `role_database_level` for database",
         ))
         .stderr(predicate::str::contains(
-            "│ duyet2 │ privileges `role_database_level` for database",
+            "│ duyet2 │ `role_database_level` for database",
         ))
         // Look like this:
         // ┌────────┬───────────────────────────────────────────────────────┬─────────┐
         // │ User   │ Schema Privileges                                     │ Action  │
         // │ ---    │ ---                                                   │ ---     │
-        // │ duyet  │ privileges `role_schema_level` for schema: ["public"] │ updated │
-        // │ duyet2 │ privileges `role_schema_level` for schema: ["public"] │ updated │
+        // │ duyet  │ `role_schema_level` for schema: ["public"] │ updated │
+        // │ duyet2 │ `role_schema_level` for schema: ["public"] │ updated │
         // └────────┴───────────────────────────────────────────────────────┴─────────┘
         .stderr(predicate::str::contains(
-            "│ duyet  │ privileges `role_schema_level` for schema",
+            "│ duyet  │ `role_schema_level` for schema",
         ))
         .stderr(predicate::str::contains(
-            "│ duyet2 │ privileges `role_schema_level` for schema",
+            "│ duyet2 │ `role_schema_level` for schema",
         ))
         // Look like this:
         // ┌────────┬─────────────────────────────────────────────────┬─────────┐
         // │ User   │ Table Privileges                                │ Action  │
         // │ ---    │ ---                                             │ ---     │
-        // │ duyet  │ privileges `role_all_schema` for table: ["ALL"] │ updated │
-        // │ duyet2 │ privileges `role_all_schema` for table: ["ALL"] │ updated │
+        // │ duyet  │ `role_all_schema` for table: ["ALL"] │ updated │
+        // │ duyet2 │ `role_all_schema` for table: ["ALL"] │ updated │
         // └────────┴─────────────────────────────────────────────────┴─────────┘
         .stderr(predicate::str::contains(
-            "│ duyet  │ privileges `role_all_schema` for table",
+            "│ duyet  │ `role_all_schema` for table",
         ))
         .stderr(predicate::str::contains(
-            "│ duyet2 │ privileges `role_all_schema` for table",
+            "│ duyet2 │ `role_all_schema` for table",
         ))
         .stderr(predicate::str::contains("Summary"));
 }
