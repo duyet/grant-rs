@@ -93,7 +93,7 @@ users:
       - role_all_schema
       - role_schema_level
   - name: duyet2
-    password: md58243e8f5dfb84bbd851de920e28f596f # support md5 style
+    password: md58243e8f5dfb84bbd851de920e28f596f # support md5 style: grant gen-pass -u duyet2
     roles:
       - role_database_level
       - role_all_schema
