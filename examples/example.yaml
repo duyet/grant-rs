@@ -45,3 +45,8 @@ users:
       - role_database_level
       - role_all_schema
       - role_schema_level
+  - name: duyet3
+    roles:
+      - role_database_level
+      - role_all_schema
+      - role_schema_level

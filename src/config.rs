@@ -380,17 +380,19 @@ impl RoleTableLevel {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
     pub name: String,
-    pub password: String,
+    // password is optional
+    pub password: Option<String>,
     pub roles: Vec<String>,
 }
 
 impl User {
     pub fn to_sql_create(&self) -> String {
-        let sql = format!(
-            "CREATE USER {} WITH PASSWORD '{}';",
-            self.name, self.password
-        );
-        sql
+        let password = match &self.password {
+            Some(p) => format!(" WITH PASSWORD '{}'", p),
+            None => "".to_string(),
+        };
+
+        format!("CREATE USER {}{};", self.name, password)
     }
 
     pub fn to_sql_drop(&self) -> String {
@@ -403,10 +405,6 @@ impl User {
             return Err(anyhow!("user name is empty"));
         }
 
-        if self.password.is_empty() {
-            return Err(anyhow!("user password is empty"));
-        }
-
         Ok(())
     }
 
@@ -415,7 +413,10 @@ impl User {
     }
 
     pub fn get_password(&self) -> String {
-        self.password.clone()
+        match &self.password {
+            Some(p) => p.clone(),
+            None => "".to_string(),
+        }
     }
 
     pub fn get_roles(&self) -> Vec<String> {
@@ -1100,7 +1101,7 @@ mod tests {
         let _text = indoc! {"
                  connection:
                    type: postgres
-                   url: postgres://localhost:5432/postgres
+                   url: postgres://postgres:postgres@localhost:5432/postgres
                  roles:
                  - type: database
                    name: role_database_level
@@ -1137,6 +1138,11 @@ mod tests {
                    - role_database_level
                    - role_schema_level
                    - role_table_level
+                 - name: duyet_without_password
+                   roles:
+                   - role_database_level
+                   - role_schema_level
+                   - role_table_level
              "};
 
         let mut file = NamedTempFile::new().expect("failed to create temp file");
@@ -1145,7 +1151,7 @@ mod tests {
         let path = PathBuf::from(file.path().to_str().unwrap());
 
         let config = Config::new(&path).expect("failed to parse config");
-        assert_eq!(config.users.len(), 1);
+        assert_eq!(config.users.len(), 2);
 
         // Test user 1
         assert_eq!(config.users[0].get_name(), "duyet");
@@ -1159,6 +1165,12 @@ mod tests {
         assert_eq!(
             config.users[0].to_sql_create(),
             "CREATE USER duyet WITH PASSWORD '123456';"
+        );
+
+        // Test sql create user without password
+        assert_eq!(
+            config.users[1].to_sql_create(),
+            "CREATE USER duyet_without_password;"
         );
 
         // Test sql drop user

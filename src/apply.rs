@@ -42,34 +42,17 @@ fn apply_users(
     for user in users_in_config {
         let user_in_db = users_in_db.iter().find(|&u| u.name == user.name);
         match user_in_db {
+            // User in config and in database
             Some(user_in_db) => {
-                if user_in_db.password != user.password {
-                    // TODO: fixme just clone the user and change the password, but this is not working
-                    let user_to_update = User {
-                        name: user_in_db.name.clone(),
-                        user_createdb: false,
-                        user_super: false,
-                        password: user.password.clone(),
-                    };
+                // TODO: Update password if needed, currently we can't compare the password
 
-                    if !dryrun {
-                        conn.update_user_password(&user_to_update);
-                        info!("User {} password updated", user_to_update.name);
-                    } else {
-                        info!("User {} password would be updated", user_to_update.name);
-                    }
-
-                    // Update summary
-                    summary.push(vec![user.name.clone(), "update password".to_string()]);
-                } else {
-                    info!("User {} already exists", user.name);
-
-                    // Update summary
-                    summary.push(vec![user.name.clone(), "unchanged".to_string()]);
-                }
+                // Do nothing if user is not changed
+                summary.push(vec![user_in_db.name.clone(), "Already exists".to_string()]);
             }
+
+            // User in config but not in database
             None => {
-                let new_user = User::new(user.name.clone(), false, false, user.password.clone());
+                let new_user = User::new(user.get_name(), false, false, user.get_password());
 
                 if !dryrun {
                     conn.create_user(&new_user);

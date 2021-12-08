@@ -139,6 +139,8 @@ impl DbConnection {
     /// Get the list of users
     pub fn get_users(&mut self) -> Result<Vec<User>> {
         let mut users = vec![];
+
+        // TODO: Get the password from database, currently it only returns *****
         let sql = "SELECT usename, usecreatedb, usesuper, passwd FROM pg_user";
         let stmt = self.client.prepare(&sql).unwrap();
 
