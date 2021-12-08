@@ -196,8 +196,11 @@ cargo test
 
 - [x] Support reading connection info from environment variables
 - [ ] Support store encrypted password in Git
-- [x] Support Postgres
+- [x] Support Postgres and Redshift
+- [ ] Support change password
 - [ ] Visuallization (who can see what?)
+- [ ] Apply show more detail about diff changes
+- [ ] Inspect show more detail about user privileges
 
 # LICENSE
 
