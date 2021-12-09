@@ -4,14 +4,14 @@ use std::process::Command; // Run programs
 
 #[test]
 fn missing_arguments() {
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.assert().failure();
 }
 
 #[test]
 /// `./grant gen` without any args can generate project in current folder
 fn gen_without_any_args() {
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("gen")
         .assert()
         .success()
@@ -24,7 +24,7 @@ fn gen_with_target_args() {
     // Random folder name in /tmp
     let folder_name = format!("/tmp/{}", rand::random::<u64>());
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("gen")
         .arg("--target")
         .arg(folder_name.clone())
@@ -37,7 +37,7 @@ fn gen_with_target_args() {
 #[test]
 /// Test gen-pass
 fn gen_pass() {
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("gen-pass")
         .assert()
         .success()
@@ -50,7 +50,7 @@ fn gen_pass() {
 #[test]
 /// Test gen-pass with --username
 fn gen_pass_with_username() {
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("gen-pass")
         .arg("--username")
         .arg("test")
@@ -70,7 +70,7 @@ fn gen_pass_with_username() {
 /// Generated MD5 (user: duyet): md5de3331387913465470ce1772a279be8e
 /// ```
 fn gen_pass_with_username_and_password() {
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("gen-pass")
         .arg("--username")
         .arg("duyet")
