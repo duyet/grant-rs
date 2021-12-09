@@ -8,14 +8,14 @@ use tempfile::NamedTempFile; // Create temporary files
 
 #[test]
 fn missing_arguments() {
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.assert().failure();
 }
 
 #[test]
 /// `grant apply` must have --file or -f args
 fn apply_missing_arguments() {
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .assert()
         .failure()
@@ -81,7 +81,7 @@ fn apply_with_config_file() {
         .expect("failed to write to temp file");
     let path = PathBuf::from(file.path().to_str().unwrap());
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .arg("--file")
         .arg(path)

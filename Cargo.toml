@@ -25,6 +25,6 @@ ansi_term = "0.12"
 envmnt = "0.9"
 
 [dev-dependencies]
-assert_cmd = "0.10"
+assert_cmd = "2.0"
 predicates = "1"
 tempfile = "3"

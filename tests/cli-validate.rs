@@ -10,7 +10,7 @@ use tempfile::NamedTempFile;
 #[test]
 /// `./grant validate` must have --file or -f args
 fn validate_missing_arguments() {
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .assert()
         .failure()
@@ -20,7 +20,7 @@ fn validate_missing_arguments() {
 /// `./grant validate --file` must have a valid file
 #[test]
 fn validate_file_not_found() {
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .arg("--file")
         .arg("/tmp/test-file-not-found")
@@ -91,7 +91,7 @@ fn validate_file_valid() {
         .expect("failed to write to temp file");
     let path = PathBuf::from(file.path().to_str().unwrap());
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .arg("--file")
         .arg(path)
@@ -129,7 +129,7 @@ fn validate_file_invalid_role_type_schema() {
         .expect("failed to write to temp file");
     let path = PathBuf::from(file.path().to_str().unwrap());
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .arg("--file")
         .arg(path)
@@ -162,7 +162,7 @@ fn validate_file_invalid_role_type_database() {
         .expect("failed to write to temp file");
     let path = PathBuf::from(file.path().to_str().unwrap());
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .arg("--file")
         .arg(path)
@@ -197,7 +197,7 @@ fn validate_file_invalid_role_type_table() {
     let path = PathBuf::from(file.path().to_str().unwrap());
 
     // Validate the file
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .arg("--file")
         .arg(path)
@@ -231,7 +231,7 @@ fn validate_file_invalid_role_type_table_missing_schemas() {
     let path = PathBuf::from(file.path().to_str().unwrap());
 
     // Validate the file
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .arg("--file")
         .arg(path)
@@ -262,7 +262,7 @@ fn validate_file_invalid_role_type_table_missing_tables() {
         .expect("failed to write to temp file");
     let path = PathBuf::from(file.path().to_str().unwrap());
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .arg("--file")
         .arg(path)
@@ -295,7 +295,7 @@ fn validate_file_invalid_role_type() {
         .expect("failed to write to temp file");
     let path = PathBuf::from(file.path().to_str().unwrap());
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .arg("--file")
         .arg(path)
@@ -339,7 +339,7 @@ fn validate_file_user_role_not_existing() {
         .expect("failed to write to temp file");
     let path = PathBuf::from(file.path().to_str().unwrap());
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("grant").unwrap();
     cmd.arg("apply")
         .arg("--file")
         .arg(path)
