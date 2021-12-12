@@ -83,7 +83,7 @@ fn apply_users(
                 // Do nothing if user is not changed
                 summary.push(vec![
                     user_in_db.name.clone(),
-                    "no action (existing)".to_string(),
+                    "no action (already exists)".to_string(),
                 ]);
             }
 
