@@ -1,22 +1,55 @@
 use crate::config::{Config, Role, User as UserInConfig};
 use crate::connection::{DbConnection, User};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use ascii_table::AsciiTable;
 use log::error;
 use log::info;
+use std::path::PathBuf;
 
-pub fn apply(config: &Config, dryrun: bool) -> Result<()> {
+/// Read the config from the given path and apply it to the database.
+/// If the dryrun flag is set, the changes will not be applied.
+pub fn apply(target: &PathBuf, dryrun: bool) -> Result<()> {
+    if target.is_dir() {
+        return Err(anyhow!("The target is a directory"));
+    }
+
+    let config = Config::new(&target)?;
+
     info!("Applying configuration:\n{}", config);
-    let mut conn = DbConnection::new(config);
+    let mut conn = DbConnection::new(&config);
 
     let users_in_db = conn.get_users()?;
     let users_in_config = config.users.clone();
 
     // TODO: Refactor these functions
     apply_users(&mut conn, &users_in_db, &users_in_config, dryrun)?;
-    apply_database_privileges(&mut conn, &config, dryrun)?;
-    apply_schema_privileges(&mut conn, &config, dryrun)?;
-    apply_table_privileges(&mut conn, &config, dryrun)?;
+
+    // Apply roles privileges to cluster
+    apply_privileges(&mut conn, &config, dryrun)?;
+
+    Ok(())
+}
+
+/// Apply all config files from the given directory.
+pub fn apply_all(target: &PathBuf, dryrun: bool) -> Result<()> {
+    // Scan recursively for config files (.yaml for .yml) in target directory
+    let mut config_files = Vec::new();
+    for entry in std::fs::read_dir(target)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_file() {
+            let ext = path.extension().unwrap();
+            if ext == "yaml" || ext == "yml" {
+                config_files.push(path);
+            }
+        }
+    }
+
+    // Apply each config file
+    for config_file in config_files {
+        info!("Applying configuration from {}", config_file.display());
+        apply(&config_file, dryrun)?;
+    }
 
     Ok(())
 }
@@ -47,19 +80,26 @@ fn apply_users(
                 // TODO: Update password if needed, currently we can't compare the password
 
                 // Do nothing if user is not changed
-                summary.push(vec![user_in_db.name.clone(), "no action (existing)".to_string()]);
+                summary.push(vec![
+                    user_in_db.name.clone(),
+                    "no action (existing)".to_string(),
+                ]);
             }
 
             // User in config but not in database
             None => {
-                let new_user = User::new(user.get_name(), false, false, user.get_password());
+                let sql = user.to_sql_create();
 
-                if !dryrun {
-                    conn.create_user(&new_user);
-                    info!("User {} created", new_user.name);
+                if dryrun {
+                    summary.push(vec![
+                        user.name.clone(),
+                        format!("would create (dryrun) {}", sql),
+                    ]);
                 } else {
-                    info!("User {} would be created", new_user.name);
+                    conn.execute(&sql, &[])?;
+                    summary.push(vec![user.name.clone(), format!("created {}", sql)]);
                 }
+
                 // Update summary
                 summary.push(vec![user.name.clone(), "created".to_string()]);
             }
@@ -83,24 +123,27 @@ fn apply_users(
     Ok(())
 }
 
-/// Apply database privileges from config to database
-pub fn apply_database_privileges(
-    conn: &mut DbConnection,
-    config: &Config,
-    dryrun: bool,
-) -> Result<()> {
+/// Render role configuration to SQL and sync with database.
+/// If the privileges are not in the database, they will be granted to user.
+/// If the privileges are in the database, they will be updated.
+/// If the privileges are not in the configuration, they will be revoked from user.
+fn apply_privileges(conn: &mut DbConnection, config: &Config, dryrun: bool) -> Result<()> {
     let mut summary = vec![vec![
         "User".to_string(),
-        "Database Privilege".to_string(),
+        "Kind".to_string(),
+        "Privilege".to_string(),
         "Action".to_string(),
     ]];
     summary.push(vec![
         "---".to_string(),
         "---".to_string(),
         "---".to_string(),
+        "---".to_string(),
     ]);
 
-    let user_privileges_on_db = conn.get_user_database_privileges()?;
+    let user_database_privileges = conn.get_user_database_privileges()?;
+    let user_schema_privileges = conn.get_user_schema_privileges()?;
+    let user_table_privileges = conn.get_user_table_privileges()?;
 
     // Loop through users in config
     // Get the user Role object by the user.roles[*].name
@@ -110,232 +153,96 @@ pub fn apply_database_privileges(
         let user_roles_in_config: Vec<_> = user
             .roles
             .iter()
-            .map(|role_name| {
-                config
-                    .roles
-                    .iter()
-                    .find(|&r| r.get_name() == role_name.to_string())
-                    .unwrap()
-            })
+            .map(|role_name| config.roles.iter().find(|&r| r.find(&role_name)).unwrap())
             .collect();
 
-        let privileges_on_db = user_privileges_on_db.iter().find(|&p| p.name == user.name);
+        // Using current privileges on database to revoke nessessary privileges
+        let current_user_database_privileges = user_database_privileges
+            .iter()
+            .find(|&p| p.name == user.name);
+        let current_user_schema_privileges =
+            user_schema_privileges.iter().find(|&p| p.name == user.name);
+        let current_user_table_privileges =
+            user_table_privileges.iter().find(|&p| p.name == user.name);
 
         // Compare privileges on config and db
         // If privileges on config are not in db, add them
         // If privileges on db are not in config, remove them
         for role in user_roles_in_config {
-            match role {
+            // TODO: revoke if privileges on db are not in configuration
+
+            // grant privileges from config to database
+            let sql = role.to_sql_grant(user.name.clone());
+
+            if !dryrun {
+                conn.query(&sql, &[]).unwrap_or_else(|e| {
+                    error!("failed to run sql:\n{}", sql);
+                    panic!("{}", e);
+                });
+                info!("Granting: {}", sql);
+            } else {
+                info!("Granting: {}", sql);
+            }
+
+            let (kind, action, message) = match role {
                 Role::Database(role) => {
-                    // TODO: revoke if privileges on db are not in configuration
-
-                    // grant privileges on config to db
-                    let sql = role.to_sql_grant(user.name.clone());
-                    if !dryrun {
-                        conn.query(&sql, &[]).unwrap_or_else(|e| {
-                            error!("failed to run sql:\n{}", sql);
-                            panic!("{}", e);
-                        });
-                        info!("Granting: {}", sql);
-                    } else {
-                        info!("Granting: {}", sql);
-                    }
-
-                    let action = if privileges_on_db.is_none() {
+                    let kind = "database";
+                    let action = if current_user_database_privileges.is_none() {
                         "granted"
                     } else {
                         "updated"
                     };
+                    let message = format!(
+                        "`{}` for database: {:?}",
+                        role.name.clone(),
+                        role.databases.clone()
+                    );
 
-                    // Update summary
-                    summary.push(vec![
-                        user.name.clone(),
-                        format!(
-                            "`{}` for database: {:?}",
-                            role.name.clone(),
-                            role.databases.clone()
-                        ),
-                        action.to_string(),
-                    ]);
+                    (kind, action, message)
                 }
-                _ => {}
-            }
+                Role::Schema(role) => {
+                    let kind = "schema";
+                    let action = if current_user_schema_privileges.is_none() {
+                        "granted"
+                    } else {
+                        "updated"
+                    };
+                    let message = format!(
+                        "`{}` for schema: {:?}",
+                        role.name.clone(),
+                        role.schemas.clone()
+                    );
+
+                    (kind, action, message)
+                }
+                Role::Table(role) => {
+                    let kind = "table";
+                    let action = if current_user_table_privileges.is_none() {
+                        "granted"
+                    } else {
+                        "updated"
+                    };
+                    let message = format!(
+                        "`{}` for table: {:?}",
+                        role.name.clone(),
+                        role.tables.clone()
+                    );
+
+                    (kind, action, message)
+                }
+            };
+
+            // Update summary
+            summary.push(vec![
+                user.name.clone(),
+                kind.to_string(),
+                message.to_string(),
+                action.to_string(),
+            ]);
         }
     }
 
     // Show summary
-    print_summary(summary);
-
-    Ok(())
-}
-
-/// Apply schema privileges from config to database
-pub fn apply_schema_privileges(
-    conn: &mut DbConnection,
-    config: &Config,
-    dryrun: bool,
-) -> Result<()> {
-    let mut summary = vec![vec![
-        "User".to_string(),
-        "Schema Privileges".to_string(),
-        "Action".to_string(),
-    ]];
-    summary.push(vec![
-        "---".to_string(),
-        "---".to_string(),
-        "---".to_string(),
-    ]);
-
-    let user_privileges_on_db = conn.get_user_schema_privileges()?;
-
-    // Loop through users in config
-    // Get the user Role object by the user.roles[*].name
-    // Apply the Role sql privileges to the cluster
-    for user in &config.users {
-        // Get roles for user from config
-        let user_roles_in_config: Vec<_> = user
-            .roles
-            .iter()
-            .map(|role_name| {
-                config
-                    .roles
-                    .iter()
-                    .find(|&r| r.get_name() == role_name.to_string())
-                    .unwrap()
-            })
-            .collect();
-
-        let privileges_on_db = user_privileges_on_db.iter().find(|&p| p.name == user.name);
-
-        // Compare privileges on config and db
-        // If privileges on config are not in db, add them
-        // If privileges on db are not in config, remove them
-        for role in user_roles_in_config {
-            match role {
-                Role::Schema(role) => {
-                    // TODO: revoke if privileges on db are not in configuration
-
-                    // grant
-                    let sql = role.to_sql_grant(user.name.clone());
-                    if !dryrun {
-                        conn.query(&sql, &[]).unwrap_or_else(|e| {
-                            error!("failed to run sql:\n{}", sql);
-                            panic!("{}", e);
-                        });
-                        info!("Granting: {}", sql);
-                    } else {
-                        info!("Granting: {}", sql);
-                    }
-
-                    let action = if privileges_on_db.is_none() {
-                        "granted"
-                    } else {
-                        "updated"
-                    };
-
-                    // Update Summary
-                    summary.push(vec![
-                        user.name.clone(),
-                        format!(
-                            "`{}` for schema: {:?}",
-                            role.name.clone(),
-                            role.schemas.clone()
-                        ),
-                        action.to_string(),
-                    ]);
-                }
-                _ => {}
-            }
-        }
-    }
-
-    // Show Summary
-    print_summary(summary);
-
-    Ok(())
-}
-
-/// Apply table privileges from config to database
-pub fn apply_table_privileges(
-    conn: &mut DbConnection,
-    config: &Config,
-    dryrun: bool,
-) -> Result<()> {
-    let mut summary = vec![vec![
-        "User".to_string(),
-        "Table Privileges".to_string(),
-        "Action".to_string(),
-    ]];
-    summary.push(vec![
-        "---".to_string(),
-        "---".to_string(),
-        "---".to_string(),
-    ]);
-
-    let user_privileges_on_db = conn.get_user_table_privileges()?;
-
-    // Loop through users in config
-    // Get the user Role object by the user.roles[*].name
-    // Apply the Role sql privileges to the cluster
-    for user in &config.users {
-        // Get roles for user from config
-        let user_roles_in_config: Vec<_> = user
-            .roles
-            .iter()
-            .map(|role_name| {
-                config
-                    .roles
-                    .iter()
-                    .find(|&r| r.get_name() == role_name.to_string())
-                    .unwrap()
-            })
-            .collect();
-
-        let privileges_on_db = user_privileges_on_db.iter().find(|&p| p.name == user.name);
-
-        // Compare privileges on config and db
-        // If privileges on config are not in db, add them
-        // If privileges on db are not in config, remove them
-        for role in user_roles_in_config {
-            match role {
-                Role::Table(role) => {
-                    // TODO: revoke if privileges on db are not in configuration
-
-                    // grant
-                    let sql = role.to_sql_grant(user.name.clone());
-                    if !dryrun {
-                        conn.query(&sql, &[]).unwrap_or_else(|e| {
-                            error!("failed to run sql:\n{}", sql);
-                            panic!("{}", e);
-                        });
-                        info!("Granting: {}", sql);
-                    } else {
-                        info!("Granting: {}", sql);
-                    }
-
-                    let action = if privileges_on_db.is_none() {
-                        "granted"
-                    } else {
-                        "updated"
-                    };
-
-                    // Update summary
-                    summary.push(vec![
-                        user.name.clone(),
-                        format!(
-                            "`{}` for table: {:?}",
-                            role.name.clone(),
-                            role.tables.clone()
-                        ),
-                        action.to_string(),
-                    ]);
-                }
-                _ => {}
-            }
-        }
-    }
-
-    // Show Summary
     print_summary(summary);
 
     Ok(())

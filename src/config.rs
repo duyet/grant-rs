@@ -30,13 +30,6 @@ pub struct Connection {
 }
 
 impl Connection {
-    pub fn new(type_: ConnectionType, url: String) -> Self {
-        let mut conn = Self { type_, url };
-        conn = conn.expand_env_vars().unwrap();
-
-        conn
-    }
-
     pub fn validate(&self) -> Result<()> {
         match self.type_ {
             ConnectionType::Postgres => Ok(()),
@@ -83,28 +76,6 @@ impl fmt::Display for RoleLevelType {
             RoleLevelType::Schema => write!(f, "schema"),
             RoleLevelType::Table => write!(f, "table"),
         }
-    }
-}
-
-impl RoleLevelType {
-    pub fn validate(&self) -> Result<()> {
-        match self {
-            RoleLevelType::Database => Ok(()),
-            RoleLevelType::Schema => Ok(()),
-            RoleLevelType::Table => Ok(()),
-        }
-    }
-
-    pub fn get_level_type(&self) -> String {
-        match self {
-            RoleLevelType::Database => "database".to_string(),
-            RoleLevelType::Schema => "schema".to_string(),
-            RoleLevelType::Table => "table".to_string(),
-        }
-    }
-
-    pub fn is_none(&self) -> bool {
-        false
     }
 }
 
@@ -157,10 +128,6 @@ impl RoleDatabaseLevel {
 
     pub fn to_sql_grant(&self, user: String) -> String {
         self.to_sql(user, true)
-    }
-
-    pub fn to_sql_revoke(&self, user: String) -> String {
-        self.to_sql(user, false)
     }
 
     pub fn validate(&self) -> Result<()> {
@@ -245,10 +212,6 @@ impl RoleSchemaLevel {
         self.to_sql(user, true)
     }
 
-    pub fn to_sql_revoke(&self, user: String) -> String {
-        self.to_sql(user, false)
-    }
-
     pub fn validate(&self) -> Result<()> {
         if self.name.is_empty() {
             return Err(anyhow!("role name is empty"));
@@ -328,10 +291,6 @@ impl RoleTableLevel {
 
     pub fn to_sql_grant(&self, user: String) -> String {
         self.to_sql(user, true)
-    }
-
-    pub fn to_sql_revoke(&self, user: String) -> String {
-        self.to_sql(user, false)
     }
 
     pub fn validate(&self) -> Result<()> {
@@ -469,6 +428,17 @@ impl Role {
         }
     }
 
+    pub fn find(&self, name: &str) -> bool {
+        // role name can contain '-', so we need to remove it before comparing
+        let name = name.replace("-", "");
+
+        match self {
+            Role::Database(role) => role.name == name,
+            Role::Schema(role) => role.name == name,
+            Role::Table(role) => role.name == name,
+        }
+    }
+
     pub fn get_level(&self) -> RoleLevelType {
         match self {
             Role::Database(_role) => RoleLevelType::Database,
@@ -595,7 +565,14 @@ impl Config {
         // Validate users roles are available in roles
         for user in &self.users {
             for role in &user.roles {
-                if !self.roles.iter().any(|r| r.get_name() == role.to_string()) {
+                // role name can contain '-' at the first position
+                let role_name = if role.starts_with('-') {
+                    &role[1..]
+                } else {
+                    role
+                };
+
+                if !self.roles.iter().any(|r| r.get_name() == role_name) {
                     return Err(anyhow!("user role {} is not available", role));
                 }
             }
@@ -1175,5 +1152,107 @@ mod tests {
 
         // Test sql drop user
         assert_eq!(config.users[0].to_sql_drop(), "DROP USER IF EXISTS duyet;");
+    }
+
+    // Test users config with revoke role by `-role_name`
+    #[test]
+    fn test_read_config_users_exclude_role_by_minus_role_name() {
+        let _text = indoc! {"
+             connection:
+               type: postgres
+               url: postgres://postgres:postgres@localhost:5432/postgres
+             roles:
+             - type: database
+               name: role_database_level
+               grants:
+               - CREATE
+               - TEMP
+               databases:
+               - db1
+               - db2
+               - db3
+             - type: schema
+               name: role_schema_level
+               grants:
+               - ALL
+               schemas:
+               - schema1
+               - schema2
+               - schema3
+             - type: table
+               name: role_table_level
+               grants:
+               - SELECT
+               - INSERT
+               schemas:
+               - schema1
+               tables:
+               - table1
+               - table2
+               - table3
+             users:
+             - name: duyet
+               password: 123456
+               roles:
+               - -role_database_level
+               - -role_schema_level
+               - -role_table_level
+             - name: duyet_without_password
+               roles:
+               - role_database_level
+               - role_schema_level
+               - role_table_level
+        "};
+
+        let mut file = NamedTempFile::new().expect("failed to create temp file");
+        file.write(_text.as_bytes())
+            .expect("failed to write to temp file");
+        let path = PathBuf::from(file.path().to_str().unwrap());
+
+        let config = Config::new(&path).expect("failed to parse config");
+        assert_eq!(config.users.len(), 2);
+
+        // Test user 1
+        assert_eq!(config.users[0].get_name(), "duyet");
+        assert_eq!(config.users[0].get_password(), "123456");
+        assert_eq!(config.users[0].get_roles().len(), 3);
+    }
+
+    /// Test find role by name, name can contains `-` in case of exclude role
+    #[test]
+    fn test_find_role_by_name() {
+        let _text = indoc! {"
+             connection:
+               type: postgres
+               url: postgres://postgres:postgres@localhost:5432/postgres
+             roles:
+             - type: database
+               name: role_database_level
+               grants:
+               - CREATE
+               databases:
+               - db1
+             users: []
+        "};
+
+        let mut file = NamedTempFile::new().expect("failed to create temp file");
+        file.write(_text.as_bytes())
+            .expect("failed to write to temp file");
+        let path = PathBuf::from(file.path().to_str().unwrap());
+
+        let config = Config::new(&path).expect("failed to parse config");
+
+        assert!(config
+            .roles
+            .iter()
+            .find(|r| r.find("role_database_level"))
+            .is_some());
+
+        // Test find role by name with `-`
+        assert!(config
+            .roles
+            .iter()
+            .find(|r| r.find("-role_database_level"))
+            .is_some());
     }
 }

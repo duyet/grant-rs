@@ -43,6 +43,10 @@ pub enum Command {
         /// Dry run mode, only print what would be apply
         #[structopt(short, long)]
         dryrun: bool,
+
+        /// Apply all files in the current folder or target folder (if --file is a folder)
+        #[structopt(short, long)]
+        all: bool,
     },
 
     /// Validate a configuration file or

@@ -22,6 +22,38 @@ fn apply_missing_arguments() {
         .stderr(predicate::str::contains("--file"));
 }
 
+/// `grant apply` with target is a directory
+#[test]
+fn apply_target_is_directory() {
+    // create a temporary directory
+    let dir = tempfile::tempdir().unwrap();
+
+    let mut cmd = Command::cargo_bin("grant").unwrap();
+    cmd.arg("apply")
+        .arg("--file")
+        .arg(dir.path())
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("is a directory"));
+
+    // cleanup
+    dir.close().unwrap();
+}
+
+/// `grant apply` with target is a directory but --all is set
+#[test]
+fn apply_target_is_directory_with_all() {
+    let test_dir = tempfile::tempdir().unwrap();
+
+    let mut cmd = Command::cargo_bin("grant").unwrap();
+    cmd.arg("apply")
+        .arg("--file")
+        .arg(test_dir.path())
+        .arg("--all")
+        .assert()
+        .success();
+}
+
 /// `grant apply` with a config file
 #[test]
 fn apply_with_config_file() {
@@ -93,43 +125,33 @@ fn apply_with_config_file() {
         .stderr(predicate::str::contains("duyet"))
         .stderr(predicate::str::contains("duyet2"))
         // Look like this:
-        // ┌────────┬───────────────────────────────────────────────────────────┬─────────┐
-        // │ User   │ Database Privilege                                        │ Action  │
-        // │ ---    │ ---                                                       │ ---     │
-        // │ duyet  │ `role_database_level` for database: ["postgre+ │ updated │
-        // │ duyet2 │ `role_database_level` for database: ["postgre+ │ updated │
-        // └────────┴───────────────────────────────────────────────────────────┴─────────┘
+        //    ┌────────┬──────────┬────────────────────────────────────────────────┬─────────┐
+        //    │ User   │ Kind     │ Privilege                                      │ Action  │
+        //    │ ---    │ ---      │ ---                                            │ ---     │
+        //    │ duyet  │ database │ `role_database_level` for database: ["postgre+ │ updated │
+        //    │ duyet  │ table    │ `role_all_schema` for table: ["ALL"]           │ updated │
+        //    │ duyet  │ schema   │ `role_schema_level` for schema: ["public"]     │ updated │
+        //    │ duyet2 │ database │ `role_database_level` for database: ["postgre+ │ updated │
+        //    │ duyet2 │ table    │ `role_all_schema` for table: ["ALL"]           │ updated │
+        //    │ duyet2 │ schema   │ `role_schema_level` for schema: ["public"]     │ updated │
+        //    └────────┴──────────┴────────────────────────────────────────────────┴─────────┘
         .stderr(predicate::str::contains(
-            "│ duyet  │ `role_database_level` for database",
+            "│ duyet  │ database │ `role_database_level` for database:",
         ))
         .stderr(predicate::str::contains(
-            "│ duyet2 │ `role_database_level` for database",
-        ))
-        // Look like this:
-        // ┌────────┬───────────────────────────────────────────────────────┬─────────┐
-        // │ User   │ Schema Privileges                                     │ Action  │
-        // │ ---    │ ---                                                   │ ---     │
-        // │ duyet  │ `role_schema_level` for schema: ["public"] │ updated │
-        // │ duyet2 │ `role_schema_level` for schema: ["public"] │ updated │
-        // └────────┴───────────────────────────────────────────────────────┴─────────┘
-        .stderr(predicate::str::contains(
-            "│ duyet  │ `role_schema_level` for schema",
+            "│ duyet  │ schema   │ `role_schema_level` for schema:",
         ))
         .stderr(predicate::str::contains(
-            "│ duyet2 │ `role_schema_level` for schema",
-        ))
-        // Look like this:
-        // ┌────────┬─────────────────────────────────────────────────┬─────────┐
-        // │ User   │ Table Privileges                                │ Action  │
-        // │ ---    │ ---                                             │ ---     │
-        // │ duyet  │ `role_all_schema` for table: ["ALL"] │ updated │
-        // │ duyet2 │ `role_all_schema` for table: ["ALL"] │ updated │
-        // └────────┴─────────────────────────────────────────────────┴─────────┘
-        .stderr(predicate::str::contains(
-            "│ duyet  │ `role_all_schema` for table",
+            "│ duyet  │ table    │ `role_all_schema` for table:",
         ))
         .stderr(predicate::str::contains(
-            "│ duyet2 │ `role_all_schema` for table",
+            "│ duyet2 │ database │ `role_database_level` for database:",
+        ))
+        .stderr(predicate::str::contains(
+            "│ duyet2 │ schema   │ `role_schema_level` for schema:",
+        ))
+        .stderr(predicate::str::contains(
+            "│ duyet2 │ table    │ `role_all_schema` for table:",
         ))
         .stderr(predicate::str::contains("Summary"));
 }

@@ -7,11 +7,14 @@ use postgres::{Client, NoTls, ToStatement};
 
 // TODO: support multiple adapters
 
+/// Connection to the database, currently only Postgres and Redshift is supported
+/// TODO: support multiple adapters
 pub struct DbConnection {
     pub connection_info: String,
     pub client: Client,
 }
 
+/// Presentation for a user in the database
 #[derive(Debug, Clone)]
 pub struct User {
     pub name: String,
@@ -20,17 +23,8 @@ pub struct User {
     pub password: String,
 }
 
-impl User {
-    pub fn new(name: String, user_createdb: bool, user_super: bool, password: String) -> User {
-        User {
-            name,
-            user_createdb,
-            user_super,
-            password,
-        }
-    }
-}
-
+/// Presentation for a user database privilege in the database
+/// which a users has `create` or `temp` on database
 #[derive(Debug)]
 pub struct UserDatabaseRole {
     pub name: String,
@@ -39,6 +33,8 @@ pub struct UserDatabaseRole {
     pub has_temp: bool,
 }
 
+/// Presentation for a user schema privilege in the database
+/// which a users has `create` or `usage` on schema
 #[derive(Debug)]
 pub struct UserSchemaRole {
     pub name: String,
@@ -47,6 +43,8 @@ pub struct UserSchemaRole {
     pub has_usage: bool,
 }
 
+/// Presentation for a user table privilege in the database
+/// which a users has `select`, `insert`, `update`, `delete` or `reference` on table
 #[derive(Debug)]
 pub struct UserTableRole {
     pub name: String,
@@ -63,6 +61,24 @@ impl DbConnection {
     /// A convenience function which store the connection string into `connection_info` and then connects to the database.
     ///
     /// Refer to <https://rust-lang-nursery.github.io/rust-cookbook/database/postgres.html>
+    /// for more information.
+    ///
+    /// ```rust
+    /// use grant::{config::Config, connection::DbConnection};
+    ///
+    /// let config = Config::from_str(
+    ///     r#"
+    ///       connection:
+    ///         type: postgres
+    ///         url: "postgresql://postgres:postgres@localhost:5432/postgres"
+    ///       roles: []
+    ///       users: []
+    ///     "#,
+    ///    )
+    ///    .unwrap();
+    ///    let mut db = DbConnection::new(&config);
+    ///    db.query("SELECT 1", &[]).unwrap();
+    /// ```
     pub fn new(config: &Config) -> Self {
         match config.connection.type_ {
             ConnectionType::Postgres => {
@@ -85,6 +101,14 @@ impl DbConnection {
     }
 
     /// Connection by a connection string.
+    ///
+    /// ```rust
+    /// use grant::connection::DbConnection;
+    ///
+    /// let connection_info = "postgres://postgres:postgres@localhost:5432/postgres".to_string();
+    /// let mut client = DbConnection::new_from_string(connection_info);
+    /// client.query("SELECT 1", &[]).unwrap();
+    /// ```
     pub fn new_from_string(connection_info: String) -> Self {
         let client = Client::connect(&connection_info, NoTls).unwrap();
         DbConnection {
@@ -94,6 +118,13 @@ impl DbConnection {
     }
 
     /// Returns the connection_info
+    ///
+    /// ```rust
+    /// use grant::connection::DbConnection;
+    /// let connection_info = "postgres://postgres:postgres@localhost:5432/postgres".to_string();
+    /// let mut client = DbConnection::new_from_string(connection_info);
+    /// assert_eq!(client.connection_info(), "postgres://postgres:postgres@localhost:5432/postgres");
+    /// ```
     pub fn connection_info(self) -> String {
         self.connection_info
     }
@@ -334,6 +365,14 @@ impl DbConnection {
         let ri = self.client.query(query, params)?;
         Ok(ri)
     }
+
+    pub fn execute<T>(&mut self, query: &T, params: &[&(dyn ToSql + Sync)]) -> Result<Vec<Row>>
+    where
+        T: ?Sized + ToStatement,
+    {
+        let ri = self.client.query(query, params)?;
+        Ok(ri)
+    }
 }
 
 // Test DbConnection
@@ -341,29 +380,6 @@ impl DbConnection {
 mod tests {
     use super::*;
     use rand::{thread_rng, Rng};
-
-    #[test]
-    fn test_connect_from_config() {
-        let config = Config::from_str(
-            r#"
-            connection:
-              type: postgres
-              url: "postgresql://postgres:postgres@localhost:5432/postgres"
-            roles: []
-            users: []
-            "#,
-        )
-        .unwrap();
-        let mut db = DbConnection::new(&config);
-        db.query("SELECT 1", &[]).unwrap();
-    }
-
-    #[test]
-    fn test_connect_from_string() {
-        let url = "postgres://postgres:postgres@localhost:5432/postgres".to_string();
-        let mut db = DbConnection::new_from_string(url);
-        db.query("SELECT 1", &[]).unwrap();
-    }
 
     #[test]
     fn test_drop_user() {
@@ -451,6 +467,21 @@ mod tests {
         let mut db = DbConnection::new_from_string(url.to_string());
         let rows = db.query("SELECT 1 as t", &[]).unwrap();
         debug!("test_query: {:?}", rows);
+
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows.get(0).unwrap().len(), 1);
+
+        let t: i32 = rows.get(0).unwrap().get("t");
+        assert_eq!(t, 1);
+    }
+
+    // Test execute
+    #[test]
+    fn test_execute() {
+        let url = "postgresql://postgres:postgres@localhost:5432/postgres";
+        let mut db = DbConnection::new_from_string(url.to_string());
+        let rows = db.execute("SELECT 1 as t", &[]).unwrap();
+        debug!("test_execute: {:?}", rows);
 
         assert_eq!(rows.len(), 1);
         assert_eq!(rows.get(0).unwrap().len(), 1);

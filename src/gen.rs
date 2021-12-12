@@ -34,8 +34,8 @@ pub fn gen_password(length: u8, username: Option<String>, password: Option<Strin
         Some(p) => p,
         None => {
             const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ\
-                            abcdefghijklmnopqrstuvwxyz\
-                            0123456789)(*&^%$#@!~";
+                                   abcdefghijklmnopqrstuvwxyz\
+                                   0123456789)(*&^%$#@!~";
             let mut rng = rand::thread_rng();
             let password: String = (0..length)
                 .map(|_| {

@@ -45,9 +45,12 @@ fn main() -> Result<()> {
             inspect::inspect(&value)?;
         }
 
-        Command::Apply { file, dryrun, .. } => {
-            let value = Config::new(&file)?;
-            apply::apply(&value, dryrun)?;
+        Command::Apply { file, dryrun, all } => {
+            if all {
+                apply::apply_all(&file, dryrun)?;
+            } else {
+                apply::apply(&file, dryrun)?;
+            }
         }
     }
 
