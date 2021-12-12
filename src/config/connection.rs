@@ -1,5 +1,6 @@
 use anyhow::Result;
 use envmnt::{ExpandOptions, ExpansionType};
+use log::warn;
 use serde::{Deserialize, Serialize};
 
 /// Connection type. Supported values: Postgres
@@ -40,9 +41,21 @@ impl Connection {
     pub fn expand_env_vars(&self) -> Result<Self> {
         let mut connection = self.clone();
 
-        let mut options = ExpandOptions::new();
-        options.expansion_type = Some(ExpansionType::UnixBracketsWithDefaults);
+        let options = ExpandOptions {
+            expansion_type: Some(ExpansionType::UnixBracketsWithDefaults),
+            default_to_empty: false,
+        };
+
         connection.url = envmnt::expand(&self.url, Some(options));
+
+        // Warning if still have environment variables in the `url` field.
+        // Most likely, the user forgot to export the environment variables.
+        if connection.url.contains("${") {
+            warn!(
+                "The connection url may not have fully expanded environment variables: {}",
+                connection.url
+            );
+        }
 
         Ok(connection)
     }
