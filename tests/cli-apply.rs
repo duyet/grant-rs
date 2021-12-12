@@ -74,13 +74,11 @@ fn test_apply_with_config_file_from_example() {
     ));
 
     let expected = indoc! {r#"
-        ┌────────────┬────────────────────────────┐
-        │ User       │ Action                     │
-        │ ---        │ ---                        │
-        │ duyet      │ no action (already exists) │
-        │ duyet2     │ no action (already exists) │
-        │ duyet3     │ no action (already exists) │
-        └────────────┴────────────────────────────┘
+        │ User     │ Action                     │
+        │ ---      │ ---                        │
+        │ duyet    │ no action (already exists) │
+        │ duyet2   │ no action (already exists) │
+        │ duyet3   │ no action (already exists) │
         ┌────────┬─────────────────────┬──────────────────────┬────────┬
         │ User   │ Role Name           │ Detail               │ Action │
         │ ---    │ ---                 │ ---                  │ ---    │

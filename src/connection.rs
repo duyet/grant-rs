@@ -129,44 +129,6 @@ impl DbConnection {
         self.connection_info
     }
 
-    /// Drop a user
-    pub fn drop_user(&mut self, user: &User) {
-        let sql: String = format!("DROP USER IF EXISTS {}", user.name).to_owned();
-        debug!("drop_user: {}", sql);
-
-        self.client.execute(&sql, &[]).expect("could not drop user");
-    }
-
-    /// Create user
-    pub fn create_user(&mut self, user: &User) {
-        let mut sql: String = format!("CREATE USER {} ", user.name).to_owned();
-        if user.user_createdb {
-            sql += "CREATEDB"
-        }
-        if !user.password.is_empty() {
-            sql += &format!(" PASSWORD '{}'", user.password).to_string()
-        }
-
-        let stmt = self.client.prepare(&sql).unwrap();
-
-        info!("executing: {}", sql);
-        self.client
-            .execute(&stmt, &[])
-            .expect("could not create user");
-    }
-
-    /// Update user password
-    pub fn update_user_password(&mut self, user: &User) {
-        let sql: String =
-            format!("ALTER USER {} PASSWORD '{}'", user.name, user.password).to_owned();
-        let stmt = self.client.prepare(&sql).unwrap();
-
-        info!("executing: {}", sql);
-        self.client
-            .execute(&stmt, &[])
-            .expect("could not update user password");
-    }
-
     /// Get the list of users
     pub fn get_users(&mut self) -> Result<Vec<User>> {
         let mut users = vec![];
@@ -381,6 +343,23 @@ mod tests {
     use super::*;
     use rand::{thread_rng, Rng};
 
+    fn drop_user(db: &mut DbConnection, name: &str) {
+        let sql = format!("DROP USER IF EXISTS {}", name);
+        db.execute(&sql, &[]).unwrap();
+    }
+
+    fn create_user(db: &mut DbConnection, user: &User) {
+        let mut sql: String = format!("CREATE USER {} ", user.name).to_owned();
+        if user.user_createdb {
+            sql += "CREATEDB"
+        }
+        if !user.password.is_empty() {
+            sql += &format!(" PASSWORD '{}'", user.password).to_string()
+        }
+
+        db.execute(&sql, &[]).unwrap();
+    }
+
     #[test]
     fn test_drop_user() {
         let url = "postgres://postgres:postgres@localhost:5432/postgres".to_string();
@@ -393,15 +372,16 @@ mod tests {
             user_super: false,
             password: "duyet".to_string(),
         };
-        db.drop_user(&user);
-        db.create_user(&user);
-        db.drop_user(&user);
+
+        drop_user(&mut db, &name);
+        create_user(&mut db, &user);
+        drop_user(&mut db, &name);
 
         let users = db.get_users().unwrap_or(vec![]);
         assert_eq!(users.iter().any(|u| u.name == name), false);
 
         // Clean up
-        db.drop_user(&user);
+        drop_user(&mut db, &name);
     }
 
     #[test]
@@ -416,15 +396,15 @@ mod tests {
             user_super: false,
             password: "duyet".to_string(),
         };
-        db.drop_user(&user);
-        db.create_user(&user);
+        drop_user(&mut db, &name);
+        create_user(&mut db, &user);
 
         let users = db.get_users().unwrap();
 
         assert_eq!(users.iter().any(|u| u.name == name), true);
 
         // Clean up
-        db.drop_user(&user);
+        drop_user(&mut db, &name);
     }
 
     #[test]
@@ -439,8 +419,8 @@ mod tests {
             user_super: false,
             password: "duyet".to_string(),
         };
-        db.drop_user(&user);
-        db.create_user(&user);
+        drop_user(&mut db, &name);
+        create_user(&mut db, &user);
 
         // get user roles
         let user_schema_privileges = db.get_user_schema_privileges().unwrap_or(vec![]);
@@ -457,7 +437,7 @@ mod tests {
         }
 
         // Clean up
-        db.drop_user(&user);
+        drop_user(&mut db, &name);
     }
 
     // Test query_raw
@@ -503,8 +483,8 @@ mod tests {
             user_super: false,
             password: "duyet".to_string(),
         };
-        db.drop_user(&user);
-        db.create_user(&user);
+        drop_user(&mut db, &name);
+        create_user(&mut db, &user);
 
         // get user roles
         let user_database_privileges = db.get_user_database_privileges().unwrap_or(vec![]);
@@ -521,7 +501,7 @@ mod tests {
         // FIXME seriously test this function
 
         // Clean up
-        db.drop_user(&user);
+        drop_user(&mut db, &name);
     }
 
     // Test get_user_schema_privileges
@@ -538,8 +518,8 @@ mod tests {
             user_super: false,
             password: password.to_owned(),
         };
-        db.drop_user(&user);
-        db.create_user(&user);
+        drop_user(&mut db, &name);
+        create_user(&mut db, &user);
 
         // get user roles
         let user_schema_privileges = db.get_user_schema_privileges().unwrap_or(vec![]);
@@ -552,7 +532,7 @@ mod tests {
         // FIXME seriously test this function
 
         // Clean up
-        db.drop_user(&user);
+        drop_user(&mut db, &name);
     }
 
     // Test get_user_tables_privileges
@@ -569,8 +549,8 @@ mod tests {
             user_super: false,
             password: password.to_owned(),
         };
-        db.drop_user(&user);
-        db.create_user(&user);
+        drop_user(&mut db, &name);
+        create_user(&mut db, &user);
 
         // get user roles
         let user_table_privileges = db.get_user_table_privileges().unwrap_or(vec![]);
@@ -587,7 +567,7 @@ mod tests {
         // FIXME seriously test this function
 
         // Clean up
-        db.drop_user(&user);
+        drop_user(&mut db, &name);
     }
 
     fn random_str() -> String {
