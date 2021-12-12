@@ -19,7 +19,7 @@ roles:
       - postgres
     schemas:
       - public
-  - name: role_all_schema
+  - name: role_table_level
     type: table
     grants:
       - SELECT
@@ -37,16 +37,16 @@ users:
     password: 1234567890
     roles:
       - role_database_level
-      - role_all_schema
       - role_schema_level
+      - role_table_level
   - name: duyet2
     password: 1234567890
     roles:
       - role_database_level
-      - role_all_schema
       - role_schema_level
+      - role_table_level
   - name: duyet3
     roles:
       - role_database_level
-      - role_all_schema
-      - -role_schema_level
+      - role_schema_level
+      - role_table_level

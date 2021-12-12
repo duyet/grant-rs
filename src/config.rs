@@ -126,10 +126,6 @@ impl RoleDatabaseLevel {
         sql
     }
 
-    pub fn to_sql_grant(&self, user: String) -> String {
-        self.to_sql(user, true)
-    }
-
     pub fn validate(&self) -> Result<()> {
         if self.name.is_empty() {
             return Err(anyhow!("role name is empty"));
@@ -256,41 +252,86 @@ impl RoleTableLevel {
     // {GRANT | REVOKE} { { SELECT | INSERT | UPDATE | DELETE | DROP | REFERENCES } [,...] | ALL [ PRIVILEGES ] }
     // ON { [ TABLE ] table_name [, ...] | ALL TABLES IN SCHEMA schema_name [, ...] }
     // TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
-    pub fn to_sql(&self, user: String, grant: bool) -> String {
-        let sql = if grant { "GRANT" } else { "REVOKE" };
-        let from_to = if grant { "TO" } else { "FROM" };
-
-        // grant all privileges if no grants are specified or if grants contains "ALL"
-        let grants = if self.grants.is_empty() || self.grants.contains(&"ALL".to_string()) {
+    pub fn to_sql(&self, user: String) -> String {
+        // grant all privileges if grants contains "ALL"
+        let grants = if self.grants.contains(&"ALL".to_string()) {
             "ALL PRIVILEGES".to_string()
         } else {
             self.grants.join(", ")
         };
 
-        // grant to all tables if no tables are specified or if tables contains "ALL"
-        let tables = if self.tables.is_empty() || self.tables.contains(&"ALL".to_string()) {
-            format!("ALL TABLES IN SCHEMA {}", self.schemas.join(", "))
-        } else {
-            self.schemas
+        // if `tables` only contains `ALL`, example: `tables: [ALL]`
+        //
+        // or contains more than one table, one of them is `ALL` and the others are not beginning
+        // with `-` sign. Example: `tables: [ALL, table1, table2]`
+        if self.tables.contains(&"ALL".to_string()) {
+            if self.tables.len() == 1
+                || (self.tables.len() > 1 && self.tables.iter().all(|t| !t.starts_with('-')))
+            {
+                let sql = format!(
+                    "GRANT {} ON ALL TABLES IN SCHEMA {} TO {};",
+                    grants,
+                    self.schemas.join(", "),
+                    user,
+                );
+                return sql;
+            }
+        }
+
+        // if `tables` contains `ALL` and another table name with `-` at beginning
+        if self.tables.len() > 1 && self.tables.iter().any(|t| t.starts_with('-')) {
+            let sql_grant = format!(
+                "GRANT {} ON ALL TABLES IN SCHEMA {} TO {};",
+                grants,
+                self.schemas.join(", "),
+                user
+            );
+
+            let exclude_tables = self
+                .tables
+                .iter()
+                .filter(|t| t.starts_with('-'))
+                .map(|t| t.trim_start_matches('-'))
+                .collect::<Vec<&str>>();
+
+            let exclude_tables_with_schema = self
+                .schemas
                 .iter()
                 .map(|s| {
-                    self.tables
+                    exclude_tables
                         .iter()
                         .map(|t| format!("{}.{}", s, t))
                         .collect::<Vec<String>>()
                         .join(", ")
                 })
-                .collect::<Vec<_>>()
-                .join(", ")
-        };
+                .collect::<Vec<String>>()
+                .join(", ");
 
-        let sql = format!("{} {} ON {} {} {};", sql, grants, tables, from_to, user);
+            let sql_revoke = format!(
+                "REVOKE {} ON {} FROM {};",
+                grants, exclude_tables_with_schema, user
+            );
+
+            return format!("{} {}", sql_grant, sql_revoke);
+        }
+
+        // tables contains table names
+        let tables = self
+            .schemas
+            .iter()
+            .map(|s| {
+                self.tables
+                    .iter()
+                    .map(|t| format!("{}.{}", s, t))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        let sql = format!("GRANT {} ON {} TO {};", grants, tables, user);
 
         sql
-    }
-
-    pub fn to_sql_grant(&self, user: String) -> String {
-        self.to_sql(user, true)
     }
 
     pub fn validate(&self) -> Result<()> {
@@ -300,6 +341,11 @@ impl RoleTableLevel {
 
         if self.schemas.is_empty() {
             return Err(anyhow!("role schemas is empty"));
+        }
+
+        // TODO: support schemas=[ALL]
+        if self.schemas.contains(&"ALL".to_string()) {
+            return Err(anyhow!("role schemas is not supported yet: ALL"));
         }
 
         if self.tables.is_empty() {
@@ -396,20 +442,12 @@ pub enum Role {
 }
 
 impl Role {
-    pub fn to_sql(&self, user: String, grant: bool) -> String {
+    pub fn to_sql(&self, user: String) -> String {
         match self {
-            Role::Database(role) => role.to_sql(user, grant),
-            Role::Schema(role) => role.to_sql(user, grant),
-            Role::Table(role) => role.to_sql(user, grant),
+            Role::Database(role) => role.to_sql(user, true),
+            Role::Schema(role) => role.to_sql(user, true),
+            Role::Table(role) => role.to_sql(user),
         }
-    }
-
-    pub fn to_sql_grant(&self, user: String) -> String {
-        self.to_sql(user, true)
-    }
-
-    pub fn to_sql_revoke(&self, user: String) -> String {
-        self.to_sql(user, false)
     }
 
     pub fn validate(&self) -> Result<()> {
@@ -760,12 +798,8 @@ mod tests {
         assert_eq!(config.roles[0].get_databases()[1], "db2");
         assert_eq!(config.roles[0].get_databases()[2], "db3");
         assert_eq!(
-            config.roles[0].to_sql_grant("duyet".to_string()),
+            config.roles[0].to_sql("duyet".to_string()),
             "GRANT CREATE, TEMP ON DATABASE db1, db2, db3 TO duyet;".to_string()
-        );
-        assert_eq!(
-            config.roles[0].to_sql_revoke("duyet".to_string()),
-            "REVOKE CREATE, TEMP ON DATABASE db1, db2, db3 FROM duyet;".to_string()
         );
 
         // Test role 2
@@ -778,12 +812,8 @@ mod tests {
         assert_eq!(config.roles[1].get_databases()[1], "db2");
         assert_eq!(config.roles[1].get_databases()[2], "db3");
         assert_eq!(
-            config.roles[1].to_sql_grant("duyet".to_string()),
+            config.roles[1].to_sql("duyet".to_string()),
             "GRANT ALL PRIVILEGES ON DATABASE db1, db2, db3 TO duyet;".to_string()
-        );
-        assert_eq!(
-            config.roles[1].to_sql_revoke("duyet".to_string()),
-            "REVOKE ALL PRIVILEGES ON DATABASE db1, db2, db3 FROM duyet;".to_string()
         );
     }
 
@@ -862,12 +892,8 @@ mod tests {
         assert_eq!(config.roles[0].get_schemas()[1], "schema2");
         assert_eq!(config.roles[0].get_schemas()[2], "schema3");
         assert_eq!(
-            config.roles[0].to_sql_grant("duyet".to_string()),
+            config.roles[0].to_sql("duyet".to_string()),
             "GRANT CREATE, USAGE ON SCHEMA schema1, schema2, schema3 TO duyet;".to_string()
-        );
-        assert_eq!(
-            config.roles[0].to_sql_revoke("duyet".to_string()),
-            "REVOKE CREATE, USAGE ON SCHEMA schema1, schema2, schema3 FROM duyet;".to_string()
         );
 
         // Test role 2
@@ -880,12 +906,8 @@ mod tests {
         assert_eq!(config.roles[1].get_schemas()[1], "schema2");
         assert_eq!(config.roles[1].get_schemas()[2], "schema3");
         assert_eq!(
-            config.roles[1].to_sql_grant("duyet".to_string()),
+            config.roles[1].to_sql("duyet".to_string()),
             "GRANT ALL PRIVILEGES ON SCHEMA schema1, schema2, schema3 TO duyet;".to_string()
-        );
-        assert_eq!(
-            config.roles[1].to_sql_revoke("duyet".to_string()),
-            "REVOKE ALL PRIVILEGES ON SCHEMA schema1, schema2, schema3 FROM duyet;".to_string()
         );
     }
 
@@ -928,24 +950,24 @@ mod tests {
                  - type: table
                    name: role_table_level_1
                    grants:
-                   - SELECT
-                   - INSERT
+                     - SELECT
+                     - INSERT
                    schemas:
-                   - schema1
+                     - schema1
                    tables:
-                   - table1
-                   - table2
-                   - table3
+                     - table1
+                     - table2
+                     - table3
                  - type: table
                    name: role_table_level_2
                    grants:
-                   - ALL
+                     - ALL
                    schemas:
-                   - schema1
+                     - schema1
                    tables:
-                   - table1
-                   - table2
-                   - table3
+                     - table1
+                     - table2
+                     - table3
                  users: []
              "};
 
@@ -970,12 +992,8 @@ mod tests {
         assert_eq!(config.roles[0].get_tables()[1], "table2");
         assert_eq!(config.roles[0].get_tables()[2], "table3");
         assert_eq!(
-            config.roles[0].to_sql_grant("duyet".to_string()),
+            config.roles[0].to_sql("duyet".to_string()),
             "GRANT SELECT, INSERT ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
-        );
-        assert_eq!(
-            config.roles[0].to_sql_revoke("duyet".to_string()),
-            "REVOKE SELECT, INSERT ON schema1.table1, schema1.table2, schema1.table3 FROM duyet;"
         );
 
         // Test role 2
@@ -990,14 +1008,68 @@ mod tests {
         assert_eq!(config.roles[1].get_tables()[1], "table2");
         assert_eq!(config.roles[1].get_tables()[2], "table3");
         assert_eq!(
-            config.roles[1].to_sql_grant("duyet".to_string()),
+            config.roles[1].to_sql("duyet".to_string()),
             "GRANT ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
                 .to_string()
         );
+    }
+
+    // Test config role type table level with table name is `ALL`
+    #[test]
+    fn test_read_config_role_type_table_level_all_tables() {
+        let _text = indoc! {"
+                 connection:
+                   type: postgres
+                   url: postgres://localhost:5432/postgres
+                 roles:
+                 - type: table
+                   name: role_table_level_1
+                   grants:
+                     - SELECT
+                   schemas:
+                     - schema1
+                   tables:
+                     - ALL
+                 - type: table
+                   name: role_table_level_2
+                   grants:
+                     - SELECT
+                   schemas:
+                     - schema1
+                   tables:
+                     - ALL
+                     - another_table_should_be_included_in_all_too
+                 - type: table
+                   name: role_table_level_3
+                   grants:
+                     - SELECT
+                   schemas:
+                     - schema1
+                   tables:
+                     - ALL
+                     - -but_excluded_me
+                 users: []
+             "};
+
+        let mut file = NamedTempFile::new().expect("failed to create temp file");
+        file.write(_text.as_bytes())
+            .expect("failed to write to temp file");
+        let path = PathBuf::from(file.path().to_str().unwrap());
+
+        let config = Config::new(&path).expect("failed to parse config");
+        assert_eq!(config.roles.len(), 3);
+
         assert_eq!(
-            config.roles[1].to_sql_revoke("duyet".to_string()),
-            "REVOKE ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 FROM duyet;"
-                .to_string()
+            config.roles[0].to_sql("duyet".to_string()),
+            "GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;"
+        );
+        assert_eq!(
+            config.roles[1].to_sql("duyet".to_string()),
+            "GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;"
+        );
+        assert_eq!(
+            config.roles[2].to_sql("duyet".to_string()),
+            "GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet; REVOKE SELECT ON schema1.but_excluded_me FROM duyet;"
         );
     }
 

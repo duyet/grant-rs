@@ -1,0 +1,23 @@
+connection:
+  type: "postgres"
+  url: "postgres://postgres:${PASSWORD:postgres}@localhost:5432/postgres"
+
+roles:
+  - name: role_table_exclude
+    type: table
+    grants:
+      - SELECT
+      - INSERT
+      - UPDATE
+    databases:
+      - postgres
+    schemas:
+      - public
+    tables:
+      - ALL
+      - -secret_table
+
+users:
+  - name: duyet
+    roles:
+      - role_table_exclude

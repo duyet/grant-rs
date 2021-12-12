@@ -64,8 +64,9 @@ fn test_apply_with_config_file_from_example() {
         .expect("failed to write to temp file");
     let path = PathBuf::from(file.path().to_str().unwrap());
 
+    // Command `grant apply` with --file
     let mut cmd = Command::cargo_bin("grant").unwrap();
-    let apply = cmd.arg("apply").arg("--file").arg(path);
+    let apply = cmd.arg("apply").arg("--file").arg(path).arg("--dryrun");
 
     apply.assert().success();
 
@@ -74,27 +75,25 @@ fn test_apply_with_config_file_from_example() {
     ));
 
     let expected = indoc! {r#"
-        │ User     │ Action                     │
-        │ ---      │ ---                        │
-        │ duyet    │ no action (already exists) │
-        │ duyet2   │ no action (already exists) │
-        │ duyet3   │ no action (already exists) │
-        ┌────────┬─────────────────────┬──────────────────────┬────────┬
-        │ User   │ Role Name           │ Detail               │ Action │
-        │ ---    │ ---                 │ ---                  │ ---    │
-        │ duyet  │ role_database_level │ database["postgres"] │ grant  │
-        │ duyet  │ role_all_schema     │ table["ALL"]         │ grant  │
-        │ duyet  │ role_schema_level   │ schema["public"]     │ grant  │
-        │ duyet2 │ role_database_level │ database["postgres"] │ grant  │
-        │ duyet2 │ role_all_schema     │ table["ALL"]         │ grant  │
-        │ duyet2 │ role_schema_level   │ schema["public"]     │ grant  │
-        │ duyet3 │ role_database_level │ database["postgres"] │ grant  │
-        │ duyet3 │ role_all_schema     │ table["ALL"]         │ grant  │
-        │ duyet3 │ -role_schema_level  │ schema["public"]     │ revoke │
-        └────────┴─────────────────────┴──────────────────────┴────────┴
+        ┌────────┬─────────────────────┬──────────────────────┬─────────┐
+        │ User   │ Role Name           │ Detail               │ Status  │
+        │ ---    │ ---                 │ ---                  │ ---     │
+        │ duyet  │ role_database_level │ database["postgres"] │ dry-run │
+        │ duyet  │ role_schema_level   │ schema["public"]     │ dry-run │
+        │ duyet  │ role_table_level    │ table["ALL"]         │ dry-run │
+        │ duyet2 │ role_database_level │ database["postgres"] │ dry-run │
+        │ duyet2 │ role_schema_level   │ schema["public"]     │ dry-run │
+        │ duyet2 │ role_table_level    │ table["ALL"]         │ dry-run │
+        │ duyet3 │ role_database_level │ database["postgres"] │ dry-run │
+        │ duyet3 │ role_schema_level   │ schema["public"]     │ dry-run │
+        │ duyet3 │ role_table_level    │ table["ALL"]         │ dry-run │
+        └────────┴─────────────────────┴──────────────────────┴─────────┘
     "#};
 
+    // Test output of grant
     for line in expected.lines() {
         apply.assert().stderr(predicate::str::contains(line));
     }
+
+    // TODO: test output of create users
 }

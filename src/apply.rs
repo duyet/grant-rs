@@ -133,7 +133,6 @@ fn apply_privileges(conn: &mut DbConnection, config: &Config, dryrun: bool) -> R
         "User".to_string(),
         "Role Name".to_string(),
         "Detail".to_string(),
-        "Action".to_string(),
         "Status".to_string(),
     ]];
     summary.push(vec![
@@ -141,24 +140,16 @@ fn apply_privileges(conn: &mut DbConnection, config: &Config, dryrun: bool) -> R
         "---".to_string(),
         "---".to_string(),
         "---".to_string(),
-        "---".to_string(),
     ]);
 
-    let database_privileges = conn.get_user_database_privileges()?;
-    let schema_privileges = conn.get_user_schema_privileges()?;
-    let table_privileges = conn.get_user_table_privileges()?;
+    // let database_privileges = conn.get_user_database_privileges()?;
+    // let schema_privileges = conn.get_user_schema_privileges()?;
+    // let table_privileges = conn.get_user_table_privileges()?;
 
     // Loop through users in config
     // Get the user Role object by the user.roles[*].name
     // Apply the Role sql privileges to the cluster
     for user in &config.users {
-        // Using current privileges on database to revoke nessessary privileges
-        let current_user_database_privileges =
-            database_privileges.iter().find(|&p| p.name == user.name);
-        let current_user_schema_privileges =
-            schema_privileges.iter().find(|&p| p.name == user.name);
-        let current_user_table_privileges = table_privileges.iter().find(|&p| p.name == user.name);
-
         // Compare privileges on config and db
         // If privileges on config are not in db, add them
         // If privileges on db are not in config, remove them
@@ -167,23 +158,10 @@ fn apply_privileges(conn: &mut DbConnection, config: &Config, dryrun: bool) -> R
 
             // TODO: revoke if privileges on db are not in configuration
 
-            // grant privileges from config to database
-            // if the role_name start with `-`, it means the privileges are revoked
-            // if the role_name start with `+` or nothing, it means the privileges are granted
-            let grant_revoke = if role_name.starts_with("-") {
-                "revoke"
-            } else {
-                "grant"
-            };
-
-            let sql = if grant_revoke == "revoke" {
-                role.to_sql_revoke(user.name.clone())
-            } else {
-                role.to_sql_grant(user.name.clone())
-            };
+            let sql = role.to_sql(user.name.clone());
 
             if !dryrun {
-                conn.query(&sql, &[]).unwrap_or_else(|e| {
+                conn.execute(&sql, &[]).unwrap_or_else(|e| {
                     error!("{}: {}", Red.paint("Error"), sql);
                     panic!("{}", e);
                 });
@@ -192,48 +170,23 @@ fn apply_privileges(conn: &mut DbConnection, config: &Config, dryrun: bool) -> R
                 info!("{}: {}", Purple.paint("Dry-run"), sql);
             }
 
-            let (status, message) = match role {
-                Role::Database(role) => {
-                    let kind = "database";
-                    let status = if current_user_database_privileges.is_none() {
-                        "granted"
-                    } else {
-                        "updated"
-                    };
-                    let message = format!("{}{:?}", kind, role.databases.clone());
+            let status = if dryrun {
+                "dry-run".to_string()
+            } else {
+                "updated".to_string()
+            };
 
-                    (status, message)
-                }
-                Role::Schema(role) => {
-                    let kind = "schema";
-                    let status = if current_user_schema_privileges.is_none() {
-                        "granted"
-                    } else {
-                        "updated"
-                    };
-                    let message = format!("{}{:?}", kind, role.schemas.clone());
-
-                    (status, message)
-                }
-                Role::Table(role) => {
-                    let kind = "table";
-                    let status = if current_user_table_privileges.is_none() {
-                        "granted"
-                    } else {
-                        "updated"
-                    };
-                    let message = format!("{}{:?}", kind, role.tables.clone());
-
-                    (status, message)
-                }
+            let detail = match role {
+                Role::Database(role) => format!("database{:?}", role.databases.clone()),
+                Role::Schema(role) => format!("schema{:?}", role.schemas.clone()),
+                Role::Table(role) => format!("table{:?}", role.tables.clone()),
             };
 
             // Update summary
             summary.push(vec![
                 user.name.clone(),
                 role_name.clone(),
-                message.to_string(),
-                grant_revoke.to_string(),
+                detail.to_string(),
                 status.to_string(),
             ]);
         }

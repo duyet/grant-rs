@@ -320,6 +320,24 @@ impl DbConnection {
         Ok(roles)
     }
 
+    /// Executes a statement, returning the resulting rows
+    /// A statement may contain parameters, specified by `$n` where `n` is the
+    /// index of the parameter in the list provided, 1-indexed.
+    ///
+    /// ```rust
+    /// use grant::connection::DbConnection;
+    ///
+    /// let url = "postgresql://postgres:postgres@localhost:5432/postgres";
+    /// let mut db = DbConnection::new_from_string(url.to_string());
+    /// let rows = db.query("SELECT 1 as t", &[]).unwrap();
+    /// println!("test_query: {:?}", rows);
+    ///
+    /// assert_eq!(rows.len(), 1);
+    /// assert_eq!(rows.get(0).unwrap().len(), 1);
+    ///
+    /// let t: i32 = rows.get(0).unwrap().get("t");
+    /// assert_eq!(t, 1);
+    /// ```
     pub fn query<T>(&mut self, query: &T, params: &[&(dyn ToSql + Sync)]) -> Result<Vec<Row>>
     where
         T: ?Sized + ToStatement,
@@ -328,12 +346,42 @@ impl DbConnection {
         Ok(ri)
     }
 
-    pub fn execute<T>(&mut self, query: &T, params: &[&(dyn ToSql + Sync)]) -> Result<Vec<Row>>
-    where
-        T: ?Sized + ToStatement,
-    {
-        let ri = self.client.query(query, params)?;
-        Ok(ri)
+    /// Executes a statement, returning the number of rows modified.
+    ///
+    /// If the statement does not modify any rows (e.g. SELECT), 0 is returned.
+    ///
+    /// ```rust
+    /// use grant::connection::DbConnection;
+    ///
+    /// let url = "postgresql://postgres:postgres@localhost:5432/postgres";
+    /// let mut db = DbConnection::new_from_string(url.to_string());
+    /// let nrows = db.execute("SELECT 1 as t", &[]).unwrap();
+    ///
+    /// println!("test_execute: {:?}", nrows);
+    /// assert_eq!(nrows, 1);
+    /// ```
+    pub fn execute(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<u64> {
+        // Support multiple query statements by splitting on semicolons
+        // and executing each one separately (if any)
+        // This is a bit of a hack, but it's the only way to support
+        // multiple statements in the execute method without having
+        // to rewrite the entire method
+        // should split params into multiple slices as well
+        let queries = query.split(";");
+        let mut rows_affected = 0;
+
+        for query in queries {
+            let query = query.trim();
+            if query.is_empty() {
+                continue;
+            }
+
+            let stmt = self.client.prepare(&query)?;
+            let rows = self.client.execute(&stmt, params)?;
+            rows_affected += rows;
+        }
+
+        Ok(rows_affected)
     }
 }
 
@@ -438,36 +486,6 @@ mod tests {
 
         // Clean up
         drop_user(&mut db, &name);
-    }
-
-    // Test query_raw
-    #[test]
-    fn test_query() {
-        let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::new_from_string(url.to_string());
-        let rows = db.query("SELECT 1 as t", &[]).unwrap();
-        debug!("test_query: {:?}", rows);
-
-        assert_eq!(rows.len(), 1);
-        assert_eq!(rows.get(0).unwrap().len(), 1);
-
-        let t: i32 = rows.get(0).unwrap().get("t");
-        assert_eq!(t, 1);
-    }
-
-    // Test execute
-    #[test]
-    fn test_execute() {
-        let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::new_from_string(url.to_string());
-        let rows = db.execute("SELECT 1 as t", &[]).unwrap();
-        debug!("test_execute: {:?}", rows);
-
-        assert_eq!(rows.len(), 1);
-        assert_eq!(rows.get(0).unwrap().len(), 1);
-
-        let t: i32 = rows.get(0).unwrap().get("t");
-        assert_eq!(t, 1);
     }
 
     // Test get_user_database_privileges
