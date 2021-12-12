@@ -56,7 +56,7 @@ fn apply_target_is_directory_with_all() {
 
 /// `grant apply` with a config file from `./examples/`
 #[test]
-fn apply_with_config_file() {
+fn test_apply_with_config_file_from_example() {
     // read the content from ./examples/example.yaml
     let text = std::fs::read_to_string("./examples/example.yaml").unwrap();
     let mut file = NamedTempFile::new().expect("failed to create temp file");
@@ -74,19 +74,26 @@ fn apply_with_config_file() {
     ));
 
     let expected = indoc! {r#"
-        ┌────────┬─────────────────────┬──────────────────────┬────────┬─────────┐
-        │ User   │ Role Name           │ Detail               │ Action │ Status  │
-        │ ---    │ ---                 │ ---                  │ ---    │ ---     │
-        │ duyet  │ role_database_level │ database["postgres"] │ grant  │ updated │
-        │ duyet  │ role_all_schema     │ table["ALL"]         │ grant  │ updated │
-        │ duyet  │ role_schema_level   │ schema["public"]     │ grant  │ updated │
-        │ duyet2 │ role_database_level │ database["postgres"] │ grant  │ updated │
-        │ duyet2 │ role_all_schema     │ table["ALL"]         │ grant  │ updated │
-        │ duyet2 │ role_schema_level   │ schema["public"]     │ grant  │ updated │
-        │ duyet3 │ role_database_level │ database["postgres"] │ grant  │ updated │
-        │ duyet3 │ role_all_schema     │ table["ALL"]         │ grant  │ updated │
-        │ duyet3 │ -role_schema_level  │ schema["public"]     │ revoke │ updated │
-        └────────┴─────────────────────┴──────────────────────┴────────┴─────────┘
+        ┌────────────┬────────────────────────────┐
+        │ User       │ Action                     │
+        │ ---        │ ---                        │
+        │ duyet      │ no action (already exists) │
+        │ duyet2     │ no action (already exists) │
+        │ duyet3     │ no action (already exists) │
+        └────────────┴────────────────────────────┘
+        ┌────────┬─────────────────────┬──────────────────────┬────────┬
+        │ User   │ Role Name           │ Detail               │ Action │
+        │ ---    │ ---                 │ ---                  │ ---    │
+        │ duyet  │ role_database_level │ database["postgres"] │ grant  │
+        │ duyet  │ role_all_schema     │ table["ALL"]         │ grant  │
+        │ duyet  │ role_schema_level   │ schema["public"]     │ grant  │
+        │ duyet2 │ role_database_level │ database["postgres"] │ grant  │
+        │ duyet2 │ role_all_schema     │ table["ALL"]         │ grant  │
+        │ duyet2 │ role_schema_level   │ schema["public"]     │ grant  │
+        │ duyet3 │ role_database_level │ database["postgres"] │ grant  │
+        │ duyet3 │ role_all_schema     │ table["ALL"]         │ grant  │
+        │ duyet3 │ -role_schema_level  │ schema["public"]     │ revoke │
+        └────────┴─────────────────────┴──────────────────────┴────────┴
     "#};
 
     for line in expected.lines() {
