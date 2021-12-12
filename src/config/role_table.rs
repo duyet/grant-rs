@@ -19,11 +19,13 @@ use std::collections::HashSet;
 ///     - ALL
 ///     - +table1
 ///     - -table2
+///     - -public.table2
 /// ```
 ///
 /// The above example grants SELECT, INSERT, UPDATE, DELETE to all tables in the public schema
 /// except table2.
 /// The ALL is a special keyword that means all tables in the public schema.
+/// If the table does not have a schema, it is assumed to be in all schema.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RoleTableLevel {
     pub name: String,
@@ -33,12 +35,12 @@ pub struct RoleTableLevel {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-struct TableSign {
+struct Table {
     name: String,
     sign: String,
 }
 
-impl TableSign {
+impl Table {
     fn new(name: &str) -> Self {
         let sign = match name.chars().nth(0) {
             Some('+') => "+".to_string(),
@@ -60,8 +62,8 @@ impl RoleTableLevel {
         let mut tables = self
             .tables
             .iter()
-            .map(|t| TableSign::new(t))
-            .collect::<Vec<TableSign>>();
+            .map(|t| Table::new(t))
+            .collect::<Vec<Table>>();
 
         // grant all privileges if grants contains "ALL"
         let grants = if self.grants.contains(&"ALL".to_string()) {
@@ -100,15 +102,17 @@ impl RoleTableLevel {
         // grant on tables sign `+`
         let grant_tables = tables.iter().filter(|x| x.sign == "+").collect::<Vec<_>>();
         if grant_tables.len() > 0 {
-            let _with_schema = self
-                .schemas
+            let _with_schema = grant_tables
                 .iter()
-                .map(|s| {
-                    grant_tables
-                        .iter()
-                        .map(|t| format!("{}.{}", s, t.name))
-                        .collect::<Vec<String>>()
-                        .join(", ")
+                .flat_map(|t| {
+                    if t.name.contains(".") {
+                        vec![t.name.clone()]
+                    } else {
+                        self.schemas
+                            .iter()
+                            .map(|s| format!("{}.{}", s, &t.name))
+                            .collect::<Vec<_>>()
+                    }
                 })
                 .collect::<Vec<String>>()
                 .join(", ");
@@ -127,15 +131,17 @@ impl RoleTableLevel {
         // revoke on tables start with `-`
         let revoke_tables = tables.iter().filter(|x| x.sign == "-").collect::<Vec<_>>();
         if revoke_tables.len() > 0 {
-            let _with_schema = self
-                .schemas
+            let _with_schema = revoke_tables
                 .iter()
-                .map(|s| {
-                    revoke_tables
-                        .iter()
-                        .map(|t| format!("{}.{}", s, t.name))
-                        .collect::<Vec<String>>()
-                        .join(", ")
+                .flat_map(|t| {
+                    if t.name.contains(".") {
+                        vec![t.name.clone()]
+                    } else {
+                        self.schemas
+                            .iter()
+                            .map(|s| format!("{}.{}", s, &t.name))
+                            .collect::<Vec<_>>()
+                    }
                 })
                 .collect::<Vec<String>>()
                 .join(", ");
@@ -277,6 +283,50 @@ mod tests {
         assert_eq!(
             role.to_sql("test".to_string()),
             "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA public, test TO test;"
+        );
+
+        let role = RoleTableLevel {
+            name: "test".to_string(),
+            grants: vec!["SELECT".to_string(), "INSERT".to_string()],
+            schemas: vec!["public".to_string(), "test".to_string()],
+            tables: vec!["test".to_string(), "test.test2".to_string()],
+        };
+        assert_eq!(
+            role.to_sql("test".to_string()),
+            "GRANT SELECT, INSERT ON public.test, test.test, test.test2 TO test;"
+        );
+
+        let role = RoleTableLevel {
+            name: "test".to_string(),
+            grants: vec!["SELECT".to_string(), "INSERT".to_string()],
+            schemas: vec!["public".to_string(), "test".to_string()],
+            tables: vec!["test".to_string(), "-test.test2".to_string()],
+        };
+        assert_eq!(
+            role.to_sql("test".to_string()),
+            "GRANT SELECT, INSERT ON public.test, test.test TO test; REVOKE SELECT, INSERT ON test.test2 FROM test;"
+        );
+
+        let role = RoleTableLevel {
+            name: "test".to_string(),
+            grants: vec!["SELECT".to_string(), "INSERT".to_string()],
+            schemas: vec!["public".to_string(), "test".to_string()],
+            tables: vec!["test".to_string(), "-test2".to_string()],
+        };
+        assert_eq!(
+            role.to_sql("test".to_string()),
+            "GRANT SELECT, INSERT ON public.test, test.test TO test; REVOKE SELECT, INSERT ON public.test2, test.test2 FROM test;"
+        );
+
+        let role = RoleTableLevel {
+            name: "test".to_string(),
+            grants: vec!["SELECT".to_string(), "INSERT".to_string()],
+            schemas: vec!["public".to_string(), "test".to_string()],
+            tables: vec!["ALL".to_string(), "-test.test2".to_string()],
+        };
+        assert_eq!(
+            role.to_sql("test".to_string()),
+            "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA public, test TO test; REVOKE SELECT, INSERT ON test.test2 FROM test;"
         );
     }
 }

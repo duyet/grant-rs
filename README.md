@@ -14,8 +14,8 @@ _This project is still in the early stages of development and is not ready for a
 | `SCHEMA`   |     ✓     | Support grant `CREATE` \| `USAGE` \| `ALL` on schema(s) to user                                                                                                                                                                                        |
 | `TABLE`    |     ✓     | Support grant `SELECT` \| `INSERT` \| `UPDATE` \| `DELETE` \| `DROP` \| `REFERENCES` \| `ALL` on tables(s) or `ALL` tables in schema(s) to user. <br> Supported excluding table(s) by adding `-` before the table name (e.g. `tables: [ALL, -table]`). |
 | `FUNCTION` |           | Not supported yet                                                                                                                                                                                                                                      |
-<!-- edit in https://www.tablesgenerator.com/markdown_tables -->
 
+<!-- edit in https://www.tablesgenerator.com/markdown_tables -->
 
 # Usage
 
@@ -97,8 +97,9 @@ roles:
       - public
     tables:
       - ALL # include all table
-      - +public_table # can add `+` to mark included tables
-      - -secret_table # add `-` to exclude this table
+      - +public_table # can add `+` to mark included tables (public.public_table)
+      - -secret_table # add `-` to exclude this table (public.secret_table)
+      - -schema2.table # exclude schema2.table
 
 users:
   - name: duyet

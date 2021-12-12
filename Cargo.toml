@@ -4,7 +4,7 @@ version = "0.0.1-beta.3"
 edition = "2021"
 authors = ["Duyet Le <me@duyet.net>"]
 license = "MIT"
-description = "Manage database roles and privileges in GitOps style"
+description = "Manage Redshift/Postgres privileges in GitOps style"
 readme = "README.md"
 
 
