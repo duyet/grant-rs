@@ -54,104 +54,42 @@ fn apply_target_is_directory_with_all() {
         .success();
 }
 
-/// `grant apply` with a config file
+/// `grant apply` with a config file from `./examples/`
 #[test]
 fn apply_with_config_file() {
-    // create a config file
-    let _text = indoc! {r#"
-        connection:
-          type: "postgres"
-          url: "postgres://postgres:postgres@localhost:5432/postgres"
-
-        roles:
-          - name: role_database_level
-            type: database
-            grants:
-              - CREATE
-              - TEMP
-            databases:
-              - postgres
-
-          - name: role_schema_level
-            type: schema
-            grants:
-              - CREATE
-            databases:
-              - postgres
-            schemas:
-              - public
-          - name: role_all_schema
-            type: table
-            grants:
-              - SELECT
-              - INSERT
-              - UPDATE
-            databases:
-              - postgres
-            schemas:
-              - public
-            tables:
-              - ALL
-
-        users:
-          - name: duyet
-            password: 1234567890
-            roles:
-              - role_database_level
-              - role_all_schema
-              - role_schema_level
-          - name: duyet2
-            password: 1234567890
-            roles:
-              - role_database_level
-              - role_all_schema
-              - role_schema_level
-    "#};
-
+    // read the content from ./examples/example.yaml
+    let text = std::fs::read_to_string("./examples/example.yaml").unwrap();
     let mut file = NamedTempFile::new().expect("failed to create temp file");
-    file.write(_text.as_bytes())
+    file.write(text.as_bytes())
         .expect("failed to write to temp file");
     let path = PathBuf::from(file.path().to_str().unwrap());
 
     let mut cmd = Command::cargo_bin("grant").unwrap();
-    cmd.arg("apply")
-        .arg("--file")
-        .arg(path)
-        .assert()
-        .success()
-        .stderr(predicate::str::contains(
-            "Connected to database: postgres://postgres:postgres@localhost:5432/postgres",
-        ))
-        .stderr(predicate::str::contains("duyet"))
-        .stderr(predicate::str::contains("duyet2"))
-        // Look like this:
-        //    ┌────────┬──────────┬────────────────────────────────────────────────┬─────────┐
-        //    │ User   │ Kind     │ Privilege                                      │ Action  │
-        //    │ ---    │ ---      │ ---                                            │ ---     │
-        //    │ duyet  │ database │ `role_database_level` for database: ["postgre+ │ updated │
-        //    │ duyet  │ table    │ `role_all_schema` for table: ["ALL"]           │ updated │
-        //    │ duyet  │ schema   │ `role_schema_level` for schema: ["public"]     │ updated │
-        //    │ duyet2 │ database │ `role_database_level` for database: ["postgre+ │ updated │
-        //    │ duyet2 │ table    │ `role_all_schema` for table: ["ALL"]           │ updated │
-        //    │ duyet2 │ schema   │ `role_schema_level` for schema: ["public"]     │ updated │
-        //    └────────┴──────────┴────────────────────────────────────────────────┴─────────┘
-        .stderr(predicate::str::contains(
-            "│ duyet  │ database │ `role_database_level` for database:",
-        ))
-        .stderr(predicate::str::contains(
-            "│ duyet  │ schema   │ `role_schema_level` for schema:",
-        ))
-        .stderr(predicate::str::contains(
-            "│ duyet  │ table    │ `role_all_schema` for table:",
-        ))
-        .stderr(predicate::str::contains(
-            "│ duyet2 │ database │ `role_database_level` for database:",
-        ))
-        .stderr(predicate::str::contains(
-            "│ duyet2 │ schema   │ `role_schema_level` for schema:",
-        ))
-        .stderr(predicate::str::contains(
-            "│ duyet2 │ table    │ `role_all_schema` for table:",
-        ))
-        .stderr(predicate::str::contains("Summary"));
+    let apply = cmd.arg("apply").arg("--file").arg(path);
+
+    apply.assert().success();
+
+    apply.assert().stderr(predicate::str::contains(
+        "Connected to database: postgres://postgres:postgres@localhost:5432/postgres",
+    ));
+
+    let expected = indoc! {r#"
+        ┌────────┬─────────────────────┬──────────────────────┬────────┬─────────┐
+        │ User   │ Role Name           │ Detail               │ Action │ Status  │
+        │ ---    │ ---                 │ ---                  │ ---    │ ---     │
+        │ duyet  │ role_database_level │ database["postgres"] │ grant  │ updated │
+        │ duyet  │ role_all_schema     │ table["ALL"]         │ grant  │ updated │
+        │ duyet  │ role_schema_level   │ schema["public"]     │ grant  │ updated │
+        │ duyet2 │ role_database_level │ database["postgres"] │ grant  │ updated │
+        │ duyet2 │ role_all_schema     │ table["ALL"]         │ grant  │ updated │
+        │ duyet2 │ role_schema_level   │ schema["public"]     │ grant  │ updated │
+        │ duyet3 │ role_database_level │ database["postgres"] │ grant  │ updated │
+        │ duyet3 │ role_all_schema     │ table["ALL"]         │ grant  │ updated │
+        │ duyet3 │ -role_schema_level  │ schema["public"]     │ revoke │ updated │
+        └────────┴─────────────────────┴──────────────────────┴────────┴─────────┘
+    "#};
+
+    for line in expected.lines() {
+        apply.assert().stderr(predicate::str::contains(line));
+    }
 }

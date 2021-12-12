@@ -49,4 +49,4 @@ users:
     roles:
       - role_database_level
       - role_all_schema
-      - role_schema_level
+      - -role_schema_level
