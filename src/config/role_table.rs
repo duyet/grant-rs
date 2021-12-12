@@ -149,20 +149,24 @@ impl RoleTableLevel {
 
     pub fn validate(&self) -> Result<()> {
         if self.name.is_empty() {
-            return Err(anyhow!("role name is empty"));
+            return Err(anyhow!("role.name is empty"));
         }
 
         if self.schemas.is_empty() {
-            return Err(anyhow!("role schemas is empty"));
+            return Err(anyhow!("role.schemas is empty"));
         }
 
         // TODO: support schemas=[ALL]
         if self.schemas.contains(&"ALL".to_string()) {
-            return Err(anyhow!("role schemas is not supported yet: ALL"));
+            return Err(anyhow!("role.schemas is not supported yet: ALL"));
         }
 
         if self.tables.is_empty() {
-            return Err(anyhow!("role tables is empty"));
+            return Err(anyhow!("role.tables is empty"));
+        }
+
+        if self.grants.is_empty() {
+            return Err(anyhow!("role.grants is empty"));
         }
 
         // Check valid grants: SELECT, INSERT, UPDATE, DELETE, DROP, REFERENCES, ALL
@@ -179,16 +183,12 @@ impl RoleTableLevel {
         for grant in &self.grants {
             if !valid_grants.contains(&&grant[..]) {
                 return Err(anyhow!(
-                    "invalid grant: {}, expected: {:?}",
+                    "role.grants invalid: {}, expected: {:?}",
                     grant,
                     valid_grants
                 ));
             }
             grants.insert(grant.to_string());
-        }
-
-        if self.grants.is_empty() {
-            return Err(anyhow!("role grants is empty"));
         }
 
         Ok(())

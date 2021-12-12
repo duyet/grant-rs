@@ -612,7 +612,7 @@ mod tests {
 
     // Test config role type table level with invalid grants
     #[test]
-    #[should_panic(expected = "invalid grant: invalid")]
+    #[should_panic(expected = "role.grants invalid")]
     fn test_read_config_role_type_table_level_invalid_grants() {
         let _text = indoc! {"
                  connection:

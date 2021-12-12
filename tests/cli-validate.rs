@@ -202,7 +202,7 @@ fn validate_file_invalid_role_type_table() {
         .arg("--file")
         .arg(path)
         .assert()
-        .stderr(predicate::str::contains("invalid grant: invalid"));
+        .stderr(predicate::str::contains("role.grants invalid: invalid"));
 }
 
 /// Test `grant validate --file <file>` with invalid role (type: table), missing schemas

@@ -47,3 +47,110 @@ impl User {
         self.roles.clone()
     }
 }
+
+// Test
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_user_to_sql_create() {
+        let user = User {
+            name: "test".to_string(),
+            password: Some("test".to_string()),
+            roles: vec!["test".to_string()],
+        };
+
+        let sql = user.to_sql_create();
+        assert_eq!(sql, "CREATE USER test WITH PASSWORD 'test';");
+    }
+
+    #[test]
+    fn test_user_to_sql_drop() {
+        let user = User {
+            name: "test".to_string(),
+            password: Some("test".to_string()),
+            roles: vec!["test".to_string()],
+        };
+
+        let sql = user.to_sql_drop();
+        assert_eq!(sql, "DROP USER IF EXISTS test;");
+    }
+
+    #[test]
+    fn test_user_validate() {
+        let user = User {
+            name: "test".to_string(),
+            password: Some("test".to_string()),
+            roles: vec!["test".to_string()],
+        };
+
+        assert!(user.validate().is_ok());
+    }
+
+    #[test]
+    fn test_user_validate_empty_name() {
+        let user = User {
+            name: "".to_string(),
+            password: Some("test".to_string()),
+            roles: vec!["test".to_string()],
+        };
+
+        assert!(user.validate().is_err());
+    }
+
+    #[test]
+    fn test_user_validate_empty_password() {
+        let user = User {
+            name: "test".to_string(),
+            password: None,
+            roles: vec!["test".to_string()],
+        };
+
+        assert!(user.validate().is_ok());
+    }
+
+    #[test]
+    fn test_user_validate_empty_roles() {
+        let user = User {
+            name: "test".to_string(),
+            password: Some("test".to_string()),
+            roles: vec![],
+        };
+
+        assert!(user.validate().is_ok());
+    }
+
+    #[test]
+    fn test_user_get_name() {
+        let user = User {
+            name: "test".to_string(),
+            password: Some("test".to_string()),
+            roles: vec!["test".to_string()],
+        };
+
+        assert_eq!(user.get_name(), "test");
+    }
+
+    #[test]
+    fn test_user_get_password() {
+        let user = User {
+            name: "test".to_string(),
+            password: Some("test".to_string()),
+            roles: vec!["test".to_string()],
+        };
+
+        assert_eq!(user.get_password(), "test");
+    }
+
+    #[test]
+    fn test_user_get_roles() {
+        let user = User {
+            name: "test".to_string(),
+            password: Some("test".to_string()),
+            roles: vec!["test".to_string()],
+        };
+
+        assert_eq!(user.get_roles(), vec!["test".to_string()]);
+    }
+}
