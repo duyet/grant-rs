@@ -1,6 +1,6 @@
 //! An open-source project that aims to manage Redshift database roles and privileges in GitOps style, written in Rust.
 //!
-//! Github: [https://github.com/duyet/grant.rs](https://github.com/duyet/grant.rs)
+//! [**Home**](https://github.com/duyet/grant.rs) | [**Documentation**](https://docs.rs/grant)
 //!
 //! _This project is still in the early stages of development and is not ready for any kind of production use or any alpha/beta testing._
 //!

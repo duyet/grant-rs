@@ -1,10 +1,21 @@
 # grant.rs
 
-An open-source project that aims to manage Redshift database roles and privileges in GitOps style, written in Rust.
+[![Build & Test](https://github.com/duyet/grant.rs/actions/workflows/build-test.yaml/badge.svg)](https://github.com/duyet/grant.rs/actions/workflows/build-test.yaml)
 
-Github: [https://github.com/duyet/grant.rs](https://github.com/duyet/grant.rs)
+An open-source project that aims to manage Postgres/Redshift database roles and privileges in GitOps style, written in Rust.
+
+[**Home**](https://github.com/duyet/grant.rs) | [**Documentation**](https://docs.rs/grant)
 
 _This project is still in the early stages of development and is not ready for any kind of production use or any alpha/beta testing._
+
+| Level      | Supported | Description                                                                                                                                                                                                                                            |
+| ---------- | :-------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DATABASE` |     ✓     | Support grant `CREATE`\| `TEMP` \| `ALL` on database(s) to user                                                                                                                                                                                        |
+| `SCHEMA`   |     ✓     | Support grant `CREATE` \| `USAGE` \| `ALL` on schema(s) to user                                                                                                                                                                                        |
+| `TABLE`    |     ✓     | Support grant `SELECT` \| `INSERT` \| `UPDATE` \| `DELETE` \| `DROP` \| `REFERENCES` \| `ALL` on tables(s) or `ALL` tables in schema(s) to user. <br> Supported excluding table(s) by adding `-` before the table name (e.g. `tables: [ALL, -table]`). |
+| `FUNCTION` |           | Not supported yet                                                                                                                                                                                                                                      |
+<!-- edit in https://www.tablesgenerator.com/markdown_tables -->
+
 
 # Usage
 
