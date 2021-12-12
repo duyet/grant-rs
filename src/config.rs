@@ -253,6 +253,31 @@ impl RoleTableLevel {
     // ON { [ TABLE ] table_name [, ...] | ALL TABLES IN SCHEMA schema_name [, ...] }
     // TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
     pub fn to_sql(&self, user: String) -> String {
+        #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+        struct TableSign {
+            name: String,
+            sign: String,
+        }
+
+        let mut sqls = vec![];
+        let mut tables = self
+            .tables
+            .iter()
+            .map(|t| {
+                let sign = match t.chars().nth(0) {
+                    Some('+') => "+",
+                    Some('-') => "-",
+                    _ => "+",
+                };
+                let name = t.trim_start_matches(sign);
+
+                TableSign {
+                    name: name.to_string(),
+                    sign: sign.to_string(),
+                }
+            })
+            .collect::<Vec<TableSign>>();
+
         // grant all privileges if grants contains "ALL"
         let grants = if self.grants.contains(&"ALL".to_string()) {
             "ALL PRIVILEGES".to_string()
@@ -260,78 +285,81 @@ impl RoleTableLevel {
             self.grants.join(", ")
         };
 
-        // if `tables` only contains `ALL`, example: `tables: [ALL]`
-        //
-        // or contains more than one table, one of them is `ALL` and the others are not beginning
-        // with `-` sign. Example: `tables: [ALL, table1, table2]`
-        if self.tables.contains(&"ALL".to_string()) {
-            if self.tables.len() == 1
-                || (self.tables.len() > 1 && self.tables.iter().all(|t| !t.starts_with('-')))
-            {
-                let sql = format!(
+        // if `tables` only contains `ALL`
+        if let Some(table_named_all) = tables.iter().find(|t| t.name == "ALL") {
+            let sql = match table_named_all.sign.as_str() {
+                "+" => format!(
                     "GRANT {} ON ALL TABLES IN SCHEMA {} TO {};",
                     grants,
                     self.schemas.join(", "),
-                    user,
-                );
-                return sql;
+                    user
+                ),
+                "-" => format!(
+                    "REVOKE {} ON ALL TABLES IN SCHEMA {} FROM {};",
+                    grants,
+                    self.schemas.join(", "),
+                    user
+                ),
+                _ => "".to_string(),
+            };
+            sqls.push(sql);
+
+            // remove name `ALL` and all tables start with `+`
+            for table in tables.clone() {
+                if table.name == "ALL" || table.sign == "+" {
+                    tables.retain(|x| x != &table);
+                }
             }
         }
 
-        // if `tables` contains `ALL` and another table name with `-` at beginning
-        if self.tables.len() > 1 && self.tables.iter().any(|t| t.starts_with('-')) {
-            let sql_grant = format!(
-                "GRANT {} ON ALL TABLES IN SCHEMA {} TO {};",
-                grants,
-                self.schemas.join(", "),
-                user
-            );
-
-            let exclude_tables = self
-                .tables
-                .iter()
-                .filter(|t| t.starts_with('-'))
-                .map(|t| t.trim_start_matches('-'))
-                .collect::<Vec<&str>>();
-
-            let exclude_tables_with_schema = self
+        // grant on tables sign `+`
+        let grant_tables = tables.iter().filter(|x| x.sign == "+").collect::<Vec<_>>();
+        if grant_tables.len() > 0 {
+            let _with_schema = self
                 .schemas
                 .iter()
                 .map(|s| {
-                    exclude_tables
+                    grant_tables
                         .iter()
-                        .map(|t| format!("{}.{}", s, t))
+                        .map(|t| format!("{}.{}", s, t.name))
                         .collect::<Vec<String>>()
                         .join(", ")
                 })
                 .collect::<Vec<String>>()
                 .join(", ");
 
-            let sql_revoke = format!(
-                "REVOKE {} ON {} FROM {};",
-                grants, exclude_tables_with_schema, user
-            );
+            let sql = format!("GRANT {} ON {} TO {};", grants, _with_schema, user);
+            sqls.push(sql);
 
-            return format!("{} {}", sql_grant, sql_revoke);
+            // remove all tables start with `+`
+            for table in tables.clone() {
+                if table.sign == "+" {
+                    tables.retain(|x| x != &table);
+                }
+            }
         }
 
-        // tables contains table names
-        let tables = self
-            .schemas
-            .iter()
-            .map(|s| {
-                self.tables
-                    .iter()
-                    .map(|t| format!("{}.{}", s, t))
-                    .collect::<Vec<String>>()
-                    .join(", ")
-            })
-            .collect::<Vec<_>>()
-            .join(", ");
+        // revoke on tables start with `-`
+        let revoke_tables = tables.iter().filter(|x| x.sign == "-").collect::<Vec<_>>();
+        if revoke_tables.len() > 0 {
+            let _with_schema = self
+                .schemas
+                .iter()
+                .map(|s| {
+                    revoke_tables
+                        .iter()
+                        .map(|t| format!("{}.{}", s, t.name))
+                        .collect::<Vec<String>>()
+                        .join(", ")
+                })
+                .collect::<Vec<String>>()
+                .join(", ");
 
-        let sql = format!("GRANT {} ON {} TO {};", grants, tables, user);
+            let sql = format!("REVOKE {} ON {} FROM {};", grants, _with_schema, user);
+            sqls.push(sql);
+        }
 
-        sql
+        sqls.join(" ")
     }
 
     pub fn validate(&self) -> Result<()> {
@@ -1048,6 +1076,32 @@ mod tests {
                    tables:
                      - ALL
                      - -but_excluded_me
+                 - type: table
+                   name: role_table_level_4
+                   grants:
+                     - SELECT
+                   schemas:
+                     - schema1
+                   tables:
+                     - table_a
+                     - -table_b
+                 - type: table
+                   name: role_table_level_5
+                   grants:
+                     - SELECT
+                   schemas:
+                     - schema1
+                   tables:
+                     - -table_a
+                     - -table_b
+                 - type: table
+                   name: role_table_level_6
+                   grants:
+                     - SELECT
+                   schemas:
+                     - schema1
+                   tables:
+                     - -ALL
                  users: []
              "};
 
@@ -1057,7 +1111,7 @@ mod tests {
         let path = PathBuf::from(file.path().to_str().unwrap());
 
         let config = Config::new(&path).expect("failed to parse config");
-        assert_eq!(config.roles.len(), 3);
+        assert_eq!(config.roles.len(), 6);
 
         assert_eq!(
             config.roles[0].to_sql("duyet".to_string()),
@@ -1070,6 +1124,18 @@ mod tests {
         assert_eq!(
             config.roles[2].to_sql("duyet".to_string()),
             "GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet; REVOKE SELECT ON schema1.but_excluded_me FROM duyet;"
+        );
+        assert_eq!(
+            config.roles[3].to_sql("duyet".to_string()),
+            "GRANT SELECT ON schema1.table_a TO duyet; REVOKE SELECT ON schema1.table_b FROM duyet;"
+        );
+        assert_eq!(
+            config.roles[4].to_sql("duyet".to_string()),
+            "REVOKE SELECT ON schema1.table_a, schema1.table_b FROM duyet;"
+        );
+        assert_eq!(
+            config.roles[5].to_sql("duyet".to_string()),
+            "REVOKE SELECT ON ALL TABLES IN SCHEMA schema1 FROM duyet;"
         );
     }
 

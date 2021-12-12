@@ -2,6 +2,8 @@
 
 An open-source project that aims to manage Redshift database roles and privileges in GitOps style, written in Rust.
 
+Github: [https://github.com/duyet/grant.rs](https://github.com/duyet/grant.rs)
+
 _This project is still in the early stages of development and is not ready for any kind of production use or any alpha/beta testing._
 
 # Usage
@@ -17,7 +19,7 @@ Using `grant` tool:
 ```bash
 $ grant --help
 
-grant 0.0.1-beta.2
+grant 0.0.1-beta.3
 Manage database roles and privileges in GitOps style
 
 USAGE:
@@ -83,7 +85,9 @@ roles:
     schemas:
       - public
     tables:
-      - ALL
+      - ALL # include all table
+      - +public_table # can add `+` to mark included tables
+      - -secret_table # add `-` to exclude this table
 
 users:
   - name: duyet
@@ -107,36 +111,29 @@ grant apply -f ./examples/example.yaml
 
 [2021-12-06T14:37:03Z INFO  grant::connection] Connected to database: postgres://postgres@localhost:5432/postgres
 [2021-12-06T14:37:03Z INFO  grant::apply] Summary:
-    ┌────────────┬───────────────────────────┐
-    │ User       │ Action                    │
-    │ ---        │ ---                       │
-    │ duyet      │ update password           │
-    │ duyet2     │ update password           │
-    └────────────┴───────────────────────────┘
-
-[2021-12-06T14:37:03Z INFO  grant::apply] Summary:
-    ┌────────┬───────────────────────────────────────────────────────────┬─────────┐
-    │ User   │ Database Privilege                                        │ Action  │
-    │ ---    │ ---                                                       │ ---     │
-    │ duyet  │ privileges `role_database_level` for database: ["postgre+ │ updated │
-    │ duyet2 │ privileges `role_database_level` for database: ["postgre+ │ updated │
-    └────────┴───────────────────────────────────────────────────────────┴─────────┘
-
-[2021-12-06T14:37:03Z INFO  grant::apply] Summary:
-    ┌────────┬───────────────────────────────────────────────────────┬─────────┐
-    │ User   │ Schema Privileges                                     │ Action  │
-    │ ---    │ ---                                                   │ ---     │
-    │ duyet  │ privileges `role_schema_level` for schema: ["public"] │ updated │
-    │ duyet2 │ privileges `role_schema_level` for schema: ["public"] │ updated │
-    └────────┴───────────────────────────────────────────────────────┴─────────┘
-
-[2021-12-06T14:37:03Z INFO  grant::apply] Summary:
-    ┌────────┬─────────────────────────────────────────────────┬─────────┐
-    │ User   │ Table Privileges                                │ Action  │
-    │ ---    │ ---                                             │ ---     │
-    │ duyet  │ privileges `role_all_schema` for table: ["ALL"] │ updated │
-    │ duyet2 │ privileges `role_all_schema` for table: ["ALL"] │ updated │
-    └────────┴─────────────────────────────────────────────────┴─────────┘
+    ┌────────────┬────────────────────────────┐
+    │ User       │ Action                     │
+    │ ---        │ ---                        │
+    │ duyet      │ no action (already exists) │
+    │ duyet2     │ no action (already exists) │
+    └────────────┴────────────────────────────┘
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT CREATE, TEMP ON DATABASE postgres TO duyet;
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT CREATE ON SCHEMA public TO duyet;
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO duyet;
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT CREATE, TEMP ON DATABASE postgres TO duyet2;
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT CREATE ON SCHEMA public TO duyet2;
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO duyet2;
+[2021-12-12T13:48:22Z INFO  grant::apply] Summary:
+    ┌────────┬─────────────────────┬──────────────────────┬─────────┐
+    │ User   │ Role Name           │ Detail               │ Status  │
+    │ ---    │ ---                 │ ---                  │ ---     │
+    │ duyet  │ role_database_level │ database["postgres"] │ updated │
+    │ duyet  │ role_schema_level   │ schema["public"]     │ updated │
+    │ duyet  │ role_table_level    │ table["ALL"]         │ updated │
+    │ duyet2 │ role_database_level │ database["postgres"] │ updated │
+    │ duyet2 │ role_schema_level   │ schema["public"]     │ updated │
+    │ duyet2 │ role_table_level    │ table["ALL"]         │ updated │
+    └────────┴─────────────────────┴──────────────────────┴─────────┘
 ```
 
 ## Generate random password
