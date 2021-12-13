@@ -1,6 +1,4 @@
-# grant.rs
-
-[![Build & Test](https://github.com/duyet/grant.rs/actions/workflows/build-test.yaml/badge.svg)](https://github.com/duyet/grant.rs/actions/workflows/build-test.yaml)
+# grant.rs [![crates.io](https://img.shields.io/crates/v/grant.svg)](https://crates.io/crates/grant) [![Build & Test](https://github.com/duyet/grant.rs/actions/workflows/build-test.yaml/badge.svg)](https://github.com/duyet/grant.rs/actions/workflows/build-test.yaml)
 
 An open-source project that aims to manage Postgres/Redshift database roles and privileges in GitOps style, written in Rust.
 
