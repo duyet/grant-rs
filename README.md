@@ -210,6 +210,7 @@ cargo test
 - [ ] Visuallization (who can see what?)
 - [ ] Apply show more detail about diff changes
 - [ ] Inspect show more detail about user privileges
+- [ ] Command to rotate passwords
 
 # LICENSE
 
