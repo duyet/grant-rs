@@ -360,7 +360,7 @@ impl DbConnection {
     /// println!("test_execute: {:?}", nrows);
     /// assert_eq!(nrows, 1);
     /// ```
-    pub fn execute(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<u64> {
+    pub fn execute(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<i64> {
         // Support multiple query statements by splitting on semicolons
         // and executing each one separately (if any)
         // This is a bit of a hack, but it's the only way to support
@@ -381,7 +381,7 @@ impl DbConnection {
             rows_affected += rows;
         }
 
-        Ok(rows_affected)
+        Ok(rows_affected.try_into().unwrap())
     }
 }
 

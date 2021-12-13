@@ -159,22 +159,32 @@ fn apply_privileges(conn: &mut DbConnection, config: &Config, dryrun: bool) -> R
             // TODO: revoke if privileges on db are not in configuration
 
             let sql = role.to_sql(user.name.clone());
-
-            if !dryrun {
-                conn.execute(&sql, &[]).unwrap_or_else(|e| {
-                    error!("{}: {}", Red.paint("Error"), sql);
-                    panic!("{}", e);
-                });
-                info!("{}: {}", Green.paint("Success"), sql);
-            } else {
-                info!("{}: {}", Purple.paint("Dry-run"), sql);
-            }
-
-            let status = if dryrun {
+            let mut status = if dryrun {
                 "dry-run".to_string()
             } else {
                 "updated".to_string()
             };
+
+            if !dryrun {
+                let nrows = conn.execute(&sql, &[]).unwrap_or_else(|e| {
+                    error!("{}: {}", Red.paint("Error"), sql);
+                    error!("  -> {}: {}", Red.paint("Error details"), e);
+                    status = "error".to_string();
+
+                    -1
+                });
+
+                if nrows > -1 {
+                    info!(
+                        "{}: {} {}",
+                        Green.paint("Success"),
+                        Purple.paint(sql),
+                        format!("(updated {} row(s))", nrows.to_string())
+                    );
+                }
+            } else {
+                info!("{}: {}", Purple.paint("Dry-run"), sql);
+            }
 
             let detail = match role {
                 Role::Database(role) => format!("database{:?}", role.databases.clone()),
