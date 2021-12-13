@@ -17,13 +17,22 @@ _This project is still in the early stages of development and is not ready for a
 
 <!-- edit in https://www.tablesgenerator.com/markdown_tables -->
 
-# Usage
+# Installation
 
-Install binary from crates.io
+Install via Homebrew:
+
+```bash
+brew tap duyet/tap
+brew install grant
+```
+
+Install binary from crates.io via Cargo:
 
 ```bash
 cargo install grant
 ```
+
+# Usage
 
 Using `grant` tool:
 
