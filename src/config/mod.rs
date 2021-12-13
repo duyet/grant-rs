@@ -227,7 +227,10 @@ mod tests {
 
         let config = Config::new(&path).expect("failed to get content");
 
-        assert_eq!(config.connection.url, "postgres://duyet:5432/");
+        assert_eq!(
+            config.connection.url,
+            "postgres://duyet:5432/${POSTGRES_ABC}"
+        );
     }
 
     // Test config with invalid connection type
