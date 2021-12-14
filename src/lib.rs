@@ -206,3 +206,14 @@ pub mod cli;
 pub mod config;
 pub mod connection;
 pub mod gen;
+pub mod inspect;
+pub mod validate;
+
+pub use cli::Cli;
+pub use config::Config;
+pub use connection::DbConnection;
+
+pub use apply::*;
+pub use gen::*;
+pub use inspect::*;
+pub use validate::*;

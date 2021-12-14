@@ -10,12 +10,12 @@ use std::path::PathBuf;
 pub fn gen(target: &PathBuf) {
     // Skip if target already exists
     if target.exists() {
-        info!("Target already exists");
+        info!("target already exists");
         return;
     }
 
     fs::create_dir_all(target).unwrap_or_else(|_| panic!("failed to generate {:?}", target));
-    info!("Creating path: {:?}", target);
+    info!("creating path: {:?}", target);
 
     let config = Config::default();
     let config_str = serde_yaml::to_string(&config).unwrap();

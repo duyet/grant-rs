@@ -16,7 +16,7 @@ fn gen_without_any_args() {
         .assert()
         .success()
         // because run test in current folder
-        .stderr(predicate::str::contains("Target already exists"));
+        .stderr(predicate::str::contains("target already exists"));
 }
 
 #[test]

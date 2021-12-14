@@ -24,7 +24,7 @@ brew tap duyet/tap
 brew install grant
 ```
 
-Install binary from crates.io via Cargo:
+Or, install binary from crates.io via Cargo. You will need to have Rust installed. You can get it by visiting [rustup.rs](https://rustup.rs). This'll also install Cargo, Rust's package/project manager.
 
 ```bash
 cargo install grant
@@ -207,6 +207,11 @@ To run the unittest:
 ```bash
 cargo test
 ```
+
+# Contributing
+
+I greatly appreciate if you have any ideas or make a PR to this project.
+Thank you for contributing! 
 
 # TODO
 

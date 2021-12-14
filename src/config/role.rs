@@ -2,9 +2,9 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-use super::role_database::RoleDatabaseLevel;
-use super::role_schema::RoleSchemaLevel;
-use super::role_table::RoleTableLevel;
+pub use super::role_database::RoleDatabaseLevel;
+pub use super::role_schema::RoleSchemaLevel;
+pub use super::role_table::RoleTableLevel;
 
 /// Level type for role.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

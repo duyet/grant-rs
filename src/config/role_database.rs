@@ -4,7 +4,8 @@ use std::collections::HashSet;
 
 /// Role Database Level.
 ///
-/// for example:
+/// For example:
+///
 /// ```yaml
 /// - name: role_database_level
 ///   type: database
