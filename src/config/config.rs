@@ -45,11 +45,27 @@ pub use super::{Role, RoleLevelType};
 ///    - role_schema_level
 ///    - role_table_level
 /// ```
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Config {
     pub connection: Connection,
     pub roles: Vec<Role>,
     pub users: Vec<User>,
+}
+
+impl fmt::Display for Config {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", serde_yaml::to_string(&self).unwrap())
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            connection: Connection::default(),
+            roles: vec![],
+            users: vec![],
+        }
+    }
 }
 
 impl Config {
@@ -132,23 +148,6 @@ impl Config {
     }
 }
 
-impl fmt::Display for Config {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", serde_yaml::to_string(&self).unwrap())
-    }
-}
-
-// Implement default values for Config
-impl Default for Config {
-    fn default() -> Self {
-        Config {
-            connection: Connection::default(),
-            roles: vec![],
-            users: vec![],
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -185,6 +184,42 @@ mod tests {
         let path = PathBuf::from(file.path().to_str().unwrap());
 
         Config::new(&path).expect("failed to get content");
+    }
+
+    // Test Config::from_str
+    #[test]
+    fn test_read_config_from_str() {
+        let _text = indoc! {"
+                 connection:
+                   type: postgres
+                   url: postgres://localhost:5432/postgres
+                 roles: []
+                 users: []
+             "};
+
+        Config::from_str(_text).expect("failed to get content");
+    }
+
+    // Config::from_str and Config::new should return the same result
+    #[test]
+    fn test_read_config_from_str_and_new() {
+        let _text = indoc! {"
+             connection:
+               type: postgres
+               url: postgres://localhost:5432/postgres
+             roles: []
+             users: []
+        "};
+
+        let config_1 = Config::from_str(_text).expect("failed to get content");
+
+        let mut file = NamedTempFile::new().expect("failed to create temp file");
+        file.write(_text.as_bytes())
+            .expect("failed to write to temp file");
+        let path = PathBuf::from(file.path().to_str().unwrap());
+        let config_2 = Config::new(&path).expect("failed to get content");
+
+        assert_eq!(config_1, config_2);
     }
 
     // Test config with url contains environement variable
@@ -303,7 +338,7 @@ mod tests {
         assert_eq!(config.roles[0].get_databases()[1], "db2");
         assert_eq!(config.roles[0].get_databases()[2], "db3");
         assert_eq!(
-            config.roles[0].to_sql("duyet".to_string()),
+            config.roles[0].to_sql("duyet"),
             "GRANT CREATE, TEMP ON DATABASE db1, db2, db3 TO duyet;".to_string()
         );
 
@@ -317,7 +352,7 @@ mod tests {
         assert_eq!(config.roles[1].get_databases()[1], "db2");
         assert_eq!(config.roles[1].get_databases()[2], "db3");
         assert_eq!(
-            config.roles[1].to_sql("duyet".to_string()),
+            config.roles[1].to_sql("duyet"),
             "GRANT ALL PRIVILEGES ON DATABASE db1, db2, db3 TO duyet;".to_string()
         );
     }
@@ -397,7 +432,7 @@ mod tests {
         assert_eq!(config.roles[0].get_schemas()[1], "schema2");
         assert_eq!(config.roles[0].get_schemas()[2], "schema3");
         assert_eq!(
-            config.roles[0].to_sql("duyet".to_string()),
+            config.roles[0].to_sql("duyet"),
             "GRANT CREATE, USAGE ON SCHEMA schema1, schema2, schema3 TO duyet;".to_string()
         );
 
@@ -411,7 +446,7 @@ mod tests {
         assert_eq!(config.roles[1].get_schemas()[1], "schema2");
         assert_eq!(config.roles[1].get_schemas()[2], "schema3");
         assert_eq!(
-            config.roles[1].to_sql("duyet".to_string()),
+            config.roles[1].to_sql("duyet"),
             "GRANT ALL PRIVILEGES ON SCHEMA schema1, schema2, schema3 TO duyet;".to_string()
         );
     }
@@ -497,7 +532,7 @@ mod tests {
         assert_eq!(config.roles[0].get_tables()[1], "table2");
         assert_eq!(config.roles[0].get_tables()[2], "table3");
         assert_eq!(
-            config.roles[0].to_sql("duyet".to_string()),
+            config.roles[0].to_sql("duyet"),
             "GRANT SELECT, INSERT ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
         );
 
@@ -513,7 +548,7 @@ mod tests {
         assert_eq!(config.roles[1].get_tables()[1], "table2");
         assert_eq!(config.roles[1].get_tables()[2], "table3");
         assert_eq!(
-            config.roles[1].to_sql("duyet".to_string()),
+            config.roles[1].to_sql("duyet"),
             "GRANT ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
                 .to_string()
         );
@@ -591,27 +626,27 @@ mod tests {
         assert_eq!(config.roles.len(), 6);
 
         assert_eq!(
-            config.roles[0].to_sql("duyet".to_string()),
+            config.roles[0].to_sql("duyet"),
             "GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;"
         );
         assert_eq!(
-            config.roles[1].to_sql("duyet".to_string()),
+            config.roles[1].to_sql("duyet"),
             "GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;"
         );
         assert_eq!(
-            config.roles[2].to_sql("duyet".to_string()),
+            config.roles[2].to_sql("duyet"),
             "GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet; REVOKE SELECT ON schema1.but_excluded_me FROM duyet;"
         );
         assert_eq!(
-            config.roles[3].to_sql("duyet".to_string()),
+            config.roles[3].to_sql("duyet"),
             "GRANT SELECT ON schema1.table_a TO duyet; REVOKE SELECT ON schema1.table_b FROM duyet;"
         );
         assert_eq!(
-            config.roles[4].to_sql("duyet".to_string()),
+            config.roles[4].to_sql("duyet"),
             "REVOKE SELECT ON schema1.table_a, schema1.table_b FROM duyet;"
         );
         assert_eq!(
-            config.roles[5].to_sql("duyet".to_string()),
+            config.roles[5].to_sql("duyet"),
             "REVOKE SELECT ON ALL TABLES IN SCHEMA schema1 FROM duyet;"
         );
     }

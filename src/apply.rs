@@ -3,8 +3,7 @@ use crate::connection::{DbConnection, User};
 use ansi_term::Colour::{Green, Purple, Red};
 use anyhow::{anyhow, Result};
 use ascii_table::AsciiTable;
-use log::error;
-use log::info;
+use log::{error, info};
 use std::path::PathBuf;
 
 /// Read the config from the given path and apply it to the database.
@@ -158,7 +157,8 @@ fn apply_privileges(conn: &mut DbConnection, config: &Config, dryrun: bool) -> R
 
             // TODO: revoke if privileges on db are not in configuration
 
-            let sql = role.to_sql(user.name.clone());
+            let sql = role.to_sql(&user.name);
+
             let mut status = if dryrun {
                 "dry-run".to_string()
             } else {

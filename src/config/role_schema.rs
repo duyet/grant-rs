@@ -1,3 +1,4 @@
+use super::role::RoleValidate;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -18,7 +19,7 @@ use std::collections::HashSet;
 /// ```
 ///
 ///  The above example will grant CREATE and TEMP privileges on schema1 and schema2.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct RoleSchemaLevel {
     pub name: String,
     pub grants: Vec<String>,
@@ -29,10 +30,7 @@ impl RoleSchemaLevel {
     // { GRANT | REVOKE } { { CREATE | USAGE } [,...] | ALL [ PRIVILEGES ] }
     // ON SCHEMA schema_name [, ...]
     // TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
-    pub fn to_sql(&self, user: String, grant: bool) -> String {
-        let sql = if grant { "GRANT" } else { "REVOKE" };
-        let from_to = if grant { "TO" } else { "FROM" };
-
+    pub fn to_sql(&self, user: &str) -> String {
         // grant all privileges if no grants are specified or if grants contains "ALL"
         let grants = if self.grants.is_empty() || self.grants.contains(&"ALL".to_string()) {
             "ALL PRIVILEGES".to_string()
@@ -42,22 +40,18 @@ impl RoleSchemaLevel {
 
         // grant on schemas to user
         let sql = format!(
-            "{} {} ON SCHEMA {} {} {};",
-            sql,
+            "GRANT {} ON SCHEMA {} TO {};",
             grants,
             self.schemas.join(", "),
-            from_to,
             user
         );
 
         sql
     }
+}
 
-    pub fn to_sql_grant(&self, user: String) -> String {
-        self.to_sql(user, true)
-    }
-
-    pub fn validate(&self) -> Result<()> {
+impl RoleValidate for RoleSchemaLevel {
+    fn validate(&self) -> Result<()> {
         if self.name.is_empty() {
             return Err(anyhow!("role name is empty"));
         }
@@ -103,7 +97,7 @@ mod tests {
 
         role_schema_level.validate().ok();
 
-        let sql = role_schema_level.to_sql_grant("user".to_string());
+        let sql = role_schema_level.to_sql("user");
         assert_eq!(
             sql,
             "GRANT CREATE, TEMP ON SCHEMA schema1, schema2 TO user;"

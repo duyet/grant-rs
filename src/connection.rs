@@ -1,9 +1,7 @@
 use crate::config::{Config, ConnectionType};
 use anyhow::Result;
 use log::{debug, error, info};
-use postgres::row::Row;
-use postgres::types::ToSql;
-use postgres::{Client, NoTls, ToStatement};
+use postgres::{row::Row, types::ToSql, Client, NoTls, ToStatement};
 
 // TODO: support multiple adapters
 

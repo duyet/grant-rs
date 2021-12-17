@@ -1,3 +1,4 @@
+use super::role::RoleValidate;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -26,7 +27,7 @@ use std::collections::HashSet;
 /// except table2.
 /// The ALL is a special keyword that means all tables in the public schema.
 /// If the table does not have a schema, it is assumed to be in all schema.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct RoleTableLevel {
     pub name: String,
     pub grants: Vec<String>,
@@ -57,7 +58,7 @@ impl RoleTableLevel {
     // {GRANT | REVOKE} { { SELECT | INSERT | UPDATE | DELETE | DROP | REFERENCES } [,...] | ALL [ PRIVILEGES ] }
     // ON { [ TABLE ] table_name [, ...] | ALL TABLES IN SCHEMA schema_name [, ...] }
     // TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
-    pub fn to_sql(&self, user: String) -> String {
+    pub fn to_sql(&self, user: &str) -> String {
         let mut sqls = vec![];
         let mut tables = self
             .tables
@@ -152,8 +153,10 @@ impl RoleTableLevel {
 
         sqls.join(" ")
     }
+}
 
-    pub fn validate(&self) -> Result<()> {
+impl RoleValidate for RoleTableLevel {
+    fn validate(&self) -> Result<()> {
         if self.name.is_empty() {
             return Err(anyhow!("role.name is empty"));
         }
@@ -214,10 +217,7 @@ mod tests {
             schemas: vec!["public".to_string()],
             tables: vec!["test".to_string()],
         };
-        assert_eq!(
-            role.to_sql("test".to_string()),
-            "GRANT SELECT ON public.test TO test;"
-        );
+        assert_eq!(role.to_sql("test"), "GRANT SELECT ON public.test TO test;");
 
         let role = RoleTableLevel {
             name: "test".to_string(),
@@ -226,7 +226,7 @@ mod tests {
             tables: vec!["test".to_string()],
         };
         assert_eq!(
-            role.to_sql("test".to_string()),
+            role.to_sql("test"),
             "GRANT SELECT, INSERT ON public.test TO test;"
         );
 
@@ -237,7 +237,7 @@ mod tests {
             tables: vec!["test".to_string()],
         };
         assert_eq!(
-            role.to_sql("test".to_string()),
+            role.to_sql("test"),
             "GRANT SELECT, INSERT ON public.test, test.test TO test;"
         );
 
@@ -248,7 +248,7 @@ mod tests {
             tables: vec!["test".to_string()],
         };
         assert_eq!(
-            role.to_sql("test".to_string()),
+            role.to_sql("test"),
             "GRANT ALL PRIVILEGES ON public.test TO test;"
         );
 
@@ -259,7 +259,7 @@ mod tests {
             tables: vec!["ALL".to_string()],
         };
         assert_eq!(
-            role.to_sql("test".to_string()),
+            role.to_sql("test"),
             "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA public TO test;"
         );
 
@@ -270,7 +270,7 @@ mod tests {
             tables: vec!["ALL".to_string()],
         };
         assert_eq!(
-            role.to_sql("test".to_string()),
+            role.to_sql("test"),
             "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public, test TO test;"
         );
 
@@ -281,7 +281,7 @@ mod tests {
             tables: vec!["ALL".to_string()],
         };
         assert_eq!(
-            role.to_sql("test".to_string()),
+            role.to_sql("test"),
             "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA public, test TO test;"
         );
 
@@ -292,7 +292,7 @@ mod tests {
             tables: vec!["test".to_string(), "test.test2".to_string()],
         };
         assert_eq!(
-            role.to_sql("test".to_string()),
+            role.to_sql("test"),
             "GRANT SELECT, INSERT ON public.test, test.test, test.test2 TO test;"
         );
 
@@ -303,7 +303,7 @@ mod tests {
             tables: vec!["test".to_string(), "-test.test2".to_string()],
         };
         assert_eq!(
-            role.to_sql("test".to_string()),
+            role.to_sql("test"),
             "GRANT SELECT, INSERT ON public.test, test.test TO test; REVOKE SELECT, INSERT ON test.test2 FROM test;"
         );
 
@@ -314,7 +314,7 @@ mod tests {
             tables: vec!["test".to_string(), "-test2".to_string()],
         };
         assert_eq!(
-            role.to_sql("test".to_string()),
+            role.to_sql("test"),
             "GRANT SELECT, INSERT ON public.test, test.test TO test; REVOKE SELECT, INSERT ON public.test2, test.test2 FROM test;"
         );
 
@@ -325,7 +325,7 @@ mod tests {
             tables: vec!["ALL".to_string(), "-test.test2".to_string()],
         };
         assert_eq!(
-            role.to_sql("test".to_string()),
+            role.to_sql("test"),
             "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA public, test TO test; REVOKE SELECT, INSERT ON test.test2 FROM test;"
         );
     }
