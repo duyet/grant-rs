@@ -1,8 +1,8 @@
-# grant.rs [![crates.io](https://img.shields.io/crates/v/grant.svg)](https://crates.io/crates/grant) [![Build & Test](https://github.com/duyet/grant.rs/actions/workflows/build-test.yaml/badge.svg)](https://github.com/duyet/grant.rs/actions/workflows/build-test.yaml)
+# grant-rs [![crates.io](https://img.shields.io/crates/v/grant.svg)](https://crates.io/crates/grant) [![Build & Test](https://github.com/duyet/grant-rs/actions/workflows/build-test.yaml/badge.svg)](https://github.com/duyet/grant-rs/actions/workflows/build-test.yaml)
 
 An open-source project that aims to manage Postgres/Redshift database roles and privileges in GitOps style, written in Rust.
 
-[**Home**](https://github.com/duyet/grant.rs) | [**Documentation**](https://docs.rs/grant)
+[**Home**](https://github.com/duyet/grant-rs) | [**Documentation**](https://docs.rs/grant)
 
 _This project is still in the early stages of development and is not ready for any kind of production use or any alpha/beta testing._
 
@@ -189,7 +189,7 @@ $ grant inspect -f examples/example.yaml
 Clone the repo:
 
 ```bash
-git clone https://github.com/duyet/grant.rs && cd grant.rs
+git clone https://github.com/duyet/grant-rs && cd grant-rs
 ```
 
 Postgres is required for testing, you might need to use the `docker-compose.yaml`:
