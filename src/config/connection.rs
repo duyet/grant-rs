@@ -4,7 +4,7 @@ use log::warn;
 use serde::{Deserialize, Serialize};
 
 /// Connection type. Supported values: Postgres
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum ConnectionType {
     #[serde(rename = "postgres")]
     Postgres,
@@ -21,7 +21,7 @@ pub enum ConnectionType {
 /// ```
 ///
 /// The connection type is required.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Connection {
     #[serde(rename = "type")]
     pub type_: ConnectionType,

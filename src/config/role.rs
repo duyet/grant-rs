@@ -26,7 +26,7 @@ impl fmt::Display for RoleLevelType {
 }
 
 /// Configuration for a role.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(tag = "type")]
 pub enum Role {
     #[serde(rename = "database")]
@@ -37,11 +37,15 @@ pub enum Role {
     Table(RoleTableLevel),
 }
 
+pub trait RoleValidate {
+    fn validate(&self) -> Result<()>;
+}
+
 impl Role {
-    pub fn to_sql(&self, user: String) -> String {
+    pub fn to_sql(&self, user: &str) -> String {
         match self {
-            Role::Database(role) => role.to_sql(user, true),
-            Role::Schema(role) => role.to_sql(user, true),
+            Role::Database(role) => role.to_sql(user),
+            Role::Schema(role) => role.to_sql(user),
             Role::Table(role) => role.to_sql(user),
         }
     }
