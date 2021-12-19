@@ -223,6 +223,7 @@ Thank you for contributing!
 - [ ] Apply show more detail about diff changes
 - [ ] Inspect show more detail about user privileges
 - [ ] Command to rotate passwords
+- [ ] Suport DROP users that not in the configuration (it's not safe to do it for now)
 
 # LICENSE
 
