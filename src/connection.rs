@@ -1,7 +1,7 @@
 use crate::config::{Config, ConnectionType};
 use anyhow::Result;
 use log::{debug, error, info};
-use postgres::{row::Row, types::ToSql, Client, NoTls, ToStatement};
+use postgres::{row::Row, types::ToSql, Client, Config as ConnConfig, NoTls, ToStatement};
 
 // TODO: support multiple adapters
 
@@ -10,6 +10,7 @@ use postgres::{row::Row, types::ToSql, Client, NoTls, ToStatement};
 pub struct DbConnection {
     pub connection_info: String,
     pub client: Client,
+    conn_config: ConnConfig,
 }
 
 /// Presentation for a user in the database
@@ -31,6 +32,21 @@ pub struct UserDatabaseRole {
     pub has_temp: bool,
 }
 
+impl UserDatabaseRole {
+    pub fn perm_to_string(&self, with_name: bool) -> String {
+        if with_name {
+            return format!("{}({})", self.database_name, self.perm_to_string(false));
+        }
+
+        match (self.has_create, self.has_temp) {
+            (true, true) => "A".to_string(),
+            (true, false) => "C".to_string(),
+            (false, true) => "T".to_string(),
+            (false, false) => "".to_string(),
+        }
+    }
+}
+
 /// Presentation for a user schema privilege in the database
 /// which a users has `create` or `usage` on schema
 #[derive(Debug)]
@@ -39,6 +55,21 @@ pub struct UserSchemaRole {
     pub schema_name: String,
     pub has_create: bool,
     pub has_usage: bool,
+}
+
+impl UserSchemaRole {
+    pub fn perm_to_string(&self, with_name: bool) -> String {
+        if with_name {
+            return format!("{}({})", self.schema_name, self.perm_to_string(false));
+        }
+
+        match (self.has_create, self.has_usage) {
+            (true, true) => "A".to_string(),
+            (true, false) => "C".to_string(),
+            (false, true) => "U".to_string(),
+            _ => "".to_string(),
+        }
+    }
 }
 
 /// Presentation for a user table privilege in the database
@@ -53,6 +84,38 @@ pub struct UserTableRole {
     pub has_update: bool,
     pub has_delete: bool,
     pub has_references: bool,
+}
+
+impl UserTableRole {
+    pub fn perm_to_string(&self, with_name: bool) -> String {
+        if with_name {
+            return format!(
+                "{}.{}({})",
+                self.schema_name,
+                self.table_name,
+                self.perm_to_string(false)
+            );
+        }
+
+        if self.has_select
+            && self.has_insert
+            && self.has_update
+            && self.has_delete
+            && self.has_references
+        {
+            return "A".to_string();
+        }
+
+        let has_select = if self.has_select { "S" } else { "" };
+        let has_insert = if self.has_insert { "I" } else { "" };
+        let has_update = if self.has_update { "U" } else { "" };
+        let has_delete = if self.has_delete { "D" } else { "" };
+        let has_references = if self.has_references { "R" } else { "" };
+        format!(
+            "{}{}{}{}{}",
+            has_select, has_insert, has_update, has_delete, has_references
+        )
+    }
 }
 
 impl DbConnection {
@@ -90,9 +153,12 @@ impl DbConnection {
                     info!("Connected to database: {}", connection_info);
                 }
 
+                let conn_config = connection_info.parse::<ConnConfig>().unwrap();
+
                 DbConnection {
                     connection_info,
                     client,
+                    conn_config,
                 }
             }
         }
@@ -109,10 +175,18 @@ impl DbConnection {
     /// ```
     pub fn new_from_string(connection_info: String) -> Self {
         let client = Client::connect(&connection_info, NoTls).unwrap();
+        let conn_config = connection_info.parse::<ConnConfig>().unwrap();
+
         DbConnection {
             connection_info,
             client,
+            conn_config,
         }
+    }
+
+    /// Get current database name.
+    pub fn get_current_database(&self) -> Option<&str> {
+        self.conn_config.get_dbname()
     }
 
     /// Returns the connection_info

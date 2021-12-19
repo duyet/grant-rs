@@ -23,6 +23,7 @@ md5 = "0.7"
 walkdir = "2"
 ansi_term = "0.12"
 envmnt = "0.9"
+term_size = "0.3"
 
 [dev-dependencies]
 assert_cmd = "2.0"
