@@ -24,10 +24,11 @@ fn main() -> Result<()> {
 
         Command::GenPass {
             length,
+            no_special,
             username,
             password,
         } => {
-            gen::gen_password(length, username, password);
+            gen::gen_password(length, no_special, username, password);
         }
 
         Command::Validate { file } => {

@@ -23,8 +23,11 @@ pub enum Command {
     /// Generate random password
     GenPass {
         /// The target folder
-        #[structopt(short, long, default_value = "16")]
+        #[structopt(short, long, default_value = "32")]
         length: u8,
+        /// No special characters
+        #[structopt(short, long)]
+        no_special: bool,
         /// The username, using to create md5 hash
         #[structopt(short, long)]
         username: Option<String>,

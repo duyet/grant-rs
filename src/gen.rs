@@ -28,19 +28,30 @@ pub fn gen(target: &PathBuf) {
 }
 
 /// Generating password with given length
-pub fn gen_password(length: u8, username: Option<String>, password: Option<String>) {
+pub fn gen_password(
+    length: u8,
+    no_special: bool,
+    username: Option<String>,
+    password: Option<String>,
+) {
     // If not password is given, generate random password
     let password = match password {
         Some(p) => p,
         None => {
-            const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ\
-                                   abcdefghijklmnopqrstuvwxyz\
-                                   0123456789)(*&^%$#@!~";
+            let chars: &[u8] = if no_special {
+                b"ABCDEFGHIJKLMNOPQRSTUVWXYZ\
+                  abcdefghijklmnopqrstuvwxyz\
+                  0123456789"
+            } else {
+                b"ABCDEFGHIJKLMNOPQRSTUVWXYZ\
+                  abcdefghijklmnopqrstuvwxyz\
+                  0123456789)(*&^%#!~"
+            };
             let mut rng = rand::thread_rng();
             let password: String = (0..length)
                 .map(|_| {
-                    let idx = rng.gen_range(0..CHARS.len());
-                    CHARS[idx] as char
+                    let idx = rng.gen_range(0..chars.len());
+                    chars[idx] as char
                 })
                 .collect();
 
@@ -82,9 +93,12 @@ mod tests {
     // Test gen_password
     #[test]
     fn test_gen_password() {
-        gen_password(10, None, None);
-        gen_password(10, Some("test".to_string()), None);
-        gen_password(10, Some("test".to_string()), Some("test".to_string()));
+        gen_password(10, true, None, None);
+        gen_password(10, true, Some("test".to_string()), None);
+        gen_password(10, true, Some("test".to_string()), Some("test".to_string()));
+        gen_password(10, false, None, None);
+        gen_password(10, false, Some("test".to_string()), None);
+        gen_password(10, false, Some("test".to_string()), Some("test".to_string()));
     }
 
     // Test gen_md5_password
