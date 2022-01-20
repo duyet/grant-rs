@@ -10,7 +10,10 @@ use std::path::PathBuf;
 /// If the dryrun flag is set, the changes will not be applied.
 pub fn apply(target: &PathBuf, dryrun: bool) -> Result<()> {
     if target.is_dir() {
-        return Err(anyhow!("The target is a directory"));
+        return Err(anyhow!(
+            "directory is not supported yet ({})",
+            target.display()
+        ));
     }
 
     let config = Config::new(&target)?;
@@ -22,10 +25,10 @@ pub fn apply(target: &PathBuf, dryrun: bool) -> Result<()> {
     let users_in_config = config.users.clone();
 
     // Apply users changes (new users, update password)
-    apply_users(&mut conn, &users_in_db, &users_in_config, dryrun)?;
+    create_or_update_users(&mut conn, &users_in_db, &users_in_config, dryrun)?;
 
     // Apply roles privileges to cluster (database role, schema role, table role)
-    apply_privileges(&mut conn, &config, dryrun)?;
+    create_or_update_privileges(&mut conn, &config, dryrun)?;
 
     Ok(())
 }
@@ -62,7 +65,7 @@ pub fn apply_all(target: &PathBuf, dryrun: bool) -> Result<()> {
 /// If user is in both, compare passwords and update if needed
 ///
 /// Show the summary as table of users created, updated, deleted
-fn apply_users(
+fn create_or_update_users(
     conn: &mut DbConnection,
     users_in_db: &[User],
     users_in_config: &[UserInConfig],
@@ -77,13 +80,28 @@ fn apply_users(
         match user_in_db {
             // User in config and in database
             Some(user_in_db) => {
-                // TODO: Update password if needed, currently we can't compare the password
+                // Update password if `update_password` is set to true
+                if user.update_password.unwrap_or(false) {
+                    let sql = user.to_sql_update();
 
-                // Do nothing if user is not changed
-                summary.push(vec![
-                    user_in_db.name.clone(),
-                    "no action (already exists)".to_string(),
-                ]);
+                    if dryrun {
+                        info!("{}: {}", Purple.paint("Dry-run"), Purple.paint(sql));
+                        summary.push(vec![
+                            format!("{}", user.name),
+                            format!("{}", Green.paint("would update password")),
+                        ]);
+                    } else {
+                        conn.execute(&sql, &[])?;
+                        info!("{}: {}", Green.paint("Success"), Purple.paint(sql));
+                        summary.push(vec![user.name.clone(), "password updated".to_string()]);
+                    }
+                } else {
+                    // Do nothing if user is not changed
+                    summary.push(vec![
+                        user_in_db.name.clone(),
+                        "no action (already exists)".to_string(),
+                    ]);
+                }
             }
 
             // User in config but not in database
@@ -91,17 +109,16 @@ fn apply_users(
                 let sql = user.to_sql_create();
 
                 if dryrun {
+                    info!("{}: {}", Purple.paint("Dry-run"), sql);
                     summary.push(vec![
                         user.name.clone(),
                         format!("would create (dryrun) {}", sql),
                     ]);
                 } else {
                     conn.execute(&sql, &[])?;
+                    info!("{}: {}", Green.paint("Success"), sql);
                     summary.push(vec![user.name.clone(), format!("created {}", sql)]);
                 }
-
-                // Update summary
-                summary.push(vec![user.name.clone(), "created".to_string()]);
             }
         }
     }
@@ -127,7 +144,11 @@ fn apply_users(
 /// If the privileges are not in the database, they will be granted to user.
 /// If the privileges are in the database, they will be updated.
 /// If the privileges are not in the configuration, they will be revoked from user.
-fn apply_privileges(conn: &mut DbConnection, config: &Config, dryrun: bool) -> Result<()> {
+fn create_or_update_privileges(
+    conn: &mut DbConnection,
+    config: &Config,
+    dryrun: bool,
+) -> Result<()> {
     let mut summary = vec![vec![
         "User".to_string(),
         "Role Name".to_string(),
@@ -140,10 +161,6 @@ fn apply_privileges(conn: &mut DbConnection, config: &Config, dryrun: bool) -> R
         "---".to_string(),
         "---".to_string(),
     ]);
-
-    // let database_privileges = conn.get_user_database_privileges()?;
-    // let schema_privileges = conn.get_user_schema_privileges()?;
-    // let table_privileges = conn.get_user_table_privileges()?;
 
     // Loop through users in config
     // Get the user Role object by the user.roles[*].name

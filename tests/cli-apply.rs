@@ -34,7 +34,7 @@ fn apply_target_is_directory() {
         .arg(dir.path())
         .assert()
         .failure()
-        .stderr(predicate::str::contains("is a directory"));
+        .stderr(predicate::str::contains("directory is not supported"));
 
     // cleanup
     dir.close().unwrap();

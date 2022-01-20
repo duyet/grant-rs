@@ -98,7 +98,12 @@ mod tests {
         gen_password(10, true, Some("test".to_string()), Some("test".to_string()));
         gen_password(10, false, None, None);
         gen_password(10, false, Some("test".to_string()), None);
-        gen_password(10, false, Some("test".to_string()), Some("test".to_string()));
+        gen_password(
+            10,
+            false,
+            Some("test".to_string()),
+            Some("test".to_string()),
+        );
     }
 
     // Test gen_md5_password

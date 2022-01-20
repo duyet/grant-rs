@@ -35,9 +35,8 @@ impl Connection {
         }
     }
 
-    // xpaned environtment variables in the `url` field.
-    // Expand environment variables in the `url` field.
-    // For example: postgres://user:${PASSWORD}@host:port/database
+    /// Expand environment variables in the `url` field.
+    /// For example: postgres://user:${PASSWORD}@host:port/database
     pub fn expand_env_vars(&self) -> Result<Self> {
         let mut connection = self.clone();
 
@@ -61,7 +60,7 @@ impl Connection {
     }
 }
 
-// Implement default values for connection type and url.
+/// Implement default values for connection type and url.
 impl Default for Connection {
     fn default() -> Self {
         Self {
@@ -71,7 +70,6 @@ impl Default for Connection {
     }
 }
 
-// Test Connection.
 #[cfg(test)]
 mod tests {
     use super::*;

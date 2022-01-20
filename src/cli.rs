@@ -39,7 +39,7 @@ pub enum Command {
     /// Apply a configuration to a redshift by file name.
     /// Yaml format are accepted.
     Apply {
-        /// The path to the file to read
+        /// The path to the file to read, directory is not supported yet.
         #[structopt(short, long, parse(from_os_str))]
         file: PathBuf,
 

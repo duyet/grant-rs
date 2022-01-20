@@ -27,9 +27,13 @@ pub struct RoleSchemaLevel {
 }
 
 impl RoleSchemaLevel {
-    // { GRANT | REVOKE } { { CREATE | USAGE } [,...] | ALL [ PRIVILEGES ] }
-    // ON SCHEMA schema_name [, ...]
-    // TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
+    /// Generate role schema to sql.
+    ///
+    /// ```sql
+    /// { GRANT | REVOKE } { { CREATE | USAGE } [,...] | ALL [ PRIVILEGES ] }
+    /// ON SCHEMA schema_name [, ...]
+    /// TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
+    /// ```
     pub fn to_sql(&self, user: &str) -> String {
         // grant all privileges if no grants are specified or if grants contains "ALL"
         let grants = if self.grants.is_empty() || self.grants.contains(&"ALL".to_string()) {
