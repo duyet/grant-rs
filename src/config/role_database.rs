@@ -25,9 +25,13 @@ pub struct RoleDatabaseLevel {
 }
 
 impl RoleDatabaseLevel {
-    // { GRANT | REVOKE } { { CREATE | TEMPORARY | TEMP } [,...] | ALL [ PRIVILEGES ] }
-    // ON DATABASE db_name [, ...]
-    // TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
+    /// Generate role database to SQL.
+    ///
+    /// ```sql
+    /// { GRANT | REVOKE } { { CREATE | TEMPORARY | TEMP } [,...] | ALL [ PRIVILEGES ] }
+    /// ON DATABASE db_name [, ...]
+    /// TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
+    /// ```
     pub fn to_sql(&self, user: &str) -> String {
         // grant all if no grants specified or contains "ALL"
         let grants = if self.grants.is_empty() || self.grants.contains(&"ALL".to_string()) {
@@ -80,7 +84,6 @@ impl RoleValidate for RoleDatabaseLevel {
     }
 }
 
-// Test
 #[cfg(test)]
 mod tests {
     use super::*;

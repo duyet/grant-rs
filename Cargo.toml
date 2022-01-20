@@ -1,6 +1,6 @@
 [package]
 name = "grant"
-version = "0.0.1-beta.3"
+version = "0.0.1-beta.4"
 edition = "2021"
 authors = ["Duyet Le <me@duyet.net>"]
 license = "MIT"

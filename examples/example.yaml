@@ -41,6 +41,7 @@ users:
       - role_table_level
   - name: duyet2
     password: 1234567890
+    update_password: true
     roles:
       - role_database_level
       - role_schema_level

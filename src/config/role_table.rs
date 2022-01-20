@@ -55,9 +55,13 @@ impl Table {
 }
 
 impl RoleTableLevel {
-    // {GRANT | REVOKE} { { SELECT | INSERT | UPDATE | DELETE | DROP | REFERENCES } [,...] | ALL [ PRIVILEGES ] }
-    // ON { [ TABLE ] table_name [, ...] | ALL TABLES IN SCHEMA schema_name [, ...] }
-    // TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
+    /// Generate role table to sql.
+    ///
+    /// ```sql
+    /// {GRANT | REVOKE} { { SELECT | INSERT | UPDATE | DELETE | DROP | REFERENCES } [,...] | ALL [ PRIVILEGES ] }
+    /// ON { [ TABLE ] table_name [, ...] | ALL TABLES IN SCHEMA schema_name [, ...] }
+    /// TO { username [ WITH GRANT OPTION ] | GROUP group_name | PUBLIC } [, ...]
+    /// ```
     pub fn to_sql(&self, user: &str) -> String {
         let mut sqls = vec![];
         let mut tables = self
@@ -204,7 +208,6 @@ impl RoleValidate for RoleTableLevel {
     }
 }
 
-// Test
 #[cfg(test)]
 mod tests {
     use super::*;
