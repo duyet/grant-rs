@@ -126,6 +126,7 @@ impl DbConnection {
     ///
     /// ```rust
     /// use grant::{config::Config, connection::DbConnection};
+    /// use std::str::FromStr;
     ///
     /// let config = Config::from_str(
     ///     r#"
@@ -164,26 +165,6 @@ impl DbConnection {
         }
     }
 
-    /// Connection by a connection string.
-    ///
-    /// ```rust
-    /// use grant::connection::DbConnection;
-    ///
-    /// let connection_info = "postgres://postgres:postgres@localhost:5432/postgres".to_string();
-    /// let mut client = DbConnection::new_from_string(connection_info);
-    /// client.query("SELECT 1", &[]).unwrap();
-    /// ```
-    pub fn new_from_string(connection_info: String) -> Self {
-        let client = Client::connect(&connection_info, NoTls).unwrap();
-        let conn_config = connection_info.parse::<ConnConfig>().unwrap();
-
-        DbConnection {
-            connection_info,
-            client,
-            conn_config,
-        }
-    }
-
     /// Get current database name.
     pub fn get_current_database(&self) -> Option<&str> {
         self.conn_config.get_dbname()
@@ -193,8 +174,10 @@ impl DbConnection {
     ///
     /// ```rust
     /// use grant::connection::DbConnection;
-    /// let connection_info = "postgres://postgres:postgres@localhost:5432/postgres".to_string();
-    /// let mut client = DbConnection::new_from_string(connection_info);
+    /// use std::str::FromStr;
+    ///
+    /// let connection_info = "postgres://postgres:postgres@localhost:5432/postgres";
+    /// let mut client = DbConnection::from_str(connection_info).unwrap();
     /// assert_eq!(client.connection_info(), "postgres://postgres:postgres@localhost:5432/postgres");
     /// ```
     pub fn connection_info(self) -> String {
@@ -207,7 +190,7 @@ impl DbConnection {
 
         // TODO: Get the password from database, currently it only returns *****
         let sql = "SELECT usename, usecreatedb, usesuper, passwd FROM pg_user";
-        let stmt = self.client.prepare(&sql).unwrap();
+        let stmt = self.client.prepare(sql).unwrap();
 
         debug!("executing: {}", sql);
         let rows = self.client.query(&stmt, &[]).unwrap();
@@ -258,7 +241,7 @@ impl DbConnection {
             FROM db CROSS JOIN users u;
         "#;
 
-        let stmt = self.client.prepare(&sql).unwrap();
+        let stmt = self.client.prepare(sql).unwrap();
 
         debug!("executing: {}", sql);
         let rows = self.client.query(&stmt, &[])?;
@@ -297,7 +280,7 @@ impl DbConnection {
               AND s.schemaname != 'information_schema';
         ";
 
-        let stmt = self.client.prepare(&sql).unwrap();
+        let stmt = self.client.prepare(sql).unwrap();
 
         debug!("executing: {}", sql);
         let rows = self.client.query(&stmt, &[])?;
@@ -343,7 +326,7 @@ impl DbConnection {
                 AND t.schemaname != 'information_schema';
         ";
 
-        let stmt = self.client.prepare(&sql).unwrap();
+        let stmt = self.client.prepare(sql).unwrap();
 
         debug!("executing: {}", sql);
         let rows = self.client.query(&stmt, &[])?;
@@ -398,9 +381,10 @@ impl DbConnection {
     ///
     /// ```rust
     /// use grant::connection::DbConnection;
+    /// use std::str::FromStr;
     ///
     /// let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-    /// let mut db = DbConnection::new_from_string(url.to_string());
+    /// let mut db = DbConnection::from_str(url).unwrap();
     /// let rows = db.query("SELECT 1 as t", &[]).unwrap();
     /// println!("test_query: {:?}", rows);
     ///
@@ -424,9 +408,10 @@ impl DbConnection {
     ///
     /// ```rust
     /// use grant::connection::DbConnection;
+    /// use std::str::FromStr;
     ///
     /// let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-    /// let mut db = DbConnection::new_from_string(url.to_string());
+    /// let mut db = DbConnection::from_str(url).unwrap();
     /// let nrows = db.execute("SELECT 1 as t", &[]).unwrap();
     ///
     /// println!("test_execute: {:?}", nrows);
@@ -439,7 +424,7 @@ impl DbConnection {
         // multiple statements in the execute method without having
         // to rewrite the entire method
         // should split params into multiple slices as well
-        let queries = query.split(";");
+        let queries = query.split(';');
         let mut rows_affected = 0;
 
         for query in queries {
@@ -448,7 +433,7 @@ impl DbConnection {
                 continue;
             }
 
-            let stmt = self.client.prepare(&query)?;
+            let stmt = self.client.prepare(query)?;
             let rows = self.client.execute(&stmt, params)?;
             rows_affected += rows;
         }
@@ -457,24 +442,50 @@ impl DbConnection {
     }
 }
 
+impl std::str::FromStr for DbConnection {
+    type Err = anyhow::Error;
+
+    /// Connection by a connection string.
+    ///
+    /// ```
+    /// use grant::connection::DbConnection;
+    /// use std::str::FromStr;
+    ///
+    /// let connection_info = "postgres://postgres:postgres@localhost:5432/postgres";
+    /// let mut client = DbConnection::from_str(connection_info).unwrap();
+    /// client.query("SELECT 1", &[]).unwrap();
+    /// ```
+    fn from_str(connection_info: &str) -> Result<Self> {
+        let client = Client::connect(connection_info, NoTls).unwrap();
+        let conn_config = connection_info.parse::<ConnConfig>().unwrap();
+
+        Ok(Self {
+            connection_info: connection_info.to_owned(),
+            client,
+            conn_config,
+        })
+    }
+}
+
 // Test DbConnection
 #[cfg(test)]
 mod tests {
     use super::*;
     use rand::{thread_rng, Rng};
+    use std::str::FromStr;
 
     fn drop_user(db: &mut DbConnection, name: &str) {
-        let sql = format!("DROP USER IF EXISTS {}", name);
-        db.execute(&sql, &[]).unwrap();
+        let sql = &format!("DROP USER IF EXISTS {}", name);
+        db.execute(sql, &[]).unwrap();
     }
 
     fn create_user(db: &mut DbConnection, user: &User) {
-        let mut sql: String = format!("CREATE USER {} ", user.name).to_owned();
+        let mut sql = format!("CREATE USER {} ", user.name);
         if user.user_createdb {
             sql += "CREATEDB"
         }
         if !user.password.is_empty() {
-            sql += &format!(" PASSWORD '{}'", user.password).to_string()
+            sql += &format!(" PASSWORD '{}'", user.password)
         }
 
         db.execute(&sql, &[]).unwrap();
@@ -482,8 +493,8 @@ mod tests {
 
     #[test]
     fn test_drop_user() {
-        let url = "postgres://postgres:postgres@localhost:5432/postgres".to_string();
-        let mut db = DbConnection::new_from_string(url);
+        let url = "postgres://postgres:postgres@localhost:5432/postgres";
+        let mut db = DbConnection::from_str(url).unwrap();
 
         let name = random_str();
         let user = User {
@@ -506,8 +517,8 @@ mod tests {
 
     #[test]
     fn test_drop_create_user() {
-        let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::new_from_string(url.to_string());
+        let url = "postgres://postgres:postgres@localhost:5432/postgres";
+        let mut db = DbConnection::from_str(url).unwrap();
 
         let name = random_str();
         let user = User {
@@ -529,8 +540,8 @@ mod tests {
 
     #[test]
     fn test_get_schema_roles() {
-        let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::new_from_string(url.to_string());
+        let url = "postgres://postgres:postgres@localhost:5432/postgres";
+        let mut db = DbConnection::from_str(url).unwrap();
 
         let name = random_str();
         let user = User {
@@ -563,8 +574,8 @@ mod tests {
     // Test get_user_database_privileges
     #[test]
     fn test_get_user_database_privileges() {
-        let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::new_from_string(url.to_string());
+        let url = "postgres://postgres:postgres@localhost:5432/postgres";
+        let mut db = DbConnection::from_str(url).unwrap();
 
         let name = random_str();
         let user = User {
@@ -597,8 +608,8 @@ mod tests {
     // Test get_user_schema_privileges
     #[test]
     fn test_get_user_schema_privileges() {
-        let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::new_from_string(url.to_string());
+        let url = "postgres://postgres:postgres@localhost:5432/postgres";
+        let mut db = DbConnection::from_str(url).unwrap();
 
         let name = random_str();
         let password = random_str();
@@ -628,8 +639,8 @@ mod tests {
     // Test get_user_tables_privileges
     #[test]
     fn test_get_user_table_privileges() {
-        let url = "postgresql://postgres:postgres@localhost:5432/postgres";
-        let mut db = DbConnection::new_from_string(url.to_string());
+        let url = "postgres://postgres:postgres@localhost:5432/postgres";
+        let mut db = DbConnection::from_str(url).unwrap();
 
         let name = random_str();
         let password = random_str();

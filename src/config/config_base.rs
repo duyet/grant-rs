@@ -1,8 +1,7 @@
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
-use serde_yaml;
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::path::Path;
 use std::{fmt, fs};
 
 pub use super::connection::{Connection, ConnectionType};
@@ -45,7 +44,7 @@ pub use super::{Role, RoleLevelType};
 ///    - role_schema_level
 ///    - role_table_level
 /// ```
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct Config {
     pub connection: Connection,
     pub roles: Vec<Role>,
@@ -58,18 +57,22 @@ impl fmt::Display for Config {
     }
 }
 
-impl Default for Config {
-    fn default() -> Self {
-        Config {
-            connection: Connection::default(),
-            roles: vec![],
-            users: vec![],
-        }
+impl std::str::FromStr for Config {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        let config: Config = serde_yaml::from_str(s)?;
+
+        // Validate
+        config.validate()?;
+
+        Ok(config)
     }
 }
 
 impl Config {
-    pub fn new(config_path: &PathBuf) -> Result<Self> {
+    pub fn new(config_path: &Path) -> Result<Self> {
+        let config_path = config_path.to_path_buf();
         let config_str = fs::read_to_string(&config_path).context("failed to read config file")?;
         let config: Config = serde_yaml::from_str(&config_str)?;
 
@@ -77,14 +80,6 @@ impl Config {
 
         // expand env variables
         let config = config.expand_env_vars()?;
-
-        Ok(config)
-    }
-
-    pub fn from_str(config_str: &str) -> Result<Self> {
-        let config: Config = serde_yaml::from_str(config_str)?;
-
-        config.validate()?;
 
         Ok(config)
     }
@@ -122,8 +117,8 @@ impl Config {
         for user in &self.users {
             for role in &user.roles {
                 // role name can contain '-' at the first position
-                let role_name = if role.starts_with('-') {
-                    &role[1..]
+                let role_name = if let Some(without_sign) = role.strip_prefix('-') {
+                    without_sign
                 } else {
                     role
                 };
@@ -153,6 +148,8 @@ mod tests {
     use super::*;
     use indoc::indoc;
     use std::io::Write;
+    use std::path::PathBuf;
+    use std::str::FromStr;
     use tempfile::NamedTempFile;
 
     #[test]

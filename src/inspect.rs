@@ -4,7 +4,6 @@ use anyhow::Result;
 use ascii_table::AsciiTable;
 use indoc::indoc;
 use log::info;
-use term_size;
 
 pub fn inspect(config: &Config) -> Result<()> {
     let mut conn = DbConnection::new(config);
@@ -57,7 +56,7 @@ pub fn inspect(config: &Config) -> Result<()> {
 
     // Print the table in max size
     let mut table = AsciiTable::default();
-    table.max_width = term_width;
+    table.set_max_width(term_width);
 
     info!(
         "Current users in {}:\n{}",
@@ -91,10 +90,10 @@ pub fn inspect(config: &Config) -> Result<()> {
 }
 
 /// Get current user database privileges
-fn get_user_database_privileges(privileges: &Vec<UserDatabaseRole>, user: &str) -> Result<String> {
+fn get_user_database_privileges(privileges: &[UserDatabaseRole], user: &str) -> Result<String> {
     let privileges = privileges
         .iter()
-        .filter(|p| p.name == user.to_string()) // is current user
+        .filter(|p| p.name == *user) // is current user
         .filter(|p| p.has_create || p.has_temp) // has at least create or temp
         .map(|p| p.perm_to_string(true))
         .collect::<Vec<_>>()
@@ -104,10 +103,10 @@ fn get_user_database_privileges(privileges: &Vec<UserDatabaseRole>, user: &str) 
 }
 
 /// Get current user schema privileges
-fn get_user_schema_privileges(privileges: &Vec<UserSchemaRole>, user: &str) -> Result<String> {
+fn get_user_schema_privileges(privileges: &[UserSchemaRole], user: &str) -> Result<String> {
     let privileges = privileges
         .iter()
-        .filter(|p| p.name == user.to_string())
+        .filter(|p| p.name == *user)
         .filter(|p| p.has_create || p.has_usage)
         .map(|p| p.perm_to_string(true))
         .collect::<Vec<_>>()
@@ -117,10 +116,10 @@ fn get_user_schema_privileges(privileges: &Vec<UserSchemaRole>, user: &str) -> R
 }
 
 /// Get current user schema.table privileges
-fn get_user_table_privileges(privileges: &Vec<UserTableRole>, user: &str) -> Result<String> {
+fn get_user_table_privileges(privileges: &[UserTableRole], user: &str) -> Result<String> {
     let privileges = privileges
         .iter()
-        .filter(|p| p.name == user.to_string()) // is current user
+        .filter(|p| p.name == *user) // is current user
         .filter(|p| {
             p.has_select || p.has_insert || p.has_update || p.has_delete || p.has_references
         }) // has at least create or select
