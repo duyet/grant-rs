@@ -10,7 +10,6 @@ use crate::config::Config;
 use anyhow::Result;
 use cli::Command;
 use env_logger::Env;
-use std::path::PathBuf;
 
 fn main() -> Result<()> {
     // Logger config, for debugger export RUST_LOG=debug
@@ -35,7 +34,7 @@ fn main() -> Result<()> {
             let target = if let Some(file) = file {
                 file
             } else {
-                PathBuf::from(std::env::current_dir()?)
+                std::env::current_dir()?
             };
 
             validate::validate_target(&target)?;

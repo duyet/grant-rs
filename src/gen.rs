@@ -4,17 +4,19 @@ use log::info;
 use md5::compute;
 use rand::Rng;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Generate project template to given target
-pub fn gen(target: &PathBuf) {
+pub fn gen(target: &Path) {
+    let target = target.to_path_buf();
+
     // Skip if target already exists
     if target.exists() {
         info!("target already exists");
         return;
     }
 
-    fs::create_dir_all(target).unwrap_or_else(|_| panic!("failed to generate {:?}", target));
+    fs::create_dir_all(&target).unwrap_or_else(|_| panic!("failed to generate {:?}", &target));
     info!("creating path: {:?}", target);
 
     let config = Config::default();
@@ -66,7 +68,7 @@ pub fn gen_password(
         println!(
             "Generated MD5 (user: {}): {}",
             username,
-            Green.paint(password_hash.clone())
+            Green.paint(password_hash)
         );
         println!("\nHint: https://docs.aws.amazon.com/redshift/latest/dg/r_CREATE_USER.html");
     } else {

@@ -43,7 +43,7 @@ struct Table {
 
 impl Table {
     fn new(name: &str) -> Self {
-        let sign = match name.chars().nth(0) {
+        let sign = match name.chars().next() {
             Some('+') => "+".to_string(),
             Some('-') => "-".to_string(),
             _ => "+".to_string(),
@@ -106,11 +106,11 @@ impl RoleTableLevel {
 
         // grant on tables sign `+`
         let grant_tables = tables.iter().filter(|x| x.sign == "+").collect::<Vec<_>>();
-        if grant_tables.len() > 0 {
+        if !grant_tables.is_empty() {
             let _with_schema = grant_tables
                 .iter()
                 .flat_map(|t| {
-                    if t.name.contains(".") {
+                    if t.name.contains('.') {
                         vec![t.name.clone()]
                     } else {
                         self.schemas
@@ -135,11 +135,11 @@ impl RoleTableLevel {
 
         // revoke on tables start with `-`
         let revoke_tables = tables.iter().filter(|x| x.sign == "-").collect::<Vec<_>>();
-        if revoke_tables.len() > 0 {
+        if !revoke_tables.is_empty() {
             let _with_schema = revoke_tables
                 .iter()
                 .flat_map(|t| {
-                    if t.name.contains(".") {
+                    if t.name.contains('.') {
                         vec![t.name.clone()]
                     } else {
                         self.schemas

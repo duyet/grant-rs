@@ -4,11 +4,13 @@ use ansi_term::Colour::{Green, Purple, Red};
 use anyhow::{anyhow, Result};
 use ascii_table::AsciiTable;
 use log::{error, info};
-use std::path::PathBuf;
+use std::path::Path;
 
 /// Read the config from the given path and apply it to the database.
 /// If the dryrun flag is set, the changes will not be applied.
-pub fn apply(target: &PathBuf, dryrun: bool) -> Result<()> {
+pub fn apply(target: &Path, dryrun: bool) -> Result<()> {
+    let target = target.to_path_buf();
+
     if target.is_dir() {
         return Err(anyhow!(
             "directory is not supported yet ({})",
@@ -34,7 +36,9 @@ pub fn apply(target: &PathBuf, dryrun: bool) -> Result<()> {
 }
 
 /// Apply all config files from the given directory.
-pub fn apply_all(target: &PathBuf, dryrun: bool) -> Result<()> {
+pub fn apply_all(target: &Path, dryrun: bool) -> Result<()> {
+    let target = target.to_path_buf();
+
     // Scan recursively for config files (.yaml for .yml) in target directory
     let mut config_files = Vec::new();
     for entry in std::fs::read_dir(target)? {
@@ -87,8 +91,8 @@ fn create_or_update_users(
                     if dryrun {
                         info!("{}: {}", Purple.paint("Dry-run"), Purple.paint(sql));
                         summary.push(vec![
-                            format!("{}", user.name),
-                            format!("{}", Green.paint("would update password")),
+                            user.name.to_string(),
+                            Green.paint("would update password").to_string(),
                         ]);
                     } else {
                         conn.execute(&sql, &[])?;
@@ -170,7 +174,7 @@ fn create_or_update_privileges(
         // If privileges on config are not in db, add them
         // If privileges on db are not in config, remove them
         for role_name in user.roles.iter() {
-            let role = config.roles.iter().find(|&r| r.find(&role_name)).unwrap();
+            let role = config.roles.iter().find(|&r| r.find(role_name)).unwrap();
 
             // TODO: revoke if privileges on db are not in configuration
 
@@ -196,7 +200,7 @@ fn create_or_update_privileges(
                         "{}: {} {}",
                         Green.paint("Success"),
                         Purple.paint(sql),
-                        format!("(updated {} row(s))", nrows.to_string())
+                        format!("(updated {} row(s))", nrows)
                     );
                 }
             } else {
@@ -229,5 +233,6 @@ fn create_or_update_privileges(
 /// TODO: Format the table, detect max size to console
 fn print_summary(summary: Vec<Vec<String>>) {
     let ascii_table = AsciiTable::default();
+
     info!("Summary:\n{}", ascii_table.format(summary));
 }
