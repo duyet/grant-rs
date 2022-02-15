@@ -216,9 +216,9 @@ Thank you for contributing!
 # TODO
 
 - [x] Support reading connection info from environment variables
-- [ ] Support store encrypted password in Git
+- [x] Support store encrypted password in Git ([md5](https://docs.aws.amazon.com/redshift/latest/dg/r_CREATE_USER.html))
 - [x] Support Postgres and Redshift
-- [ ] Support change password
+- [x] Support change password (via: `users[*].update_password=true`)
 - [ ] Visuallization (who can see what?)
 - [ ] Apply show more detail about diff changes
 - [ ] Inspect show more detail about user privileges
