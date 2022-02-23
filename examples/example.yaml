@@ -51,3 +51,9 @@ users:
       - role_database_level
       - role_schema_level
       - role_table_level
+  - name: duyet_handsome
+    roles:
+      - role_database_level
+      - role_schema_level
+      - role_table_level
+
