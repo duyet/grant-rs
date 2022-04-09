@@ -56,7 +56,7 @@ pub fn inspect(config: &Config) -> Result<()> {
 
     // Print the table in max size
     let mut table = AsciiTable::default();
-    table.max_width = term_width;
+    table.set_max_width(term_width);
 
     info!(
         "Current users in {}:\n{}",
@@ -90,7 +90,7 @@ pub fn inspect(config: &Config) -> Result<()> {
 }
 
 /// Get current user database privileges
-fn get_user_database_privileges(privileges: &Vec<UserDatabaseRole>, user: &str) -> Result<String> {
+fn get_user_database_privileges(privileges: &[UserDatabaseRole], user: &str) -> Result<String> {
     let privileges = privileges
         .iter()
         .filter(|p| p.name == *user) // is current user
@@ -103,7 +103,7 @@ fn get_user_database_privileges(privileges: &Vec<UserDatabaseRole>, user: &str) 
 }
 
 /// Get current user schema privileges
-fn get_user_schema_privileges(privileges: &Vec<UserSchemaRole>, user: &str) -> Result<String> {
+fn get_user_schema_privileges(privileges: &[UserSchemaRole], user: &str) -> Result<String> {
     let privileges = privileges
         .iter()
         .filter(|p| p.name == *user)
@@ -116,7 +116,7 @@ fn get_user_schema_privileges(privileges: &Vec<UserSchemaRole>, user: &str) -> R
 }
 
 /// Get current user schema.table privileges
-fn get_user_table_privileges(privileges: &Vec<UserTableRole>, user: &str) -> Result<String> {
+fn get_user_table_privileges(privileges: &[UserTableRole], user: &str) -> Result<String> {
     let privileges = privileges
         .iter()
         .filter(|p| p.name == *user) // is current user

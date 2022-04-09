@@ -1,11 +1,13 @@
 use crate::config::Config;
 use ansi_term::Colour::{Green, Red};
 use anyhow::{anyhow, Result};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
 /// Validate the target PathBuf
-pub fn validate_target(target: &PathBuf) -> Result<()> {
+pub fn validate_target(target: &Path) -> Result<()> {
+    let target = PathBuf::from(target);
+
     if !target.exists() {
         return Err(anyhow!(
             "{:?} ... {} - file/directory does not exist",
@@ -42,12 +44,13 @@ pub fn validate_target(target: &PathBuf) -> Result<()> {
     }
 
     // Validate single file
-    validate_file(target)
+    validate_file(&target)
 }
 
 /// Validate target yaml file
-pub fn validate_file(file: &PathBuf) -> Result<()> {
-    let value = Config::new(file)
+pub fn validate_file(file: &Path) -> Result<()> {
+    let file = PathBuf::from(file);
+    let value = Config::new(&file)
         .map_err(|e| anyhow!("{:?} ... {} - {}", file, Red.paint("invalid"), e))?;
 
     value
