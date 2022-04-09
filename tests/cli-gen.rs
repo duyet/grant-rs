@@ -31,7 +31,7 @@ fn gen_with_target_args() {
         .assert()
         .success()
         .stderr(predicate::str::contains("Generated"))
-        .stderr(predicate::str::contains(folder_name.clone()));
+        .stderr(predicate::str::contains(folder_name));
 }
 
 #[test]

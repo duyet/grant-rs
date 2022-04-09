@@ -68,7 +68,7 @@ impl Role {
 
     pub fn find(&self, name: &str) -> bool {
         // role name can contain '-', so we need to remove it before comparing
-        let name = name.replace("-", "");
+        let name = name.replace('-', "");
 
         match self {
             Role::Database(role) => role.name == name,

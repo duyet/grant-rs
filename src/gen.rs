@@ -66,7 +66,7 @@ pub fn gen_password(
         println!(
             "Generated MD5 (user: {}): {}",
             username,
-            Green.paint(password_hash.clone())
+            Green.paint(password_hash)
         );
         println!("\nHint: https://docs.aws.amazon.com/redshift/latest/dg/r_CREATE_USER.html");
     } else {

@@ -42,7 +42,7 @@ pub fn validate_target(target: &PathBuf) -> Result<()> {
     }
 
     // Validate single file
-    Ok(validate_file(target)?)
+    validate_file(target)
 }
 
 /// Validate target yaml file

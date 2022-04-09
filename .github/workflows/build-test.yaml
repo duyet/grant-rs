@@ -44,6 +44,11 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v1
 
+      - name: Code Coverage
+        run: |
+          curl -o cov.sh https://github.com/duyet/cov-rs/blob/master/cov.sh && chmod +x ./cov.sh
+          ./cov.sh
+
       - name: Build
         run: cargo build --verbose
 

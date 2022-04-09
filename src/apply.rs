@@ -16,7 +16,7 @@ pub fn apply(target: &PathBuf, dryrun: bool) -> Result<()> {
         ));
     }
 
-    let config = Config::new(&target)?;
+    let config = Config::new(target)?;
 
     info!("Applying configuration:\n{}", config);
     let mut conn = DbConnection::new(&config);
@@ -170,7 +170,7 @@ fn create_or_update_privileges(
         // If privileges on config are not in db, add them
         // If privileges on db are not in config, remove them
         for role_name in user.roles.iter() {
-            let role = config.roles.iter().find(|&r| r.find(&role_name)).unwrap();
+            let role = config.roles.iter().find(|&r| r.find(role_name)).unwrap();
 
             // TODO: revoke if privileges on db are not in configuration
 
@@ -196,7 +196,7 @@ fn create_or_update_privileges(
                         "{}: {} {}",
                         Green.paint("Success"),
                         Purple.paint(sql),
-                        format!("(updated {} row(s))", nrows.to_string())
+                        format!("(updated {} row(s))", nrows)
                     );
                 }
             } else {

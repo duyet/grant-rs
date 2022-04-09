@@ -207,7 +207,7 @@ impl DbConnection {
 
         // TODO: Get the password from database, currently it only returns *****
         let sql = "SELECT usename, usecreatedb, usesuper, passwd FROM pg_user";
-        let stmt = self.client.prepare(&sql).unwrap();
+        let stmt = self.client.prepare(sql).unwrap();
 
         debug!("executing: {}", sql);
         let rows = self.client.query(&stmt, &[]).unwrap();
@@ -258,7 +258,7 @@ impl DbConnection {
             FROM db CROSS JOIN users u;
         "#;
 
-        let stmt = self.client.prepare(&sql).unwrap();
+        let stmt = self.client.prepare(sql).unwrap();
 
         debug!("executing: {}", sql);
         let rows = self.client.query(&stmt, &[])?;
@@ -297,7 +297,7 @@ impl DbConnection {
               AND s.schemaname != 'information_schema';
         ";
 
-        let stmt = self.client.prepare(&sql).unwrap();
+        let stmt = self.client.prepare(sql).unwrap();
 
         debug!("executing: {}", sql);
         let rows = self.client.query(&stmt, &[])?;
@@ -343,7 +343,7 @@ impl DbConnection {
                 AND t.schemaname != 'information_schema';
         ";
 
-        let stmt = self.client.prepare(&sql).unwrap();
+        let stmt = self.client.prepare(sql).unwrap();
 
         debug!("executing: {}", sql);
         let rows = self.client.query(&stmt, &[])?;
@@ -439,7 +439,7 @@ impl DbConnection {
         // multiple statements in the execute method without having
         // to rewrite the entire method
         // should split params into multiple slices as well
-        let queries = query.split(";");
+        let queries = query.split(';');
         let mut rows_affected = 0;
 
         for query in queries {
@@ -448,7 +448,7 @@ impl DbConnection {
                 continue;
             }
 
-            let stmt = self.client.prepare(&query)?;
+            let stmt = self.client.prepare(query)?;
             let rows = self.client.execute(&stmt, params)?;
             rows_affected += rows;
         }
@@ -469,12 +469,12 @@ mod tests {
     }
 
     fn create_user(db: &mut DbConnection, user: &User) {
-        let mut sql: String = format!("CREATE USER {} ", user.name).to_owned();
+        let mut sql: String = format!("CREATE USER {} ", user.name);
         if user.user_createdb {
             sql += "CREATEDB"
         }
         if !user.password.is_empty() {
-            sql += &format!(" PASSWORD '{}'", user.password).to_string()
+            sql += &format!(" PASSWORD '{}'", user.password)
         }
 
         db.execute(&sql, &[]).unwrap();
@@ -497,7 +497,7 @@ mod tests {
         create_user(&mut db, &user);
         drop_user(&mut db, &name);
 
-        let users = db.get_users().unwrap_or(vec![]);
+        let users = db.get_users().unwrap_or_default();
         assert_eq!(users.iter().any(|u| u.name == name), false);
 
         // Clean up
@@ -543,15 +543,15 @@ mod tests {
         create_user(&mut db, &user);
 
         // get user roles
-        let user_schema_privileges = db.get_user_schema_privileges().unwrap_or(vec![]);
+        let user_schema_privileges = db.get_user_schema_privileges().unwrap_or_default();
 
         // FIXME it will be empty if the schema doesn't have any tables
-        if user_schema_privileges.len() > 0 {
+        if !user_schema_privileges.is_empty() {
             // new user, that user will don't have any priviledge
             assert_eq!(
                 user_schema_privileges
                     .iter()
-                    .any(|u| u.name == name && u.has_usage == false && u.has_create == false),
+                    .any(|u| u.name == name && !u.has_usage && !u.has_create),
                 true
             );
         }
@@ -577,14 +577,14 @@ mod tests {
         create_user(&mut db, &user);
 
         // get user roles
-        let user_database_privileges = db.get_user_database_privileges().unwrap_or(vec![]);
+        let user_database_privileges = db.get_user_database_privileges().unwrap_or_default();
 
         // Check if user_database_privileges contains current users
         // is empty if the user doesn't have any database privileges
         assert_eq!(
             user_database_privileges
                 .iter()
-                .any(|u| u.name == name && u.has_create == true),
+                .any(|u| u.name == name && u.has_create),
             false
         );
 
@@ -606,13 +606,13 @@ mod tests {
             name: name.to_owned(),
             user_createdb: false,
             user_super: false,
-            password: password.to_owned(),
+            password,
         };
         drop_user(&mut db, &name);
         create_user(&mut db, &user);
 
         // get user roles
-        let user_schema_privileges = db.get_user_schema_privileges().unwrap_or(vec![]);
+        let user_schema_privileges = db.get_user_schema_privileges().unwrap_or_default();
         println!("{:?}", user_schema_privileges);
 
         // Check if user_schema_privileges contains current users
@@ -637,20 +637,20 @@ mod tests {
             name: name.to_owned(),
             user_createdb: false,
             user_super: false,
-            password: password.to_owned(),
+            password,
         };
         drop_user(&mut db, &name);
         create_user(&mut db, &user);
 
         // get user roles
-        let user_table_privileges = db.get_user_table_privileges().unwrap_or(vec![]);
+        let user_table_privileges = db.get_user_table_privileges().unwrap_or_default();
 
         // Check if user_tables_privileges contains current users
         // is empty if the user doesn't have any tables privileges
         assert_eq!(
             user_table_privileges
                 .iter()
-                .any(|u| u.name == name && u.has_select == true),
+                .any(|u| u.name == name && u.has_select),
             false
         );
 
