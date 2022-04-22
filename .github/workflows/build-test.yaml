@@ -43,7 +43,11 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Code Coverage
-        run: bash <(curl -s https://raw.githubusercontent.com/duyet/cov-rs/master/cov.sh)
+        run: |
+          export GITHUB_PULL_REQUEST=${{ env.GITHUB_PULL_REQUEST }}
+          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          export PROJECT_TITLE="${{ matrix.os }}"
+          bash <(curl -s https://raw.githubusercontent.com/duyet/cov-rs/master/cov.sh)
 
   build:
     runs-on: ${{ matrix.os }}
