@@ -22,7 +22,7 @@ ascii_table = { version = "4", features = ["auto_table_width", "color_codes"]}
 md5 = "0.7"
 walkdir = "2"
 ansi_term = "0.12"
-envmnt = "0.9"
+envmnt = "0.10"
 term_size = "0.3"
 
 [dev-dependencies]
