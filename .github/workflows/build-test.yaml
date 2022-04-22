@@ -10,6 +10,47 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  cov:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Code Coverage
+        env:
+          GITHUB_PULL_REQUEST: ${{ github.event.pull_request.number }}
+        run: |
+          export GITHUB_PULL_REQUEST=${{ env.GITHUB_PULL_REQUEST }}
+          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          export PROJECT_TITLE="${{ matrix.os }}"
+          bash <(curl -s https://raw.githubusercontent.com/duyet/cov-rs/master/cov.sh)
+
   build:
     runs-on: ${{ matrix.os }}
     strategy:

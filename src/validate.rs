@@ -44,8 +44,7 @@ pub fn validate_target(target: &Path) -> Result<()> {
     }
 
     // Validate single file
-    validate_file(&target).unwrap();
-    Ok(())
+    validate_file(&target)
 }
 
 /// Validate target yaml file

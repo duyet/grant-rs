@@ -508,7 +508,7 @@ mod tests {
         create_user(&mut db, &user);
         drop_user(&mut db, &name);
 
-        let users = db.get_users().unwrap_or(vec![]);
+        let users = db.get_users().unwrap_or_default();
         assert_eq!(users.iter().any(|u| u.name == name), false);
 
         // Clean up
@@ -554,15 +554,15 @@ mod tests {
         create_user(&mut db, &user);
 
         // get user roles
-        let user_schema_privileges = db.get_user_schema_privileges().unwrap_or(vec![]);
+        let user_schema_privileges = db.get_user_schema_privileges().unwrap_or_default();
 
         // FIXME it will be empty if the schema doesn't have any tables
-        if user_schema_privileges.len() > 0 {
+        if !user_schema_privileges.is_empty() {
             // new user, that user will don't have any priviledge
             assert_eq!(
                 user_schema_privileges
                     .iter()
-                    .any(|u| u.name == name && u.has_usage == false && u.has_create == false),
+                    .any(|u| u.name == name && !u.has_usage && !u.has_create),
                 true
             );
         }
@@ -588,14 +588,14 @@ mod tests {
         create_user(&mut db, &user);
 
         // get user roles
-        let user_database_privileges = db.get_user_database_privileges().unwrap_or(vec![]);
+        let user_database_privileges = db.get_user_database_privileges().unwrap_or_default();
 
         // Check if user_database_privileges contains current users
         // is empty if the user doesn't have any database privileges
         assert_eq!(
             user_database_privileges
                 .iter()
-                .any(|u| u.name == name && u.has_create == true),
+                .any(|u| u.name == name && u.has_create),
             false
         );
 
@@ -617,13 +617,13 @@ mod tests {
             name: name.to_owned(),
             user_createdb: false,
             user_super: false,
-            password: password.to_owned(),
+            password,
         };
         drop_user(&mut db, &name);
         create_user(&mut db, &user);
 
         // get user roles
-        let user_schema_privileges = db.get_user_schema_privileges().unwrap_or(vec![]);
+        let user_schema_privileges = db.get_user_schema_privileges().unwrap_or_default();
         println!("{:?}", user_schema_privileges);
 
         // Check if user_schema_privileges contains current users
@@ -648,20 +648,20 @@ mod tests {
             name: name.to_owned(),
             user_createdb: false,
             user_super: false,
-            password: password.to_owned(),
+            password,
         };
         drop_user(&mut db, &name);
         create_user(&mut db, &user);
 
         // get user roles
-        let user_table_privileges = db.get_user_table_privileges().unwrap_or(vec![]);
+        let user_table_privileges = db.get_user_table_privileges().unwrap_or_default();
 
         // Check if user_tables_privileges contains current users
         // is empty if the user doesn't have any tables privileges
         assert_eq!(
             user_table_privileges
                 .iter()
-                .any(|u| u.name == name && u.has_select == true),
+                .any(|u| u.name == name && u.has_select),
             false
         );
 
