@@ -41,7 +41,7 @@ jobs:
         fetch-depth: 1
     - name: Generate Release Notes
       run: |
-        ./.github/workflows/release-notes.py --tag ${{ env.RELEASE_VERSION }} --output notes-${{ env.RELEASE_VERSION }}.md
+        python3 ./.github/workflows/release-notes.py --tag ${{ env.RELEASE_VERSION }} --output notes-${{ env.RELEASE_VERSION }}.md
         cat notes-${{ env.RELEASE_VERSION }}.md
     - name: Create GitHub release
       id: release
