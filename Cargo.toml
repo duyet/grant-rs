@@ -17,7 +17,7 @@ env_logger = "0.9"
 rand = "0.8"
 postgres = "0.19"
 serde = { version = "1.0", features = ["derive"] }
-serde_yaml = "0.8"
+serde_yaml = "0.9"
 ascii_table = { version = "4", features = ["auto_table_width", "color_codes"]}
 md5 = "0.7"
 walkdir = "2"
