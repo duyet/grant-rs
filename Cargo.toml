@@ -13,7 +13,7 @@ structopt = "^0.3"
 anyhow = "1.0"
 indoc = "1.0"
 log = "0.4"
-env_logger = "0.9"
+env_logger = "0.10"
 rand = "0.8"
 postgres = "0.19"
 serde = { version = "1.0", features = ["derive"] }
