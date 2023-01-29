@@ -11,7 +11,7 @@ readme = "README.md"
 [dependencies]
 structopt = "^0.3"
 anyhow = "1.0"
-indoc = "1.0"
+indoc = "2.0"
 log = "0.4"
 env_logger = "0.10"
 rand = "0.8"
