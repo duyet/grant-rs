@@ -19,7 +19,7 @@ on:
     tags:
     - "*"
 env:
-  BIN_NAME: athena
+  BIN_NAME: grant
 jobs:
   create-release:
     name: create-release
