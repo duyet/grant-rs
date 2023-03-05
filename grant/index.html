@@ -1,0 +1,159 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="An open-source project that aims to manage Redshift database roles and privileges in GitOps style, written in Rust."><meta name="keywords" content="rust, rustlang, rust-lang, grant"><title>grant - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-6827029ac823cab7.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../static.files/light-ebce58d0a40c3431.css"><link rel="stylesheet" disabled href="../static.files/dark-f23faae4a2daf9a6.css"><link rel="stylesheet" disabled href="../static.files/ayu-8af5e100b21cd173.css"><script id="default-settings" ></script><script src="../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-c55e1eb52e1886b4.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../grant/index.html"><div class="logo-container"><img class="rust-logo" src="../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../grant/index.html"><div class="logo-container"><img class="rust-logo" src="../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></div></a><h2 class="location"><a href="#">Crate grant</a></h2><div class="sidebar-elems"><ul class="block"><li class="version">Version 0.0.1-beta.4</li><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Crate <a class="mod" href="#">grant</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../src/grant/lib.rs.html#1-219">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>An open-source project that aims to manage Redshift database roles and privileges in GitOps style, written in Rust.</p>
+<p><a href="https://github.com/duyet/grant.rs"><strong>Home</strong></a> | <a href="https://docs.rs/grant"><strong>Documentation</strong></a></p>
+<p><em>This project is still in the early stages of development and is not ready for any kind of production use or any alpha/beta testing.</em></p>
+<h2 id="usage"><a href="#usage">Usage</a></h2>
+<p>Install binary from crates.io</p>
+<div class="example-wrap"><pre class="language-bash"><code>cargo install grant
+</code></pre></div>
+<p>Using <code>grant</code> tool:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ grant --help
+
+grant 0.0.1-beta.3
+Manage database roles and privileges in GitOps style
+
+USAGE:
+    grant &lt;SUBCOMMAND&gt;
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+SUBCOMMANDS:
+    apply       Apply a configuration to a redshift by file name. Yaml format are accepted
+    gen         Generate sample configuration file
+    gen-pass    Generate random password
+    help        Prints this message or the help of the given subcommand(s)
+    inspect     Inspect current database cluster with connection info from configuration file
+    validate    Validate a configuration file or a target directory that contains configuration files
+</code></pre></div><h3 id="generate-project-structure"><a href="#generate-project-structure">Generate project structure</a></h3><div class="example-wrap"><pre class="language-bash"><code>grant gen --target ./cluster
+
+Creating path: &quot;./cluster&quot;
+Generated: &quot;./cluster/config.yml&quot;
+</code></pre></div><h3 id="apply-privilege-changes"><a href="#apply-privilege-changes">Apply privilege changes</a></h3>
+<p>Content of <code>./examples/example.yaml</code>:</p>
+<div class="example-wrap"><pre class="language-yaml"><code>connection:
+  type: &quot;postgres&quot;
+  # support environment variables, e.g. postgres://${HOSTNAME}:5432
+  url: &quot;postgres://postgres@localhost:5432/postgres&quot;
+
+roles:
+  - name: role_database_level
+    type: database
+    grants:
+      - CREATE
+      - TEMP
+    databases:
+      - postgres
+
+  - name: role_schema_level
+    type: schema
+    grants:
+      - CREATE
+    databases:
+      - postgres
+    schemas:
+      - public
+  - name: role_all_schema
+    type: table
+    grants:
+      - SELECT
+      - INSERT
+      - UPDATE
+    databases:
+      - postgres
+    schemas:
+      - public
+    tables:
+      - ALL # include all table
+      - +public_table # can add `+` to mark included tables
+      - -secret_table # add `-` to exclude this table
+
+users:
+  - name: duyet
+    password: 1234567890 # password in plaintext
+    roles:
+      - role_database_level
+      - role_all_schema
+      - role_schema_level
+  - name: duyet2
+    password: md58243e8f5dfb84bbd851de920e28f596f # support md5 style: grant gen-pass -u duyet2
+    roles:
+      - role_database_level
+      - role_all_schema
+      - role_schema_level
+</code></pre></div>
+<p>Apply this config to cluster:</p>
+<div class="example-wrap"><pre class="language-bash"><code>grant apply -f ./examples/example.yaml
+
+[2021-12-06T14:37:03Z INFO  grant::connection] Connected to database: postgres://postgres@localhost:5432/postgres
+[2021-12-06T14:37:03Z INFO  grant::apply] Summary:
+    ┌────────────┬────────────────────────────┐
+    │ User       │ Action                     │
+    │ ---        │ ---                        │
+    │ duyet      │ no action (already exists) │
+    │ duyet2     │ no action (already exists) │
+    └────────────┴────────────────────────────┘
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT CREATE, TEMP ON DATABASE postgres TO duyet;
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT CREATE ON SCHEMA public TO duyet;
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO duyet;
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT CREATE, TEMP ON DATABASE postgres TO duyet2;
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT CREATE ON SCHEMA public TO duyet2;
+[2021-12-12T13:48:22Z INFO  grant::apply] Success: GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO duyet2;
+[2021-12-12T13:48:22Z INFO  grant::apply] Summary:
+    ┌────────┬─────────────────────┬──────────────────────┬─────────┐
+    │ User   │ Role Name           │ Detail               │ Status  │
+    │ ---    │ ---                 │ ---                  │ ---     │
+    │ duyet  │ role_database_level │ database[&quot;postgres&quot;] │ updated │
+    │ duyet  │ role_schema_level   │ schema[&quot;public&quot;]     │ updated │
+    │ duyet  │ role_table_level    │ table[&quot;ALL&quot;]         │ updated │
+    │ duyet2 │ role_database_level │ database[&quot;postgres&quot;] │ updated │
+    │ duyet2 │ role_schema_level   │ schema[&quot;public&quot;]     │ updated │
+    │ duyet2 │ role_table_level    │ table[&quot;ALL&quot;]         │ updated │
+    └────────┴─────────────────────┴──────────────────────┴─────────┘
+</code></pre></div><h3 id="generate-random-password"><a href="#generate-random-password">Generate random password</a></h3><div class="example-wrap"><pre class="language-bash"><code>$ grant gen-pass
+
+Generated password: q)ItTjN$EXlkF@Tl
+</code></pre></div><div class="example-wrap"><pre class="language-bash"><code>$ grant gen-pass --user duyet
+
+Generated password: o^b3aD1L$xLm%#~U
+Generated MD5 (user: duyet): md58243e8f5dfb84bbd851de920e28f596f
+</code></pre></div><h3 id="inspect-the-current-cluster"><a href="#inspect-the-current-cluster">Inspect the current cluster</a></h3><div class="example-wrap"><pre class="language-bash"><code>$ grant inspect -f examples/example.yaml
+
+[2021-11-29T07:46:44Z INFO  grant::inspect] Current users in postgres://postgres@localhost:5432/postgres:
+    ┌────────────┬──────────┬───────┬──────────┐
+    │ User       │ CreateDB │ Super │ Password │
+    │ ---        │ ---      │ ---   │ ---      │
+    │ postgres   │ true     │ true  │ ******** │
+    │ duyet      │ false    │ false │ ******** │
+    └────────────┴──────────┴───────┴──────────┘
+</code></pre></div><h2 id="developement"><a href="#developement">Developement</a></h2>
+<p>Clone the repo:</p>
+<div class="example-wrap"><pre class="language-bash"><code>git clone https://github.com/duyet/grant.rs &amp;&amp; cd grant.rs
+</code></pre></div>
+<p>Postgres is required for testing, you might need to use the <code>docker-compose.yaml</code>:</p>
+<div class="example-wrap"><pre class="language-bash"><code>docker-compose up -d
+</code></pre></div>
+<p>Make sure you have connection to <code>postgres://postgres:postgres@localhost:5432/postgres</code>.</p>
+<p>On the MacOS, the easiest way is install <a href="https://postgresapp.com">Postgres.app</a>.</p>
+<p>To run the unittest:</p>
+<div class="example-wrap"><pre class="language-bash"><code>cargo test
+</code></pre></div><h2 id="todo"><a href="#todo">TODO</a></h2>
+<ul>
+<li><input disabled="" type="checkbox" checked=""/>
+Support reading connection info from environment variables</li>
+<li><input disabled="" type="checkbox"/>
+Support store encrypted password in Git</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Support Postgres and Redshift</li>
+<li><input disabled="" type="checkbox"/>
+Support change password</li>
+<li><input disabled="" type="checkbox"/>
+Visuallization (who can see what?)</li>
+<li><input disabled="" type="checkbox"/>
+Apply show more detail about diff changes</li>
+<li><input disabled="" type="checkbox"/>
+Inspect show more detail about user privileges</li>
+</ul>
+<h2 id="license"><a href="#license">LICENSE</a></h2>
+<p>MIT</p>
+</div></details><h2 id="reexports" class="small-section-header"><a href="#reexports">Re-exports</a></h2><div class="item-table"><div class="item-row"><div class="item-left import-item" id="reexport.Cli"><code>pub use cli::<a class="struct" href="cli/struct.Cli.html" title="struct grant::cli::Cli">Cli</a>;</code></div></div><div class="item-row"><div class="item-left import-item" id="reexport.Config"><code>pub use config::<a class="struct" href="config/config_base/struct.Config.html" title="struct grant::config::config_base::Config">Config</a>;</code></div></div><div class="item-row"><div class="item-left import-item" id="reexport.DbConnection"><code>pub use connection::<a class="struct" href="connection/struct.DbConnection.html" title="struct grant::connection::DbConnection">DbConnection</a>;</code></div></div><div class="item-row"><div class="item-left import-item"><code>pub use <a class="mod" href="apply/index.html" title="mod grant::apply">apply</a>::*;</code></div></div><div class="item-row"><div class="item-left import-item"><code>pub use <a class="mod" href="gen/index.html" title="mod grant::gen">gen</a>::*;</code></div></div><div class="item-row"><div class="item-left import-item"><code>pub use <a class="mod" href="inspect/index.html" title="mod grant::inspect">inspect</a>::*;</code></div></div><div class="item-row"><div class="item-left import-item"><code>pub use <a class="mod" href="validate/index.html" title="mod grant::validate">validate</a>::*;</code></div></div></div><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="apply/index.html" title="grant::apply mod">apply</a></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="cli/index.html" title="grant::cli mod">cli</a></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="config/index.html" title="grant::config mod">config</a></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="connection/index.html" title="grant::connection mod">connection</a></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="gen/index.html" title="grant::gen mod">gen</a></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="inspect/index.html" title="grant::inspect mod">inspect</a></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="validate/index.html" title="grant::validate mod">validate</a></div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="grant" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

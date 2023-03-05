@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["Command",""]],"fn":[["parse",""]],"struct":[["Cli","Manage database roles and privileges in GitOps style"],["CustomError",""]]};
