@@ -9,7 +9,7 @@ readme = "README.md"
 
 
 [dependencies]
-structopt = "^0.3"
+structopt = "^0.3.26"
 anyhow = "1.0"
 indoc = "2.0"
 log = "0.4"
