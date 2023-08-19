@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Config","Configuration contains all the information needed to connect to a database, the roles and users."]]};
+window.SIDEBAR_ITEMS = {"struct":["Config"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["gen","Generate project template to given target"],["gen_password","Generating password with given length"]]};
+window.SIDEBAR_ITEMS = {"fn":["gen","gen_password"]};

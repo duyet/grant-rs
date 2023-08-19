@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Role","Configuration for a role."],["RoleLevelType","Level type for role."]],"struct":[["RoleDatabaseLevel","Role Database Level."],["RoleSchemaLevel","Role Schema Level."],["RoleTableLevel","Role Table Level."]],"trait":[["RoleValidate",""]]};
+window.SIDEBAR_ITEMS = {"enum":["Role","RoleLevelType"],"struct":["RoleDatabaseLevel","RoleSchemaLevel","RoleTableLevel"],"trait":["RoleValidate"]};

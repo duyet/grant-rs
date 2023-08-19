@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["ConnectionType","Connection type. Supported values: Postgres"]],"struct":[["Connection","Connection configuration section. The user on the connection should have the permission to grant privileges."]]};
+window.SIDEBAR_ITEMS = {"enum":["ConnectionType"],"struct":["Connection"]};

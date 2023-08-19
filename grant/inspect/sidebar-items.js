@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["inspect",""]]};
+window.SIDEBAR_ITEMS = {"fn":["inspect"]};

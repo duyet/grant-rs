@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["apply","Read the config from the given path and apply it to the database. If the dryrun flag is set, the changes will not be applied."],["apply_all","Apply all config files from the given directory."]]};
+window.SIDEBAR_ITEMS = {"fn":["apply","apply_all"]};
