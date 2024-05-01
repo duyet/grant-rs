@@ -21,7 +21,7 @@ serde_yaml = "0.9"
 ascii_table = { version = "4", features = ["auto_table_width", "color_codes"]}
 md5 = "0.7"
 walkdir = "2"
-ansi_term = "0.12"
+ansi_term = "0.12.1"
 envmnt = "0.10"
 term_size = "0.3"
 
