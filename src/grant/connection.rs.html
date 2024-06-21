@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/connection.rs`."><title>connection.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="grant" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.1 (eb26296b5 2023-08-03)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../grant/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/connection.rs`."><title>connection.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="grant" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../grant/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -722,14 +722,14 @@
 <span class="kw">impl </span>UserDatabaseRole {
     <span class="kw">pub fn </span>perm_to_string(<span class="kw-2">&amp;</span><span class="self">self</span>, with_name: bool) -&gt; String {
         <span class="kw">if </span>with_name {
-            <span class="kw">return </span><span class="macro">format!</span>(<span class="string">&quot;{}({})&quot;</span>, <span class="self">self</span>.database_name, <span class="self">self</span>.perm_to_string(<span class="bool-val">false</span>));
+            <span class="kw">return </span><span class="macro">format!</span>(<span class="string">"{}({})"</span>, <span class="self">self</span>.database_name, <span class="self">self</span>.perm_to_string(<span class="bool-val">false</span>));
         }
 
         <span class="kw">match </span>(<span class="self">self</span>.has_create, <span class="self">self</span>.has_temp) {
-            (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; <span class="string">&quot;A&quot;</span>.to_string(),
-            (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; <span class="string">&quot;C&quot;</span>.to_string(),
-            (<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; <span class="string">&quot;T&quot;</span>.to_string(),
-            (<span class="bool-val">false</span>, <span class="bool-val">false</span>) =&gt; <span class="string">&quot;&quot;</span>.to_string(),
+            (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; <span class="string">"A"</span>.to_string(),
+            (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; <span class="string">"C"</span>.to_string(),
+            (<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; <span class="string">"T"</span>.to_string(),
+            (<span class="bool-val">false</span>, <span class="bool-val">false</span>) =&gt; <span class="string">""</span>.to_string(),
         }
     }
 }
@@ -747,14 +747,14 @@
 <span class="kw">impl </span>UserSchemaRole {
     <span class="kw">pub fn </span>perm_to_string(<span class="kw-2">&amp;</span><span class="self">self</span>, with_name: bool) -&gt; String {
         <span class="kw">if </span>with_name {
-            <span class="kw">return </span><span class="macro">format!</span>(<span class="string">&quot;{}({})&quot;</span>, <span class="self">self</span>.schema_name, <span class="self">self</span>.perm_to_string(<span class="bool-val">false</span>));
+            <span class="kw">return </span><span class="macro">format!</span>(<span class="string">"{}({})"</span>, <span class="self">self</span>.schema_name, <span class="self">self</span>.perm_to_string(<span class="bool-val">false</span>));
         }
 
         <span class="kw">match </span>(<span class="self">self</span>.has_create, <span class="self">self</span>.has_usage) {
-            (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; <span class="string">&quot;A&quot;</span>.to_string(),
-            (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; <span class="string">&quot;C&quot;</span>.to_string(),
-            (<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; <span class="string">&quot;U&quot;</span>.to_string(),
-            <span class="kw">_ </span>=&gt; <span class="string">&quot;&quot;</span>.to_string(),
+            (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; <span class="string">"A"</span>.to_string(),
+            (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; <span class="string">"C"</span>.to_string(),
+            (<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; <span class="string">"U"</span>.to_string(),
+            <span class="kw">_ </span>=&gt; <span class="string">""</span>.to_string(),
         }
     }
 }
@@ -777,7 +777,7 @@
     <span class="kw">pub fn </span>perm_to_string(<span class="kw-2">&amp;</span><span class="self">self</span>, with_name: bool) -&gt; String {
         <span class="kw">if </span>with_name {
             <span class="kw">return </span><span class="macro">format!</span>(
-                <span class="string">&quot;{}.{}({})&quot;</span>,
+                <span class="string">"{}.{}({})"</span>,
                 <span class="self">self</span>.schema_name,
                 <span class="self">self</span>.table_name,
                 <span class="self">self</span>.perm_to_string(<span class="bool-val">false</span>)
@@ -790,16 +790,16 @@
             &amp;&amp; <span class="self">self</span>.has_delete
             &amp;&amp; <span class="self">self</span>.has_references
         {
-            <span class="kw">return </span><span class="string">&quot;A&quot;</span>.to_string();
+            <span class="kw">return </span><span class="string">"A"</span>.to_string();
         }
 
-        <span class="kw">let </span>has_select = <span class="kw">if </span><span class="self">self</span>.has_select { <span class="string">&quot;S&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;&quot; </span>};
-        <span class="kw">let </span>has_insert = <span class="kw">if </span><span class="self">self</span>.has_insert { <span class="string">&quot;I&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;&quot; </span>};
-        <span class="kw">let </span>has_update = <span class="kw">if </span><span class="self">self</span>.has_update { <span class="string">&quot;U&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;&quot; </span>};
-        <span class="kw">let </span>has_delete = <span class="kw">if </span><span class="self">self</span>.has_delete { <span class="string">&quot;D&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;&quot; </span>};
-        <span class="kw">let </span>has_references = <span class="kw">if </span><span class="self">self</span>.has_references { <span class="string">&quot;R&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;&quot; </span>};
+        <span class="kw">let </span>has_select = <span class="kw">if </span><span class="self">self</span>.has_select { <span class="string">"S" </span>} <span class="kw">else </span>{ <span class="string">"" </span>};
+        <span class="kw">let </span>has_insert = <span class="kw">if </span><span class="self">self</span>.has_insert { <span class="string">"I" </span>} <span class="kw">else </span>{ <span class="string">"" </span>};
+        <span class="kw">let </span>has_update = <span class="kw">if </span><span class="self">self</span>.has_update { <span class="string">"U" </span>} <span class="kw">else </span>{ <span class="string">"" </span>};
+        <span class="kw">let </span>has_delete = <span class="kw">if </span><span class="self">self</span>.has_delete { <span class="string">"D" </span>} <span class="kw">else </span>{ <span class="string">"" </span>};
+        <span class="kw">let </span>has_references = <span class="kw">if </span><span class="self">self</span>.has_references { <span class="string">"R" </span>} <span class="kw">else </span>{ <span class="string">"" </span>};
         <span class="macro">format!</span>(
-            <span class="string">&quot;{}{}{}{}{}&quot;</span>,
+            <span class="string">"{}{}{}{}{}"</span>,
             has_select, has_insert, has_update, has_delete, has_references
         )
     }
@@ -816,29 +816,29 @@
     /// use std::str::FromStr;
     ///
     /// let config = Config::from_str(
-    ///     r#&quot;
+    ///     r#"
     ///       connection:
     ///         type: postgres
-    ///         url: &quot;postgresql://postgres:postgres@localhost:5432/postgres&quot;
+    ///         url: "postgresql://postgres:postgres@localhost:5432/postgres"
     ///       roles: []
     ///       users: []
-    ///     &quot;#,
+    ///     "#,
     ///    )
     ///    .unwrap();
     ///    let mut db = DbConnection::new(&amp;config);
-    ///    db.query(&quot;SELECT 1&quot;, &amp;[]).unwrap();
+    ///    db.query("SELECT 1", &amp;[]).unwrap();
     /// ```
     </span><span class="kw">pub fn </span>new(config: <span class="kw-2">&amp;</span>Config) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span>config.connection.type_ {
             ConnectionType::Postgres =&gt; {
                 <span class="kw">let </span>connection_info = config.connection.url.clone();
                 <span class="kw">let </span><span class="kw-2">mut </span>client = Client::connect(<span class="kw-2">&amp;</span>connection_info, NoTls)
-                    .expect(<span class="string">&quot;failed to connect to database&quot;</span>);
+                    .expect(<span class="string">"failed to connect to database"</span>);
 
-                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = client.simple_query(<span class="string">&quot;SELECT 1&quot;</span>) {
-                    <span class="macro">error!</span>(<span class="string">&quot;Failed to connect to database: {}&quot;</span>, e);
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = client.simple_query(<span class="string">"SELECT 1"</span>) {
+                    <span class="macro">error!</span>(<span class="string">"Failed to connect to database: {}"</span>, e);
                 } <span class="kw">else </span>{
-                    <span class="macro">info!</span>(<span class="string">&quot;Connected to database: {}&quot;</span>, connection_info);
+                    <span class="macro">info!</span>(<span class="string">"Connected to database: {}"</span>, connection_info);
                 }
 
                 <span class="kw">let </span>conn_config = connection_info.parse::&lt;ConnConfig&gt;().unwrap();
@@ -863,9 +863,9 @@
     /// use grant::connection::DbConnection;
     /// use std::str::FromStr;
     ///
-    /// let connection_info = &quot;postgres://postgres:postgres@localhost:5432/postgres&quot;;
+    /// let connection_info = "postgres://postgres:postgres@localhost:5432/postgres";
     /// let mut client = DbConnection::from_str(connection_info).unwrap();
-    /// assert_eq!(client.connection_info(), &quot;postgres://postgres:postgres@localhost:5432/postgres&quot;);
+    /// assert_eq!(client.connection_info(), "postgres://postgres:postgres@localhost:5432/postgres");
     /// ```
     </span><span class="kw">pub fn </span>connection_info(<span class="self">self</span>) -&gt; String {
         <span class="self">self</span>.connection_info
@@ -876,10 +876,10 @@
         <span class="kw">let </span><span class="kw-2">mut </span>users = <span class="macro">vec!</span>[];
 
         <span class="comment">// TODO: Get the password from database, currently it only returns *****
-        </span><span class="kw">let </span>sql = <span class="string">&quot;SELECT usename, usecreatedb, usesuper, passwd FROM pg_user&quot;</span>;
+        </span><span class="kw">let </span>sql = <span class="string">"SELECT usename, usecreatedb, usesuper, passwd FROM pg_user"</span>;
         <span class="kw">let </span>stmt = <span class="self">self</span>.client.prepare(sql).unwrap();
 
-        <span class="macro">debug!</span>(<span class="string">&quot;executing: {}&quot;</span>, sql);
+        <span class="macro">debug!</span>(<span class="string">"executing: {}"</span>, sql);
         <span class="kw">let </span>rows = <span class="self">self</span>.client.query(<span class="kw-2">&amp;</span>stmt, <span class="kw-2">&amp;</span>[]).unwrap();
 
         <span class="kw">for </span>row <span class="kw">in </span>rows {
@@ -896,13 +896,13 @@
                     name,
                     user_createdb: <span class="bool-val">false</span>,
                     user_super: <span class="bool-val">false</span>,
-                    password: String::from(<span class="string">&quot;&quot;</span>),
+                    password: String::from(<span class="string">""</span>),
                 }),
                 (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; (),
             }
         }
 
-        <span class="macro">debug!</span>(<span class="string">&quot;get_users: {:#?}&quot;</span>, users);
+        <span class="macro">debug!</span>(<span class="string">"get_users: {:#?}"</span>, users);
 
         <span class="prelude-val">Ok</span>(users)
     }
@@ -912,7 +912,7 @@
     </span><span class="kw">pub fn </span>get_user_database_privileges(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;UserDatabaseRole&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>roles = <span class="macro">vec!</span>[];
 
-        <span class="kw">let </span>sql = <span class="string">r#&quot;
+        <span class="kw">let </span>sql = <span class="string">r#"
             WITH db AS (
                 SELECT d.datname AS database_name
                 FROM pg_database d
@@ -923,14 +923,14 @@
             SELECT
                 u.user_name,
                 db.database_name,
-                pg_catalog.has_database_privilege(u.user_name, database_name, &#39;CREATE&#39;) AS &quot;create&quot;,
-                pg_catalog.has_database_privilege(u.user_name, database_name, &#39;TEMP&#39;) AS &quot;temp&quot;
+                pg_catalog.has_database_privilege(u.user_name, database_name, 'CREATE') AS "create",
+                pg_catalog.has_database_privilege(u.user_name, database_name, 'TEMP') AS "temp"
             FROM db CROSS JOIN users u;
-        &quot;#</span>;
+        "#</span>;
 
         <span class="kw">let </span>stmt = <span class="self">self</span>.client.prepare(sql).unwrap();
 
-        <span class="macro">debug!</span>(<span class="string">&quot;executing: {}&quot;</span>, sql);
+        <span class="macro">debug!</span>(<span class="string">"executing: {}"</span>, sql);
         <span class="kw">let </span>rows = <span class="self">self</span>.client.query(<span class="kw-2">&amp;</span>stmt, <span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>;
         <span class="kw">for </span>row <span class="kw">in </span>rows {
             <span class="kw">let </span>name: <span class="kw-2">&amp;</span>str = row.get(<span class="number">0</span>);
@@ -951,25 +951,25 @@
 
     <span class="doccomment">/// Get the user schema privileges for current database
     </span><span class="kw">pub fn </span>get_user_schema_privileges(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;UserSchemaRole&gt;&gt; {
-        <span class="comment">// FIXME it will be empty if the schema doesn&#39;t have any tables
-        </span><span class="kw">let </span>sql = <span class="string">&quot;
+        <span class="comment">// FIXME it will be empty if the schema doesn't have any tables
+        </span><span class="kw">let </span>sql = <span class="string">"
             SELECT
               u.usename AS name,
               s.schemaname AS schema_name,
-              has_schema_privilege(u.usename, s.schemaname, &#39;create&#39;) AS has_create,
-              has_schema_privilege(u.usename, s.schemaname, &#39;usage&#39;) AS has_usage
+              has_schema_privilege(u.usename, s.schemaname, 'create') AS has_create,
+              has_schema_privilege(u.usename, s.schemaname, 'usage') AS has_usage
             FROM
               pg_user u
               CROSS JOIN (SELECT DISTINCT schemaname FROM pg_tables) s
             WHERE
               1 = 1
-              AND s.schemaname != &#39;pg_catalog&#39;
-              AND s.schemaname != &#39;information_schema&#39;;
-        &quot;</span>;
+              AND s.schemaname != 'pg_catalog'
+              AND s.schemaname != 'information_schema';
+        "</span>;
 
         <span class="kw">let </span>stmt = <span class="self">self</span>.client.prepare(sql).unwrap();
 
-        <span class="macro">debug!</span>(<span class="string">&quot;executing: {}&quot;</span>, sql);
+        <span class="macro">debug!</span>(<span class="string">"executing: {}"</span>, sql);
         <span class="kw">let </span>rows = <span class="self">self</span>.client.query(<span class="kw-2">&amp;</span>stmt, <span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>roles = <span class="macro">vec!</span>[];
         <span class="kw">for </span>row <span class="kw">in </span>rows {
@@ -995,27 +995,27 @@
     <span class="doccomment">/// Get the user table privileges for current database
     </span><span class="kw">pub fn </span>get_user_table_privileges(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;UserTableRole&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>roles = <span class="macro">vec!</span>[];
-        <span class="kw">let </span>sql = <span class="string">&quot;
+        <span class="kw">let </span>sql = <span class="string">"
             SELECT
               u.usename AS name,
               t.schemaname AS schema_name,
               t.tablename AS table_name,
-              has_table_privilege(u.usename, t.schemaname || &#39;.&#39; || t.tablename, &#39;select&#39;) AS has_select,
-              has_table_privilege(u.usename, t.schemaname || &#39;.&#39; || t.tablename, &#39;insert&#39;) AS has_insert,
-              has_table_privilege(u.usename, t.schemaname || &#39;.&#39; || t.tablename, &#39;update&#39;) AS has_update,
-              has_table_privilege(u.usename, t.schemaname || &#39;.&#39; || t.tablename, &#39;delete&#39;) AS has_delete,
-              has_table_privilege(u.usename, t.schemaname || &#39;.&#39; || t.tablename, &#39;references&#39;) AS has_references
+              has_table_privilege(u.usename, t.schemaname || '.' || t.tablename, 'select') AS has_select,
+              has_table_privilege(u.usename, t.schemaname || '.' || t.tablename, 'insert') AS has_insert,
+              has_table_privilege(u.usename, t.schemaname || '.' || t.tablename, 'update') AS has_update,
+              has_table_privilege(u.usename, t.schemaname || '.' || t.tablename, 'delete') AS has_delete,
+              has_table_privilege(u.usename, t.schemaname || '.' || t.tablename, 'references') AS has_references
             FROM
               pg_user u
               CROSS JOIN (SELECT DISTINCT schemaname, tablename FROM pg_tables) t
               WHERE 1 = 1
-                AND t.schemaname NOT LIKE &#39;pg_%&#39;
-                AND t.schemaname != &#39;information_schema&#39;;
-        &quot;</span>;
+                AND t.schemaname NOT LIKE 'pg_%'
+                AND t.schemaname != 'information_schema';
+        "</span>;
 
         <span class="kw">let </span>stmt = <span class="self">self</span>.client.prepare(sql).unwrap();
 
-        <span class="macro">debug!</span>(<span class="string">&quot;executing: {}&quot;</span>, sql);
+        <span class="macro">debug!</span>(<span class="string">"executing: {}"</span>, sql);
         <span class="kw">let </span>rows = <span class="self">self</span>.client.query(<span class="kw-2">&amp;</span>stmt, <span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>;
         <span class="kw">for </span>row <span class="kw">in </span>rows {
             <span class="kw">let </span>name = row.get(<span class="number">0</span>);
@@ -1070,15 +1070,15 @@
     /// use grant::connection::DbConnection;
     /// use std::str::FromStr;
     ///
-    /// let url = &quot;postgresql://postgres:postgres@localhost:5432/postgres&quot;;
+    /// let url = "postgresql://postgres:postgres@localhost:5432/postgres";
     /// let mut db = DbConnection::from_str(url).unwrap();
-    /// let rows = db.query(&quot;SELECT 1 as t&quot;, &amp;[]).unwrap();
-    /// println!(&quot;test_query: {:?}&quot;, rows);
+    /// let rows = db.query("SELECT 1 as t", &amp;[]).unwrap();
+    /// println!("test_query: {:?}", rows);
     ///
     /// assert_eq!(rows.len(), 1);
     /// assert_eq!(rows.get(0).unwrap().len(), 1);
     ///
-    /// let t: i32 = rows.get(0).unwrap().get(&quot;t&quot;);
+    /// let t: i32 = rows.get(0).unwrap().get("t");
     /// assert_eq!(t, 1);
     /// ```
     </span><span class="kw">pub fn </span>query&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, query: <span class="kw-2">&amp;</span>T, params: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>ToSql + Sync)]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Row&gt;&gt;
@@ -1097,21 +1097,21 @@
     /// use grant::connection::DbConnection;
     /// use std::str::FromStr;
     ///
-    /// let url = &quot;postgresql://postgres:postgres@localhost:5432/postgres&quot;;
+    /// let url = "postgresql://postgres:postgres@localhost:5432/postgres";
     /// let mut db = DbConnection::from_str(url).unwrap();
-    /// let nrows = db.execute(&quot;SELECT 1 as t&quot;, &amp;[]).unwrap();
+    /// let nrows = db.execute("SELECT 1 as t", &amp;[]).unwrap();
     ///
-    /// println!(&quot;test_execute: {:?}&quot;, nrows);
+    /// println!("test_execute: {:?}", nrows);
     /// assert_eq!(nrows, 1);
     /// ```
     </span><span class="kw">pub fn </span>execute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, query: <span class="kw-2">&amp;</span>str, params: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>ToSql + Sync)]) -&gt; <span class="prelude-ty">Result</span>&lt;i64&gt; {
         <span class="comment">// Support multiple query statements by splitting on semicolons
         // and executing each one separately (if any)
-        // This is a bit of a hack, but it&#39;s the only way to support
+        // This is a bit of a hack, but it's the only way to support
         // multiple statements in the execute method without having
         // to rewrite the entire method
         // should split params into multiple slices as well
-        </span><span class="kw">let </span>queries = query.split(<span class="string">&#39;;&#39;</span>);
+        </span><span class="kw">let </span>queries = query.split(<span class="string">';'</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>rows_affected = <span class="number">0</span>;
 
         <span class="kw">for </span>query <span class="kw">in </span>queries {
@@ -1138,9 +1138,9 @@
     /// use grant::connection::DbConnection;
     /// use std::str::FromStr;
     ///
-    /// let connection_info = &quot;postgres://postgres:postgres@localhost:5432/postgres&quot;;
+    /// let connection_info = "postgres://postgres:postgres@localhost:5432/postgres";
     /// let mut client = DbConnection::from_str(connection_info).unwrap();
-    /// client.query(&quot;SELECT 1&quot;, &amp;[]).unwrap();
+    /// client.query("SELECT 1", &amp;[]).unwrap();
     /// ```
     </span><span class="kw">fn </span>from_str(connection_info: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>client = Client::connect(connection_info, NoTls).unwrap();
@@ -1162,17 +1162,17 @@
     <span class="kw">use </span>std::str::FromStr;
 
     <span class="kw">fn </span>drop_user(db: <span class="kw-2">&amp;mut </span>DbConnection, name: <span class="kw-2">&amp;</span>str) {
-        <span class="kw">let </span>sql = <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;DROP USER IF EXISTS {}&quot;</span>, name);
+        <span class="kw">let </span>sql = <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"DROP USER IF EXISTS {}"</span>, name);
         db.execute(sql, <span class="kw-2">&amp;</span>[]).unwrap();
     }
 
     <span class="kw">fn </span>create_user(db: <span class="kw-2">&amp;mut </span>DbConnection, user: <span class="kw-2">&amp;</span>User) {
-        <span class="kw">let </span><span class="kw-2">mut </span>sql = <span class="macro">format!</span>(<span class="string">&quot;CREATE USER {} &quot;</span>, user.name);
+        <span class="kw">let </span><span class="kw-2">mut </span>sql = <span class="macro">format!</span>(<span class="string">"CREATE USER {} "</span>, user.name);
         <span class="kw">if </span>user.user_createdb {
-            sql += <span class="string">&quot;CREATEDB&quot;
+            sql += <span class="string">"CREATEDB"
         </span>}
         <span class="kw">if </span>!user.password.is_empty() {
-            sql += <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot; PASSWORD &#39;{}&#39;&quot;</span>, user.password)
+            sql += <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">" PASSWORD '{}'"</span>, user.password)
         }
 
         db.execute(<span class="kw-2">&amp;</span>sql, <span class="kw-2">&amp;</span>[]).unwrap();
@@ -1180,7 +1180,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_drop_user() {
-        <span class="kw">let </span>url = <span class="string">&quot;postgres://postgres:postgres@localhost:5432/postgres&quot;</span>;
+        <span class="kw">let </span>url = <span class="string">"postgres://postgres:postgres@localhost:5432/postgres"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>db = DbConnection::from_str(url).unwrap();
 
         <span class="kw">let </span>name = random_str();
@@ -1188,7 +1188,7 @@
             name: name.to_owned(),
             user_createdb: <span class="bool-val">false</span>,
             user_super: <span class="bool-val">false</span>,
-            password: <span class="string">&quot;duyet&quot;</span>.to_string(),
+            password: <span class="string">"duyet"</span>.to_string(),
         };
 
         drop_user(<span class="kw-2">&amp;mut </span>db, <span class="kw-2">&amp;</span>name);
@@ -1204,7 +1204,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_drop_create_user() {
-        <span class="kw">let </span>url = <span class="string">&quot;postgres://postgres:postgres@localhost:5432/postgres&quot;</span>;
+        <span class="kw">let </span>url = <span class="string">"postgres://postgres:postgres@localhost:5432/postgres"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>db = DbConnection::from_str(url).unwrap();
 
         <span class="kw">let </span>name = random_str();
@@ -1212,7 +1212,7 @@
             name: name.to_owned(),
             user_createdb: <span class="bool-val">false</span>,
             user_super: <span class="bool-val">false</span>,
-            password: <span class="string">&quot;duyet&quot;</span>.to_string(),
+            password: <span class="string">"duyet"</span>.to_string(),
         };
         drop_user(<span class="kw-2">&amp;mut </span>db, <span class="kw-2">&amp;</span>name);
         create_user(<span class="kw-2">&amp;mut </span>db, <span class="kw-2">&amp;</span>user);
@@ -1227,7 +1227,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_get_schema_roles() {
-        <span class="kw">let </span>url = <span class="string">&quot;postgres://postgres:postgres@localhost:5432/postgres&quot;</span>;
+        <span class="kw">let </span>url = <span class="string">"postgres://postgres:postgres@localhost:5432/postgres"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>db = DbConnection::from_str(url).unwrap();
 
         <span class="kw">let </span>name = random_str();
@@ -1235,7 +1235,7 @@
             name: name.to_owned(),
             user_createdb: <span class="bool-val">false</span>,
             user_super: <span class="bool-val">false</span>,
-            password: <span class="string">&quot;duyet&quot;</span>.to_string(),
+            password: <span class="string">"duyet"</span>.to_string(),
         };
         drop_user(<span class="kw-2">&amp;mut </span>db, <span class="kw-2">&amp;</span>name);
         create_user(<span class="kw-2">&amp;mut </span>db, <span class="kw-2">&amp;</span>user);
@@ -1243,9 +1243,9 @@
         <span class="comment">// get user roles
         </span><span class="kw">let </span>user_schema_privileges = db.get_user_schema_privileges().unwrap_or_default();
 
-        <span class="comment">// FIXME it will be empty if the schema doesn&#39;t have any tables
+        <span class="comment">// FIXME it will be empty if the schema doesn't have any tables
         </span><span class="kw">if </span>!user_schema_privileges.is_empty() {
-            <span class="comment">// new user, that user will don&#39;t have any priviledge
+            <span class="comment">// new user, that user will don't have any priviledge
             </span><span class="macro">assert_eq!</span>(
                 user_schema_privileges
                     .iter()
@@ -1261,7 +1261,7 @@
     <span class="comment">// Test get_user_database_privileges
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_get_user_database_privileges() {
-        <span class="kw">let </span>url = <span class="string">&quot;postgres://postgres:postgres@localhost:5432/postgres&quot;</span>;
+        <span class="kw">let </span>url = <span class="string">"postgres://postgres:postgres@localhost:5432/postgres"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>db = DbConnection::from_str(url).unwrap();
 
         <span class="kw">let </span>name = random_str();
@@ -1269,7 +1269,7 @@
             name: name.to_owned(),
             user_createdb: <span class="bool-val">false</span>,
             user_super: <span class="bool-val">false</span>,
-            password: <span class="string">&quot;duyet&quot;</span>.to_string(),
+            password: <span class="string">"duyet"</span>.to_string(),
         };
         drop_user(<span class="kw-2">&amp;mut </span>db, <span class="kw-2">&amp;</span>name);
         create_user(<span class="kw-2">&amp;mut </span>db, <span class="kw-2">&amp;</span>user);
@@ -1278,7 +1278,7 @@
         </span><span class="kw">let </span>user_database_privileges = db.get_user_database_privileges().unwrap_or_default();
 
         <span class="comment">// Check if user_database_privileges contains current users
-        // is empty if the user doesn&#39;t have any database privileges
+        // is empty if the user doesn't have any database privileges
         </span><span class="macro">assert_eq!</span>(
             user_database_privileges
                 .iter()
@@ -1295,7 +1295,7 @@
     <span class="comment">// Test get_user_schema_privileges
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_get_user_schema_privileges() {
-        <span class="kw">let </span>url = <span class="string">&quot;postgres://postgres:postgres@localhost:5432/postgres&quot;</span>;
+        <span class="kw">let </span>url = <span class="string">"postgres://postgres:postgres@localhost:5432/postgres"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>db = DbConnection::from_str(url).unwrap();
 
         <span class="kw">let </span>name = random_str();
@@ -1311,10 +1311,10 @@
 
         <span class="comment">// get user roles
         </span><span class="kw">let </span>user_schema_privileges = db.get_user_schema_privileges().unwrap_or_default();
-        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, user_schema_privileges);
+        <span class="macro">println!</span>(<span class="string">"{:?}"</span>, user_schema_privileges);
 
         <span class="comment">// Check if user_schema_privileges contains current users
-        // is empty if the user doesn&#39;t have any schema privileges
+        // is empty if the user doesn't have any schema privileges
         // assert_eq!(user_schema_privileges.iter().any(|u| u.name == name), false);
 
         // FIXME seriously test this function
@@ -1326,7 +1326,7 @@
     <span class="comment">// Test get_user_tables_privileges
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_get_user_table_privileges() {
-        <span class="kw">let </span>url = <span class="string">&quot;postgres://postgres:postgres@localhost:5432/postgres&quot;</span>;
+        <span class="kw">let </span>url = <span class="string">"postgres://postgres:postgres@localhost:5432/postgres"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>db = DbConnection::from_str(url).unwrap();
 
         <span class="kw">let </span>name = random_str();
@@ -1344,7 +1344,7 @@
         </span><span class="kw">let </span>user_table_privileges = db.get_user_table_privileges().unwrap_or_default();
 
         <span class="comment">// Check if user_tables_privileges contains current users
-        // is empty if the user doesn&#39;t have any tables privileges
+        // is empty if the user doesn't have any tables privileges
         </span><span class="macro">assert_eq!</span>(
             user_table_privileges
                 .iter()
@@ -1359,7 +1359,7 @@
     }
 
     <span class="kw">fn </span>random_str() -&gt; String {
-        <span class="kw">const </span>CHARSET: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>;
+        <span class="kw">const </span>CHARSET: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"abcdefghijklmnopqrstuvwxyz"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>rng = thread_rng();
 
         <span class="kw">let </span>name: String = (<span class="number">0</span>..<span class="number">10</span>)

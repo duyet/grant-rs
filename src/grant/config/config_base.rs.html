@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/config/config_base.rs`."><title>config_base.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="grant" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.1 (eb26296b5 2023-08-03)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../grant/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/config/config_base.rs`."><title>config_base.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="grant" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../grant/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -958,7 +958,7 @@
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Config {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, serde_yaml::to_string(<span class="kw-2">&amp;</span><span class="self">self</span>).unwrap())
+        <span class="macro">write!</span>(f, <span class="string">"{}"</span>, serde_yaml::to_string(<span class="kw-2">&amp;</span><span class="self">self</span>).unwrap())
     }
 }
 
@@ -978,7 +978,7 @@
 <span class="kw">impl </span>Config {
     <span class="kw">pub fn </span>new(config_path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>config_path = config_path.to_path_buf();
-        <span class="kw">let </span>config_str = fs::read_to_string(<span class="kw-2">&amp;</span>config_path).context(<span class="string">&quot;failed to read config file&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>config_str = fs::read_to_string(<span class="kw-2">&amp;</span>config_path).context(<span class="string">"failed to read config file"</span>)<span class="question-mark">?</span>;
         <span class="kw">let </span>config: Config = serde_yaml::from_str(<span class="kw-2">&amp;</span>config_str)<span class="question-mark">?</span>;
 
         config.validate()<span class="question-mark">?</span>;
@@ -1001,7 +1001,7 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>role_names = HashSet::new();
         <span class="kw">for </span>role <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.roles {
             <span class="kw">if </span>role_names.contains(<span class="kw-2">&amp;</span>role.get_name()) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;duplicated role name: {}&quot;</span>, role.get_name()));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">"duplicated role name: {}"</span>, role.get_name()));
             }
             role_names.insert(role.get_name());
         }
@@ -1014,22 +1014,22 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>user_names: HashSet&lt;String&gt; = HashSet::new();
         <span class="kw">for </span>user <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.users {
             <span class="kw">if </span>user_names.contains(<span class="kw-2">&amp;</span>user.name) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;duplicated user: {}&quot;</span>, user.name));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">"duplicated user: {}"</span>, user.name));
             }
             user_names.insert(user.name.clone());
         }
         <span class="comment">// Validate users roles are available in roles
         </span><span class="kw">for </span>user <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.users {
             <span class="kw">for </span>role <span class="kw">in </span><span class="kw-2">&amp;</span>user.roles {
-                <span class="comment">// role name can contain &#39;-&#39; at the first position
-                </span><span class="kw">let </span>role_name = <span class="kw">if let </span><span class="prelude-val">Some</span>(without_sign) = role.strip_prefix(<span class="string">&#39;-&#39;</span>) {
+                <span class="comment">// role name can contain '-' at the first position
+                </span><span class="kw">let </span>role_name = <span class="kw">if let </span><span class="prelude-val">Some</span>(without_sign) = role.strip_prefix(<span class="string">'-'</span>) {
                     without_sign
                 } <span class="kw">else </span>{
                     role
                 };
 
                 <span class="kw">if </span>!<span class="self">self</span>.roles.iter().any(|r| r.get_name() == role_name) {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;user role {} is not available&quot;</span>, role));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">"user role {} is not available"</span>, role));
                 }
             }
         }
@@ -1058,68 +1058,68 @@
     <span class="kw">use </span>tempfile::NamedTempFile;
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;failed to get content: invalid type: string&quot;</span>)]
+    #[should_panic(expected = <span class="string">"failed to get content: invalid type: string"</span>)]
     </span><span class="kw">fn </span>test_with_basic_config() {
-        <span class="kw">let </span>_text = <span class="string">&quot;bad yaml content&quot;</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span>_text = <span class="string">"bad yaml content"</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to get content&quot;</span>);
+        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to get content"</span>);
     }
 
     <span class="comment">// Test config with minimum valid YAML
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_basic_config() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://localhost:5432/postgres
                  roles: []
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to get content&quot;</span>);
+        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to get content"</span>);
     }
 
     <span class="comment">// Test Config::from_str
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_from_str() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://localhost:5432/postgres
                  roles: []
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        Config::from_str(_text).expect(<span class="string">&quot;failed to get content&quot;</span>);
+        Config::from_str(_text).expect(<span class="string">"failed to get content"</span>);
     }
 
     <span class="comment">// Config::from_str and Config::new should return the same result
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_from_str_and_new() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
              connection:
                type: postgres
                url: postgres://localhost:5432/postgres
              roles: []
              users: []
-        &quot;</span>};
+        "</span>};
 
-        <span class="kw">let </span>config_1 = Config::from_str(_text).expect(<span class="string">&quot;failed to get content&quot;</span>);
+        <span class="kw">let </span>config_1 = Config::from_str(_text).expect(<span class="string">"failed to get content"</span>);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
-        <span class="kw">let </span>config_2 = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to get content&quot;</span>);
+        <span class="kw">let </span>config_2 = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to get content"</span>);
 
         <span class="macro">assert_eq!</span>(config_1, config_2);
     }
@@ -1127,76 +1127,76 @@
     <span class="comment">// Test config with url contains environement variable
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_with_env_var() {
-        envmnt::set(<span class="string">&quot;POSTGRES_HOST&quot;</span>, <span class="string">&quot;duyet&quot;</span>);
+        envmnt::set(<span class="string">"POSTGRES_HOST"</span>, <span class="string">"duyet"</span>);
 
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://${POSTGRES_HOST}:5432/postgres
                  roles: []
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to get content&quot;</span>);
+        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to get content"</span>);
 
-        <span class="macro">assert_eq!</span>(config.connection.url, <span class="string">&quot;postgres://duyet:5432/postgres&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.connection.url, <span class="string">"postgres://duyet:5432/postgres"</span>);
 
-        envmnt::remove(<span class="string">&quot;POSTGRES_HOST&quot;</span>);
+        envmnt::remove(<span class="string">"POSTGRES_HOST"</span>);
     }
 
     <span class="comment">// Test expand environement variables but not available
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_with_env_var_not_available() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://${POSTGRES_HOST:duyet}:5432/${POSTGRES_ABC}
                  roles: []
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to get content&quot;</span>);
+        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to get content"</span>);
 
         <span class="macro">assert_eq!</span>(
             config.connection.url,
-            <span class="string">&quot;postgres://duyet:5432/${POSTGRES_ABC}&quot;
+            <span class="string">"postgres://duyet:5432/${POSTGRES_ABC}"
         </span>);
     }
 
     <span class="comment">// Test config with invalid connection type
     </span><span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;connection.type: unknown variant `invalid`&quot;</span>)]
+    #[should_panic(expected = <span class="string">"connection.type: unknown variant `invalid`"</span>)]
     </span><span class="kw">fn </span>test_read_config_invalid_connection_type() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: invalid
                    url: postgres://postgres@localhost:5432/postgres
                  roles: []
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
     }
 
     <span class="comment">// Test config with role database level
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_one_role_database_level() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://localhost:5432/postgres
@@ -1219,51 +1219,51 @@
                    - db2
                    - db3
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
         <span class="macro">assert_eq!</span>(config.roles.len(), <span class="number">2</span>);
 
         <span class="comment">// Test role 1
-        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_name(), <span class="string">&quot;role_database_level_1&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_name(), <span class="string">"role_database_level_1"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_level(), RoleLevelType::Database);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants().len(), <span class="number">2</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">0</span>], <span class="string">&quot;CREATE&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">1</span>], <span class="string">&quot;TEMP&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">0</span>], <span class="string">"CREATE"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">1</span>], <span class="string">"TEMP"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_databases().len(), <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_databases()[<span class="number">0</span>], <span class="string">&quot;db1&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_databases()[<span class="number">1</span>], <span class="string">&quot;db2&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_databases()[<span class="number">2</span>], <span class="string">&quot;db3&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_databases()[<span class="number">0</span>], <span class="string">"db1"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_databases()[<span class="number">1</span>], <span class="string">"db2"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_databases()[<span class="number">2</span>], <span class="string">"db3"</span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">0</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;GRANT CREATE, TEMP ON DATABASE db1, db2, db3 TO duyet;&quot;</span>.to_string()
+            config.roles[<span class="number">0</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"GRANT CREATE, TEMP ON DATABASE db1, db2, db3 TO duyet;"</span>.to_string()
         );
 
         <span class="comment">// Test role 2
-        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_name(), <span class="string">&quot;role_database_level_2&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_name(), <span class="string">"role_database_level_2"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_level(), RoleLevelType::Database);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants().len(), <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants()[<span class="number">0</span>], <span class="string">&quot;ALL&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants()[<span class="number">0</span>], <span class="string">"ALL"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_databases().len(), <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_databases()[<span class="number">0</span>], <span class="string">&quot;db1&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_databases()[<span class="number">1</span>], <span class="string">&quot;db2&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_databases()[<span class="number">2</span>], <span class="string">&quot;db3&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_databases()[<span class="number">0</span>], <span class="string">"db1"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_databases()[<span class="number">1</span>], <span class="string">"db2"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_databases()[<span class="number">2</span>], <span class="string">"db3"</span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">1</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;GRANT ALL PRIVILEGES ON DATABASE db1, db2, db3 TO duyet;&quot;</span>.to_string()
+            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"GRANT ALL PRIVILEGES ON DATABASE db1, db2, db3 TO duyet;"</span>.to_string()
         );
     }
 
     <span class="comment">// Test config role type database level with invalid grants
     </span><span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;invalid grant: invalid&quot;</span>)]
+    #[should_panic(expected = <span class="string">"invalid grant: invalid"</span>)]
     </span><span class="kw">fn </span>test_read_config_role_type_database_level_invalid_grants() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://localhost:5432/postgres
@@ -1277,20 +1277,20 @@
                    - db2
                    - db3
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
     }
 
     <span class="comment">// Test config with role schema level
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_one_role_schema_level() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://localhost:5432/postgres
@@ -1313,51 +1313,51 @@
                    - schema2
                    - schema3
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
         <span class="macro">assert_eq!</span>(config.roles.len(), <span class="number">2</span>);
 
         <span class="comment">// Test role 1
-        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_name(), <span class="string">&quot;role_schema_level_1&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_name(), <span class="string">"role_schema_level_1"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_level(), RoleLevelType::Schema);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants().len(), <span class="number">2</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">0</span>], <span class="string">&quot;CREATE&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">1</span>], <span class="string">&quot;USAGE&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">0</span>], <span class="string">"CREATE"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">1</span>], <span class="string">"USAGE"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas().len(), <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">0</span>], <span class="string">&quot;schema1&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">1</span>], <span class="string">&quot;schema2&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">2</span>], <span class="string">&quot;schema3&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">0</span>], <span class="string">"schema1"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">1</span>], <span class="string">"schema2"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">2</span>], <span class="string">"schema3"</span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">0</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;GRANT CREATE, USAGE ON SCHEMA schema1, schema2, schema3 TO duyet;&quot;</span>.to_string()
+            config.roles[<span class="number">0</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"GRANT CREATE, USAGE ON SCHEMA schema1, schema2, schema3 TO duyet;"</span>.to_string()
         );
 
         <span class="comment">// Test role 2
-        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_name(), <span class="string">&quot;role_schema_level_2&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_name(), <span class="string">"role_schema_level_2"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_level(), RoleLevelType::Schema);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants().len(), <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants()[<span class="number">0</span>], <span class="string">&quot;ALL&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants()[<span class="number">0</span>], <span class="string">"ALL"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas().len(), <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">0</span>], <span class="string">&quot;schema1&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">1</span>], <span class="string">&quot;schema2&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">2</span>], <span class="string">&quot;schema3&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">0</span>], <span class="string">"schema1"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">1</span>], <span class="string">"schema2"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">2</span>], <span class="string">"schema3"</span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">1</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;GRANT ALL PRIVILEGES ON SCHEMA schema1, schema2, schema3 TO duyet;&quot;</span>.to_string()
+            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"GRANT ALL PRIVILEGES ON SCHEMA schema1, schema2, schema3 TO duyet;"</span>.to_string()
         );
     }
 
     <span class="comment">// Test config role type schema level with invalid grants
     </span><span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;invalid grant: invalid&quot;</span>)]
+    #[should_panic(expected = <span class="string">"invalid grant: invalid"</span>)]
     </span><span class="kw">fn </span>test_read_config_role_type_schema_level_invalid_grants() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://localhost:5432/postgres
@@ -1371,20 +1371,20 @@
                    - schema2
                    - schema3
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
     }
 
     <span class="comment">// Test config with one role table level
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_one_role_table_level() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://localhost:5432/postgres
@@ -1411,47 +1411,47 @@
                      - table2
                      - table3
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
         <span class="macro">assert_eq!</span>(config.roles.len(), <span class="number">2</span>);
 
         <span class="comment">// Test role 1
-        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_name(), <span class="string">&quot;role_table_level_1&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_name(), <span class="string">"role_table_level_1"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_level(), RoleLevelType::Table);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants().len(), <span class="number">2</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">0</span>], <span class="string">&quot;SELECT&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">1</span>], <span class="string">&quot;INSERT&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">0</span>], <span class="string">"SELECT"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">1</span>], <span class="string">"INSERT"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas().len(), <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">0</span>], <span class="string">&quot;schema1&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">0</span>], <span class="string">"schema1"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables().len(), <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">0</span>], <span class="string">&quot;table1&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">1</span>], <span class="string">&quot;table2&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">2</span>], <span class="string">&quot;table3&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">0</span>], <span class="string">"table1"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">1</span>], <span class="string">"table2"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">2</span>], <span class="string">"table3"</span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">0</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;GRANT SELECT, INSERT ON schema1.table1, schema1.table2, schema1.table3 TO duyet;&quot;
+            config.roles[<span class="number">0</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"GRANT SELECT, INSERT ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
         </span>);
 
         <span class="comment">// Test role 2
-        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_name(), <span class="string">&quot;role_table_level_2&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_name(), <span class="string">"role_table_level_2"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_level(), RoleLevelType::Table);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants().len(), <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants()[<span class="number">0</span>], <span class="string">&quot;ALL&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants()[<span class="number">0</span>], <span class="string">"ALL"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas().len(), <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">0</span>], <span class="string">&quot;schema1&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">0</span>], <span class="string">"schema1"</span>);
         <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables().len(), <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">0</span>], <span class="string">&quot;table1&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">1</span>], <span class="string">&quot;table2&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">2</span>], <span class="string">&quot;table3&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">0</span>], <span class="string">"table1"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">1</span>], <span class="string">"table2"</span>);
+        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">2</span>], <span class="string">"table3"</span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">1</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;GRANT ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 TO duyet;&quot;
+            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"GRANT ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
                 </span>.to_string()
         );
     }
@@ -1459,7 +1459,7 @@
     <span class="comment">// Test config role type table level with table name is `ALL`
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_role_type_table_level_all_tables() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://localhost:5432/postgres
@@ -1517,47 +1517,47 @@
                    tables:
                      - -ALL
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
         <span class="macro">assert_eq!</span>(config.roles.len(), <span class="number">6</span>);
 
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">0</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;&quot;
+            config.roles[<span class="number">0</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;"
         </span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">1</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;&quot;
+            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;"
         </span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">2</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet; REVOKE SELECT ON schema1.but_excluded_me FROM duyet;&quot;
+            config.roles[<span class="number">2</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet; REVOKE SELECT ON schema1.but_excluded_me FROM duyet;"
         </span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">3</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;GRANT SELECT ON schema1.table_a TO duyet; REVOKE SELECT ON schema1.table_b FROM duyet;&quot;
+            config.roles[<span class="number">3</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"GRANT SELECT ON schema1.table_a TO duyet; REVOKE SELECT ON schema1.table_b FROM duyet;"
         </span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">4</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;REVOKE SELECT ON schema1.table_a, schema1.table_b FROM duyet;&quot;
+            config.roles[<span class="number">4</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"REVOKE SELECT ON schema1.table_a, schema1.table_b FROM duyet;"
         </span>);
         <span class="macro">assert_eq!</span>(
-            config.roles[<span class="number">5</span>].to_sql(<span class="string">&quot;duyet&quot;</span>),
-            <span class="string">&quot;REVOKE SELECT ON ALL TABLES IN SCHEMA schema1 FROM duyet;&quot;
+            config.roles[<span class="number">5</span>].to_sql(<span class="string">"duyet"</span>),
+            <span class="string">"REVOKE SELECT ON ALL TABLES IN SCHEMA schema1 FROM duyet;"
         </span>);
     }
 
     <span class="comment">// Test config role type table level with invalid grants
     </span><span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;role.grants invalid&quot;</span>)]
+    #[should_panic(expected = <span class="string">"role.grants invalid"</span>)]
     </span><span class="kw">fn </span>test_read_config_role_type_table_level_invalid_grants() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://localhost:5432/postgres
@@ -1573,21 +1573,21 @@
                    - table2
                    - table3
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
     }
 
     <span class="comment">// Test two role duplicated name error
     </span><span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;duplicated role name: role_table_level&quot;</span>)]
+    #[should_panic(expected = <span class="string">"duplicated role name: role_table_level"</span>)]
     </span><span class="kw">fn </span>test_read_config_two_role_duplicated_name() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://localhost:5432/postgres
@@ -1614,20 +1614,20 @@
                    - table2
                    - table3
                  users: []
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
     }
 
     <span class="comment">// Test users config
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_users() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
                  connection:
                    type: postgres
                    url: postgres://postgres:postgres@localhost:5432/postgres
@@ -1672,44 +1672,44 @@
                    - role_database_level
                    - role_schema_level
                    - role_table_level
-             &quot;</span>};
+             "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
         <span class="macro">assert_eq!</span>(config.users.len(), <span class="number">2</span>);
 
         <span class="comment">// Test user 1
-        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_name(), <span class="string">&quot;duyet&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_password(), <span class="string">&quot;123456&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_name(), <span class="string">"duyet"</span>);
+        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_password(), <span class="string">"123456"</span>);
         <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles().len(), <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">0</span>], <span class="string">&quot;role_database_level&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">1</span>], <span class="string">&quot;role_schema_level&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">2</span>], <span class="string">&quot;role_table_level&quot;</span>);
+        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">0</span>], <span class="string">"role_database_level"</span>);
+        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">1</span>], <span class="string">"role_schema_level"</span>);
+        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">2</span>], <span class="string">"role_table_level"</span>);
 
         <span class="comment">// Test sql create user
         </span><span class="macro">assert_eq!</span>(
             config.users[<span class="number">0</span>].to_sql_create(),
-            <span class="string">&quot;CREATE USER duyet WITH PASSWORD &#39;123456&#39;;&quot;
+            <span class="string">"CREATE USER duyet WITH PASSWORD '123456';"
         </span>);
 
         <span class="comment">// Test sql create user without password
         </span><span class="macro">assert_eq!</span>(
             config.users[<span class="number">1</span>].to_sql_create(),
-            <span class="string">&quot;CREATE USER duyet_without_password;&quot;
+            <span class="string">"CREATE USER duyet_without_password;"
         </span>);
 
         <span class="comment">// Test sql drop user
-        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].to_sql_drop(), <span class="string">&quot;DROP USER IF EXISTS duyet;&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].to_sql_drop(), <span class="string">"DROP USER IF EXISTS duyet;"</span>);
     }
 
     <span class="comment">// Test users config with revoke role by `-role_name`
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_config_users_exclude_role_by_minus_role_name() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
              connection:
                type: postgres
                url: postgres://postgres:postgres@localhost:5432/postgres
@@ -1754,26 +1754,26 @@
                - role_database_level
                - role_schema_level
                - role_table_level
-        &quot;</span>};
+        "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
         <span class="macro">assert_eq!</span>(config.users.len(), <span class="number">2</span>);
 
         <span class="comment">// Test user 1
-        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_name(), <span class="string">&quot;duyet&quot;</span>);
-        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_password(), <span class="string">&quot;123456&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_name(), <span class="string">"duyet"</span>);
+        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_password(), <span class="string">"123456"</span>);
         <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles().len(), <span class="number">3</span>);
     }
 
     <span class="doccomment">/// Test find role by name, name can contains `-` in case of exclude role
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_find_role_by_name() {
-        <span class="kw">let </span>_text = <span class="macro">indoc! </span>{<span class="string">&quot;
+        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
              connection:
                type: postgres
                url: postgres://postgres:postgres@localhost:5432/postgres
@@ -1785,26 +1785,26 @@
                databases:
                - db1
              users: []
-        &quot;</span>};
+        "</span>};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">&quot;failed to create temp file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
         file.write(_text.as_bytes())
-            .expect(<span class="string">&quot;failed to write to temp file&quot;</span>);
+            .expect(<span class="string">"failed to write to temp file"</span>);
         <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
 
-        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">&quot;failed to parse config&quot;</span>);
+        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
 
         <span class="macro">assert!</span>(config
             .roles
             .iter()
-            .find(|r| r.find(<span class="string">&quot;role_database_level&quot;</span>))
+            .find(|r| r.find(<span class="string">"role_database_level"</span>))
             .is_some());
 
         <span class="comment">// Test find role by name with `-`
         </span><span class="macro">assert!</span>(config
             .roles
             .iter()
-            .find(|r| r.find(<span class="string">&quot;-role_database_level&quot;</span>))
+            .find(|r| r.find(<span class="string">"-role_database_level"</span>))
             .is_some());
     }
 }

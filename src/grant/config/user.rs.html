@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/config/user.rs`."><title>user.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="grant" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.1 (eb26296b5 2023-08-03)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../grant/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/config/user.rs`."><title>user.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="grant" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../grant/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -202,29 +202,29 @@
 <span class="kw">impl </span>User {
     <span class="kw">pub fn </span>to_sql_create(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">let </span>password = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.password {
-            <span class="prelude-val">Some</span>(p) =&gt; <span class="macro">format!</span>(<span class="string">&quot; WITH PASSWORD &#39;{}&#39;&quot;</span>, p),
-            <span class="prelude-val">None </span>=&gt; <span class="string">&quot;&quot;</span>.to_string(),
+            <span class="prelude-val">Some</span>(p) =&gt; <span class="macro">format!</span>(<span class="string">" WITH PASSWORD '{}'"</span>, p),
+            <span class="prelude-val">None </span>=&gt; <span class="string">""</span>.to_string(),
         };
 
-        <span class="macro">format!</span>(<span class="string">&quot;CREATE USER {}{};&quot;</span>, <span class="self">self</span>.name, password)
+        <span class="macro">format!</span>(<span class="string">"CREATE USER {}{};"</span>, <span class="self">self</span>.name, password)
     }
 
     <span class="kw">pub fn </span>to_sql_update(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">let </span>password = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.password {
-            <span class="prelude-val">Some</span>(p) =&gt; <span class="macro">format!</span>(<span class="string">&quot; WITH PASSWORD &#39;{}&#39;&quot;</span>, p),
-            <span class="prelude-val">None </span>=&gt; <span class="string">&quot;&quot;</span>.to_string(),
+            <span class="prelude-val">Some</span>(p) =&gt; <span class="macro">format!</span>(<span class="string">" WITH PASSWORD '{}'"</span>, p),
+            <span class="prelude-val">None </span>=&gt; <span class="string">""</span>.to_string(),
         };
 
-        <span class="macro">format!</span>(<span class="string">&quot;ALTER USER {}{};&quot;</span>, <span class="self">self</span>.name, password)
+        <span class="macro">format!</span>(<span class="string">"ALTER USER {}{};"</span>, <span class="self">self</span>.name, password)
     }
 
     <span class="kw">pub fn </span>to_sql_drop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
-        <span class="macro">format!</span>(<span class="string">&quot;DROP USER IF EXISTS {};&quot;</span>, <span class="self">self</span>.name)
+        <span class="macro">format!</span>(<span class="string">"DROP USER IF EXISTS {};"</span>, <span class="self">self</span>.name)
     }
 
     <span class="kw">pub fn </span>validate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span><span class="self">self</span>.name.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;user name is empty&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">"user name is empty"</span>));
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -237,7 +237,7 @@
     <span class="kw">pub fn </span>get_password(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.password {
             <span class="prelude-val">Some</span>(p) =&gt; p.clone(),
-            <span class="prelude-val">None </span>=&gt; <span class="string">&quot;&quot;</span>.to_string(),
+            <span class="prelude-val">None </span>=&gt; <span class="string">""</span>.to_string(),
         }
     }
 
@@ -254,49 +254,49 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_user_to_sql_create() {
         <span class="kw">let </span>user = User {
-            name: <span class="string">&quot;test&quot;</span>.to_string(),
-            password: <span class="prelude-val">Some</span>(<span class="string">&quot;test&quot;</span>.to_string()),
+            name: <span class="string">"test"</span>.to_string(),
+            password: <span class="prelude-val">Some</span>(<span class="string">"test"</span>.to_string()),
             update_password: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-            roles: <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>.to_string()],
+            roles: <span class="macro">vec!</span>[<span class="string">"test"</span>.to_string()],
         };
 
         <span class="kw">let </span>sql = user.to_sql_create();
-        <span class="macro">assert_eq!</span>(sql, <span class="string">&quot;CREATE USER test WITH PASSWORD &#39;test&#39;;&quot;</span>);
+        <span class="macro">assert_eq!</span>(sql, <span class="string">"CREATE USER test WITH PASSWORD 'test';"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_user_to_sql_update() {
         <span class="kw">let </span>user = User {
-            name: <span class="string">&quot;test&quot;</span>.to_string(),
-            password: <span class="prelude-val">Some</span>(<span class="string">&quot;test&quot;</span>.to_string()),
+            name: <span class="string">"test"</span>.to_string(),
+            password: <span class="prelude-val">Some</span>(<span class="string">"test"</span>.to_string()),
             update_password: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-            roles: <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>.to_string()],
+            roles: <span class="macro">vec!</span>[<span class="string">"test"</span>.to_string()],
         };
 
         <span class="kw">let </span>sql = user.to_sql_update();
-        <span class="macro">assert_eq!</span>(sql, <span class="string">&quot;ALTER USER test WITH PASSWORD &#39;test&#39;;&quot;</span>);
+        <span class="macro">assert_eq!</span>(sql, <span class="string">"ALTER USER test WITH PASSWORD 'test';"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_user_to_sql_drop() {
         <span class="kw">let </span>user = User {
-            name: <span class="string">&quot;test&quot;</span>.to_string(),
-            password: <span class="prelude-val">Some</span>(<span class="string">&quot;test&quot;</span>.to_string()),
+            name: <span class="string">"test"</span>.to_string(),
+            password: <span class="prelude-val">Some</span>(<span class="string">"test"</span>.to_string()),
             update_password: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-            roles: <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>.to_string()],
+            roles: <span class="macro">vec!</span>[<span class="string">"test"</span>.to_string()],
         };
 
         <span class="kw">let </span>sql = user.to_sql_drop();
-        <span class="macro">assert_eq!</span>(sql, <span class="string">&quot;DROP USER IF EXISTS test;&quot;</span>);
+        <span class="macro">assert_eq!</span>(sql, <span class="string">"DROP USER IF EXISTS test;"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_user_validate() {
         <span class="kw">let </span>user = User {
-            name: <span class="string">&quot;test&quot;</span>.to_string(),
-            password: <span class="prelude-val">Some</span>(<span class="string">&quot;test&quot;</span>.to_string()),
+            name: <span class="string">"test"</span>.to_string(),
+            password: <span class="prelude-val">Some</span>(<span class="string">"test"</span>.to_string()),
             update_password: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-            roles: <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>.to_string()],
+            roles: <span class="macro">vec!</span>[<span class="string">"test"</span>.to_string()],
         };
 
         <span class="macro">assert!</span>(user.validate().is_ok());
@@ -305,10 +305,10 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_user_validate_empty_name() {
         <span class="kw">let </span>user = User {
-            name: <span class="string">&quot;&quot;</span>.to_string(),
-            password: <span class="prelude-val">Some</span>(<span class="string">&quot;test&quot;</span>.to_string()),
+            name: <span class="string">""</span>.to_string(),
+            password: <span class="prelude-val">Some</span>(<span class="string">"test"</span>.to_string()),
             update_password: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-            roles: <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>.to_string()],
+            roles: <span class="macro">vec!</span>[<span class="string">"test"</span>.to_string()],
         };
 
         <span class="macro">assert!</span>(user.validate().is_err());
@@ -317,10 +317,10 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_user_validate_empty_password() {
         <span class="kw">let </span>user = User {
-            name: <span class="string">&quot;test&quot;</span>.to_string(),
+            name: <span class="string">"test"</span>.to_string(),
             password: <span class="prelude-val">None</span>,
             update_password: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-            roles: <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>.to_string()],
+            roles: <span class="macro">vec!</span>[<span class="string">"test"</span>.to_string()],
         };
 
         <span class="macro">assert!</span>(user.validate().is_ok());
@@ -329,8 +329,8 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_user_validate_empty_roles() {
         <span class="kw">let </span>user = User {
-            name: <span class="string">&quot;test&quot;</span>.to_string(),
-            password: <span class="prelude-val">Some</span>(<span class="string">&quot;test&quot;</span>.to_string()),
+            name: <span class="string">"test"</span>.to_string(),
+            password: <span class="prelude-val">Some</span>(<span class="string">"test"</span>.to_string()),
             update_password: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
             roles: <span class="macro">vec!</span>[],
         };
@@ -341,37 +341,37 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_user_get_name() {
         <span class="kw">let </span>user = User {
-            name: <span class="string">&quot;test&quot;</span>.to_string(),
-            password: <span class="prelude-val">Some</span>(<span class="string">&quot;test&quot;</span>.to_string()),
+            name: <span class="string">"test"</span>.to_string(),
+            password: <span class="prelude-val">Some</span>(<span class="string">"test"</span>.to_string()),
             update_password: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-            roles: <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>.to_string()],
+            roles: <span class="macro">vec!</span>[<span class="string">"test"</span>.to_string()],
         };
 
-        <span class="macro">assert_eq!</span>(user.get_name(), <span class="string">&quot;test&quot;</span>);
+        <span class="macro">assert_eq!</span>(user.get_name(), <span class="string">"test"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_user_get_password() {
         <span class="kw">let </span>user = User {
-            name: <span class="string">&quot;test&quot;</span>.to_string(),
-            password: <span class="prelude-val">Some</span>(<span class="string">&quot;test&quot;</span>.to_string()),
+            name: <span class="string">"test"</span>.to_string(),
+            password: <span class="prelude-val">Some</span>(<span class="string">"test"</span>.to_string()),
             update_password: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-            roles: <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>.to_string()],
+            roles: <span class="macro">vec!</span>[<span class="string">"test"</span>.to_string()],
         };
 
-        <span class="macro">assert_eq!</span>(user.get_password(), <span class="string">&quot;test&quot;</span>);
+        <span class="macro">assert_eq!</span>(user.get_password(), <span class="string">"test"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_user_get_roles() {
         <span class="kw">let </span>user = User {
-            name: <span class="string">&quot;test&quot;</span>.to_string(),
-            password: <span class="prelude-val">Some</span>(<span class="string">&quot;test&quot;</span>.to_string()),
+            name: <span class="string">"test"</span>.to_string(),
+            password: <span class="prelude-val">Some</span>(<span class="string">"test"</span>.to_string()),
             update_password: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-            roles: <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>.to_string()],
+            roles: <span class="macro">vec!</span>[<span class="string">"test"</span>.to_string()],
         };
 
-        <span class="macro">assert_eq!</span>(user.get_roles(), <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>.to_string()]);
+        <span class="macro">assert_eq!</span>(user.get_roles(), <span class="macro">vec!</span>[<span class="string">"test"</span>.to_string()]);
     }
 }
 </code></pre></div></section></main></body></html>
