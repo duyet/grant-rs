@@ -12,33 +12,58 @@ pub struct User {
 }
 
 impl User {
-    pub fn to_sql_create(&self) -> String {
+    /// Escape single quotes in a string for SQL safety
+    fn escape_sql_string(s: &str) -> String {
+        s.replace("'", "''")
+    }
+
+    /// Validate and format username for SQL (must be valid identifier)
+    fn format_username(name: &str) -> Result<String> {
+        if name.is_empty() {
+            return Err(anyhow!("Username cannot be empty"));
+        }
+
+        // Check if username contains only valid characters (alphanumeric, underscore, no spaces)
+        if !name.chars().all(|c| c.is_alphanumeric() || c == '_') {
+            return Err(anyhow!("Username '{}' contains invalid characters. Only alphanumeric and underscore allowed.", name));
+        }
+
+        // Ensure username doesn't start with a number
+        if name.chars().next().unwrap().is_numeric() {
+            return Err(anyhow!("Username '{}' cannot start with a number", name));
+        }
+
+        Ok(name.to_string())
+    }
+
+    pub fn to_sql_create(&self) -> Result<String> {
+        let username = Self::format_username(&self.name)?;
         let password = match &self.password {
-            Some(p) => format!(" WITH PASSWORD '{}'", p),
+            Some(p) => format!(" WITH PASSWORD '{}'", Self::escape_sql_string(p)),
             None => "".to_string(),
         };
 
-        format!("CREATE USER {}{};", self.name, password)
+        Ok(format!("CREATE USER {}{};", username, password))
     }
 
-    pub fn to_sql_update(&self) -> String {
+    pub fn to_sql_update(&self) -> Result<String> {
+        let username = Self::format_username(&self.name)?;
         let password = match &self.password {
-            Some(p) => format!(" WITH PASSWORD '{}'", p),
+            Some(p) => format!(" WITH PASSWORD '{}'", Self::escape_sql_string(p)),
             None => "".to_string(),
         };
 
-        format!("ALTER USER {}{};", self.name, password)
+        Ok(format!("ALTER USER {}{};", username, password))
     }
 
-    pub fn to_sql_drop(&self) -> String {
-        format!("DROP USER IF EXISTS {};", self.name)
+    pub fn to_sql_drop(&self) -> Result<String> {
+        let username = Self::format_username(&self.name)?;
+        Ok(format!("DROP USER IF EXISTS {};", username))
     }
 
     pub fn validate(&self) -> Result<()> {
-        if self.name.is_empty() {
-            return Err(anyhow!("user name is empty"));
-        }
-
+        // Use the format_username validation
+        Self::format_username(&self.name)?;
         Ok(())
     }
 
@@ -72,7 +97,7 @@ mod tests {
             roles: vec!["test".to_string()],
         };
 
-        let sql = user.to_sql_create();
+        let sql = user.to_sql_create().unwrap();
         assert_eq!(sql, "CREATE USER test WITH PASSWORD 'test';");
     }
 
@@ -85,7 +110,7 @@ mod tests {
             roles: vec!["test".to_string()],
         };
 
-        let sql = user.to_sql_update();
+        let sql = user.to_sql_update().unwrap();
         assert_eq!(sql, "ALTER USER test WITH PASSWORD 'test';");
     }
 
@@ -98,8 +123,47 @@ mod tests {
             roles: vec!["test".to_string()],
         };
 
-        let sql = user.to_sql_drop();
+        let sql = user.to_sql_drop().unwrap();
         assert_eq!(sql, "DROP USER IF EXISTS test;");
+    }
+
+    #[test]
+    fn test_sql_injection_prevention_password() {
+        let user = User {
+            name: "test".to_string(),
+            password: Some("'; DROP TABLE users; --".to_string()),
+            update_password: Some(true),
+            roles: vec!["test".to_string()],
+        };
+
+        let sql = user.to_sql_create().unwrap();
+        assert_eq!(sql, "CREATE USER test WITH PASSWORD '''; DROP TABLE users; --';");
+    }
+
+    #[test]
+    fn test_invalid_username_with_spaces() {
+        let user = User {
+            name: "test user".to_string(),
+            password: Some("password".to_string()),
+            update_password: Some(true),
+            roles: vec!["test".to_string()],
+        };
+
+        assert!(user.to_sql_create().is_err());
+        assert!(user.validate().is_err());
+    }
+
+    #[test]
+    fn test_invalid_username_starting_with_number() {
+        let user = User {
+            name: "1test".to_string(),
+            password: Some("password".to_string()),
+            update_password: Some(true),
+            roles: vec!["test".to_string()],
+        };
+
+        assert!(user.to_sql_create().is_err());
+        assert!(user.validate().is_err());
     }
 
     #[test]

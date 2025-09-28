@@ -86,17 +86,17 @@ fn create_or_update_users(
             Some(user_in_db) => {
                 // Update password if `update_password` is set to true
                 if user.update_password.unwrap_or(false) {
-                    let sql = user.to_sql_update();
+                    let sql = user.to_sql_update()?;
 
                     if dryrun {
-                        info!("{}: {}", Purple.paint("Dry-run"), Purple.paint(sql));
+                        info!("{}: {}", Purple.paint("Dry-run"), Purple.paint(&sql));
                         summary.push(vec![
                             user.name.to_string(),
                             Green.paint("would update password").to_string(),
                         ]);
                     } else {
                         conn.execute(&sql, &[])?;
-                        info!("{}: {}", Green.paint("Success"), Purple.paint(sql));
+                        info!("{}: {}", Green.paint("Success"), Purple.paint(&sql));
                         summary.push(vec![user.name.clone(), "password updated".to_string()]);
                     }
                 } else {
@@ -110,17 +110,17 @@ fn create_or_update_users(
 
             // User in config but not in database
             None => {
-                let sql = user.to_sql_create();
+                let sql = user.to_sql_create()?;
 
                 if dryrun {
-                    info!("{}: {}", Purple.paint("Dry-run"), sql);
+                    info!("{}: {}", Purple.paint("Dry-run"), &sql);
                     summary.push(vec![
                         user.name.clone(),
                         format!("would create (dryrun) {}", sql),
                     ]);
                 } else {
                     conn.execute(&sql, &[])?;
-                    info!("{}: {}", Green.paint("Success"), sql);
+                    info!("{}: {}", Green.paint("Success"), &sql);
                     summary.push(vec![user.name.clone(), format!("created {}", sql)]);
                 }
             }
