@@ -45,9 +45,10 @@ pub fn apply_all(target: &Path, dryrun: bool) -> Result<()> {
         let entry = entry?;
         let path = entry.path();
         if path.is_file() {
-            let ext = path.extension().unwrap();
-            if ext == "yaml" || ext == "yml" {
-                config_files.push(path);
+            if let Some(ext) = path.extension() {
+                if ext == "yaml" || ext == "yml" {
+                    config_files.push(path);
+                }
             }
         }
     }
