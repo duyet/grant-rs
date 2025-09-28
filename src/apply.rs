@@ -21,7 +21,7 @@ pub fn apply(target: &Path, dryrun: bool) -> Result<()> {
     let config = Config::new(&target)?;
 
     info!("Applying configuration:\n{}", config);
-    let mut conn = DbConnection::new(&config);
+    let mut conn = DbConnection::new(&config)?;
 
     let users_in_db = conn.get_users()?;
     let users_in_config = config.users.clone();

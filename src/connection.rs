@@ -1,6 +1,6 @@
 use crate::config::{Config, ConnectionType};
-use anyhow::Result;
-use log::{debug, error, info};
+use anyhow::{anyhow, Result};
+use log::{debug, info};
 use postgres::{row::Row, types::ToSql, Client, Config as ConnConfig, NoTls, ToStatement};
 
 // TODO: support multiple adapters
@@ -138,29 +138,30 @@ impl DbConnection {
     ///     "#,
     ///    )
     ///    .unwrap();
-    ///    let mut db = DbConnection::new(&config);
+    ///    let mut db = DbConnection::new(&config)?;
     ///    db.query("SELECT 1", &[]).unwrap();
     /// ```
-    pub fn new(config: &Config) -> Self {
+    pub fn new(config: &Config) -> Result<Self> {
         match config.connection.type_ {
             ConnectionType::Postgres => {
                 let connection_info = config.connection.url.clone();
                 let mut client = Client::connect(&connection_info, NoTls)
-                    .expect("failed to connect to database");
+                    .map_err(|e| anyhow!("Failed to connect to database '{}': {}", connection_info, e))?;
 
                 if let Err(e) = client.simple_query("SELECT 1") {
-                    error!("Failed to connect to database: {}", e);
+                    return Err(anyhow!("Database connection test failed for '{}': {}", connection_info, e));
                 } else {
                     info!("Connected to database: {}", connection_info);
                 }
 
-                let conn_config = connection_info.parse::<ConnConfig>().unwrap();
+                let conn_config = connection_info.parse::<ConnConfig>()
+                    .map_err(|e| anyhow!("Failed to parse connection string '{}': {}", connection_info, e))?;
 
-                DbConnection {
+                Ok(DbConnection {
                     connection_info,
                     client,
                     conn_config,
-                }
+                })
             }
         }
     }

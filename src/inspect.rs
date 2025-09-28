@@ -6,7 +6,7 @@ use indoc::indoc;
 use log::info;
 
 pub fn inspect(config: &Config) -> Result<()> {
-    let mut conn = DbConnection::new(config);
+    let mut conn = DbConnection::new(config)?;
 
     let users_in_db = conn.get_users()?;
     let user_database_privileges = conn
