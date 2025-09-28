@@ -175,7 +175,9 @@ fn create_or_update_privileges(
         // If privileges on config are not in db, add them
         // If privileges on db are not in config, remove them
         for role_name in user.roles.iter() {
-            let role = config.roles.iter().find(|&r| r.find(role_name)).unwrap();
+            let role = config.roles.iter()
+                .find(|&r| r.find(role_name))
+                .ok_or_else(|| anyhow!("Role '{}' not found for user '{}'", role_name, user.name))?;
 
             // TODO: revoke if privileges on db are not in configuration
 
