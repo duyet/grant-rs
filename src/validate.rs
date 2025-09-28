@@ -23,12 +23,13 @@ pub fn validate_target(target: &Path) -> Result<()> {
         for entry in WalkDir::new(target) {
             let entry = entry?;
             if entry.path().is_file() {
-                let file_name = entry.path().file_name().unwrap();
-                if file_name.to_str().unwrap().ends_with(".yaml")
-                    || file_name.to_str().unwrap().ends_with(".yml")
-                {
-                    let path = entry.path().to_path_buf();
-                    files.push(path);
+                if let Some(file_name) = entry.path().file_name() {
+                    if let Some(name_str) = file_name.to_str() {
+                        if name_str.ends_with(".yaml") || name_str.ends_with(".yml") {
+                            let path = entry.path().to_path_buf();
+                            files.push(path);
+                        }
+                    }
                 }
             }
         }
