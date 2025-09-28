@@ -1,3 +1,9 @@
-(function() {var implementors = {
-"grant":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.81.0/core/str/traits/trait.FromStr.html\" title=\"trait core::str::traits::FromStr\">FromStr</a> for <a class=\"struct\" href=\"grant/config/config_base/struct.Config.html\" title=\"struct grant::config::config_base::Config\">Config</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.81.0/core/str/traits/trait.FromStr.html\" title=\"trait core::str::traits::FromStr\">FromStr</a> for <a class=\"struct\" href=\"grant/connection/struct.DbConnection.html\" title=\"struct grant::connection::DbConnection\">DbConnection</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
+(function() {
+    var implementors = Object.fromEntries([["grant",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.89.0/core/str/traits/trait.FromStr.html\" title=\"trait core::str::traits::FromStr\">FromStr</a> for <a class=\"struct\" href=\"grant/config/config_base/struct.Config.html\" title=\"struct grant::config::config_base::Config\">Config</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.89.0/core/str/traits/trait.FromStr.html\" title=\"trait core::str::traits::FromStr\">FromStr</a> for <a class=\"struct\" href=\"grant/connection/struct.DbConnection.html\" title=\"struct grant::connection::DbConnection\">DbConnection</a>"]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":57,"fragment_lengths":[612]}
