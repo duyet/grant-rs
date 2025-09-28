@@ -787,18 +787,18 @@ mod tests {
 
         // Test sql create user
         assert_eq!(
-            config.users[0].to_sql_create(),
+            config.users[0].to_sql_create().unwrap(),
             "CREATE USER duyet WITH PASSWORD '123456';"
         );
 
         // Test sql create user without password
         assert_eq!(
-            config.users[1].to_sql_create(),
+            config.users[1].to_sql_create().unwrap(),
             "CREATE USER duyet_without_password;"
         );
 
         // Test sql drop user
-        assert_eq!(config.users[0].to_sql_drop(), "DROP USER IF EXISTS duyet;");
+        assert_eq!(config.users[0].to_sql_drop().unwrap(), "DROP USER IF EXISTS duyet;");
     }
 
     // Test users config with revoke role by `-role_name`
