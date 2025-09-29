@@ -2,9 +2,9 @@ use crate::config::Config;
 use ansi_term::Colour::Green;
 use log::info;
 use md5::compute;
-use rand::Rng;
+use rand::{rngs::OsRng, RngCore};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 /// Generate project template to given target
 pub fn gen(target: &Path) {
@@ -49,10 +49,12 @@ pub fn gen_password(
                   abcdefghijklmnopqrstuvwxyz\
                   0123456789)(*&^%#!~"
             };
-            let mut rng = rand::thread_rng();
+
+            // Use OsRng for cryptographically secure random number generation
+            let mut rng = OsRng;
             let password: String = (0..length)
                 .map(|_| {
-                    let idx = rng.gen_range(0..chars.len());
+                    let idx = (rng.next_u32() as usize) % chars.len();
                     chars[idx] as char
                 })
                 .collect();
