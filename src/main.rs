@@ -18,7 +18,10 @@ fn main() -> Result<()> {
 
     match cli::parse().cmd {
         Command::Gen { target } => {
-            gen::gen(&target);
+            if let Err(e) = gen::gen(&target) {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
         }
 
         Command::GenPass {

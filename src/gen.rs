@@ -1,5 +1,6 @@
 use crate::config::Config;
 use ansi_term::Colour::Green;
+use anyhow::{Context, Result};
 use log::info;
 use md5::compute;
 use rand::{rngs::OsRng, RngCore};
@@ -7,26 +8,30 @@ use std::fs;
 use std::path::Path;
 
 /// Generate project template to given target
-pub fn gen(target: &Path) {
+pub fn gen(target: &Path) -> Result<()> {
     let target = target.to_path_buf();
 
     // Skip if target already exists
     if target.exists() {
         info!("target already exists");
-        return;
+        return Ok(());
     }
 
-    fs::create_dir_all(&target).unwrap_or_else(|_| panic!("failed to generate {:?}", &target));
+    fs::create_dir_all(&target)
+        .context(format!("Failed to create directory {:?}", &target))?;
     info!("creating path: {:?}", target);
 
     let config = Config::default();
-    let config_str = serde_yaml::to_string(&config).unwrap();
+    let config_str = serde_yaml::to_string(&config)
+        .context("Failed to serialize default configuration to YAML")?;
 
     // Write config_str to target/config.yml
     let config_path = target.join("config.yml");
-    fs::write(config_path.clone(), config_str)
-        .unwrap_or_else(|_| panic!("failed to write {:?}", config_path));
+    fs::write(&config_path, config_str)
+        .context(format!("Failed to write config to {:?}", config_path))?;
     info!("Generated: {:?}", config_path);
+
+    Ok(())
 }
 
 /// Generating password with given length
