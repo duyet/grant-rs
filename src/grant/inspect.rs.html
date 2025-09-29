@@ -6,7 +6,7 @@
 <a href=#6 id=6 data-nosnippet>6</a><span class="kw">use </span>log::info;
 <a href=#7 id=7 data-nosnippet>7</a>
 <a href=#8 id=8 data-nosnippet>8</a><span class="kw">pub fn </span>inspect(config: <span class="kw-2">&amp;</span>Config) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-<a href=#9 id=9 data-nosnippet>9</a>    <span class="kw">let </span><span class="kw-2">mut </span>conn = DbConnection::new(config);
+<a href=#9 id=9 data-nosnippet>9</a>    <span class="kw">let </span><span class="kw-2">mut </span>conn = DbConnection::new(config)<span class="question-mark">?</span>;
 <a href=#10 id=10 data-nosnippet>10</a>
 <a href=#11 id=11 data-nosnippet>11</a>    <span class="kw">let </span>users_in_db = conn.get_users()<span class="question-mark">?</span>;
 <a href=#12 id=12 data-nosnippet>12</a>    <span class="kw">let </span>user_database_privileges = conn
