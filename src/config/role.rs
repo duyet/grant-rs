@@ -6,9 +6,7 @@ pub use super::role_database::RoleDatabaseLevel;
 pub use super::role_schema::RoleSchemaLevel;
 pub use super::role_table::RoleTableLevel;
 
-/// Level type for role.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-#[serde(tag = "level")]
+#[derive(Debug, PartialEq, Eq)]
 pub enum RoleLevelType {
     Database,
     Schema,
@@ -79,9 +77,9 @@ impl Role {
 
     pub fn get_level(&self) -> RoleLevelType {
         match self {
-            Role::Database(_role) => RoleLevelType::Database,
-            Role::Schema(_role) => RoleLevelType::Schema,
-            Role::Table(_role) => RoleLevelType::Table,
+            Role::Database(_) => RoleLevelType::Database,
+            Role::Schema(_) => RoleLevelType::Schema,
+            Role::Table(_) => RoleLevelType::Table,
         }
     }
 
@@ -96,24 +94,23 @@ impl Role {
     pub fn get_databases(&self) -> Vec<String> {
         match self {
             Role::Database(role) => role.databases.clone(),
-            Role::Schema(_) => vec![],
-            Role::Table(_) => vec![],
+            _ => vec![],
         }
     }
 
     pub fn get_schemas(&self) -> Vec<String> {
         match self {
-            Role::Database(_) => vec![],
             Role::Schema(role) => role.schemas.clone(),
             Role::Table(role) => role.schemas.clone(),
+            _ => vec![],
         }
     }
 
     pub fn get_tables(&self) -> Vec<String> {
         match self {
-            Role::Database(_) => vec![],
-            Role::Schema(_) => vec![],
             Role::Table(role) => role.tables.clone(),
+            _ => vec![],
         }
     }
+
 }

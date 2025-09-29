@@ -1,4 +1,5 @@
-use crate::config::{Config, ConnectionType};
+use crate::config::Config;
+use crate::config::connection::ConnectionType;
 use anyhow::{anyhow, Result};
 use log::{debug, info};
 use postgres::{row::Row, types::ToSql, Client, Config as ConnConfig, NoTls, ToStatement};
@@ -128,6 +129,7 @@ impl DbConnection {
     /// use grant::{config::Config, connection::DbConnection};
     /// use std::str::FromStr;
     ///
+    /// # fn main() -> anyhow::Result<()> {
     /// let config = Config::from_str(
     ///     r#"
     ///       connection:
@@ -140,6 +142,8 @@ impl DbConnection {
     ///    .unwrap();
     ///    let mut db = DbConnection::new(&config)?;
     ///    db.query("SELECT 1", &[]).unwrap();
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn new(config: &Config) -> Result<Self> {
         match config.connection.type_ {
