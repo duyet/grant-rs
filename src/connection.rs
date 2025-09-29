@@ -439,7 +439,8 @@ impl DbConnection {
             rows_affected += rows;
         }
 
-        Ok(rows_affected.try_into().unwrap())
+        rows_affected.try_into()
+            .map_err(|e| anyhow!("Row count {} exceeds i64::MAX: {}", rows_affected, e))
     }
 }
 
