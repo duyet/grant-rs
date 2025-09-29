@@ -7,6 +7,6 @@ mod role_table;
 pub mod user;
 
 pub use config_base::Config;
-pub use connection::{Connection, ConnectionType};
+pub use connection::Connection;
 pub use role::{Role, RoleLevelType};
 pub use user::User;

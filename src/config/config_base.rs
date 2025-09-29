@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use std::path::Path;
 use std::{fmt, fs};
 
-pub use super::connection::{Connection, ConnectionType};
+pub use super::connection::Connection;
 pub use super::User;
 pub use super::{Role, RoleLevelType};
 

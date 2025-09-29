@@ -67,19 +67,16 @@ impl User {
         Ok(())
     }
 
-    pub fn get_name(&self) -> String {
-        self.name.clone()
+    pub fn get_name(&self) -> &str {
+        &self.name
     }
 
-    pub fn get_password(&self) -> String {
-        match &self.password {
-            Some(p) => p.clone(),
-            None => "".to_string(),
-        }
+    pub fn get_password(&self) -> &str {
+        self.password.as_ref().map(|s| s.as_str()).unwrap_or("")
     }
 
-    pub fn get_roles(&self) -> Vec<String> {
-        self.roles.clone()
+    pub fn get_roles(&self) -> &[String] {
+        &self.roles
     }
 }
 
