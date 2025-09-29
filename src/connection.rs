@@ -191,10 +191,12 @@ impl DbConnection {
 
         // TODO: Get the password from database, currently it only returns *****
         let sql = "SELECT usename, usecreatedb, usesuper, passwd FROM pg_user";
-        let stmt = self.client.prepare(sql).unwrap();
+        let stmt = self.client.prepare(sql)
+            .map_err(|e| anyhow!("Failed to prepare query for users: {}", e))?;
 
         debug!("executing: {}", sql);
-        let rows = self.client.query(&stmt, &[]).unwrap();
+        let rows = self.client.query(&stmt, &[])
+            .map_err(|e| anyhow!("Failed to query users from pg_user: {}", e))?;
 
         for row in rows {
             match (row.get(0), row.get(1), row.get(2), row.get(3)) {
@@ -242,10 +244,12 @@ impl DbConnection {
             FROM db CROSS JOIN users u;
         "#;
 
-        let stmt = self.client.prepare(sql).unwrap();
+        let stmt = self.client.prepare(sql)
+            .map_err(|e| anyhow!("Failed to prepare query for database privileges: {}", e))?;
 
         debug!("executing: {}", sql);
-        let rows = self.client.query(&stmt, &[])?;
+        let rows = self.client.query(&stmt, &[])
+            .map_err(|e| anyhow!("Failed to query database privileges: {}", e))?;
         for row in rows {
             let name: &str = row.get(0);
             let database_name: &str = row.get(1);
@@ -281,10 +285,12 @@ impl DbConnection {
               AND s.schemaname != 'information_schema';
         ";
 
-        let stmt = self.client.prepare(sql).unwrap();
+        let stmt = self.client.prepare(sql)
+            .map_err(|e| anyhow!("Failed to prepare query for schema privileges: {}", e))?;
 
         debug!("executing: {}", sql);
-        let rows = self.client.query(&stmt, &[])?;
+        let rows = self.client.query(&stmt, &[])
+            .map_err(|e| anyhow!("Failed to query schema privileges: {}", e))?;
         let mut roles = vec![];
         for row in rows {
             let name = row.get(0);
@@ -327,10 +333,12 @@ impl DbConnection {
                 AND t.schemaname != 'information_schema';
         ";
 
-        let stmt = self.client.prepare(sql).unwrap();
+        let stmt = self.client.prepare(sql)
+            .map_err(|e| anyhow!("Failed to prepare query for table privileges: {}", e))?;
 
         debug!("executing: {}", sql);
-        let rows = self.client.query(&stmt, &[])?;
+        let rows = self.client.query(&stmt, &[])
+            .map_err(|e| anyhow!("Failed to query table privileges: {}", e))?;
         for row in rows {
             let name = row.get(0);
             let schema_name = row.get(1);
