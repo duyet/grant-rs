@@ -1,5 +1,5 @@
-use crate::config::Config;
 use crate::config::connection::ConnectionType;
+use crate::config::Config;
 use anyhow::{anyhow, Result};
 use log::{debug, info};
 use postgres::{row::Row, types::ToSql, Client, Config as ConnConfig, NoTls, ToStatement};
@@ -149,17 +149,27 @@ impl DbConnection {
         match config.connection.type_ {
             ConnectionType::Postgres => {
                 let connection_info = config.connection.url.clone();
-                let mut client = Client::connect(&connection_info, NoTls)
-                    .map_err(|e| anyhow!("Failed to connect to database '{}': {}", connection_info, e))?;
+                let mut client = Client::connect(&connection_info, NoTls).map_err(|e| {
+                    anyhow!("Failed to connect to database '{}': {}", connection_info, e)
+                })?;
 
                 if let Err(e) = client.simple_query("SELECT 1") {
-                    return Err(anyhow!("Database connection test failed for '{}': {}", connection_info, e));
+                    return Err(anyhow!(
+                        "Database connection test failed for '{}': {}",
+                        connection_info,
+                        e
+                    ));
                 } else {
                     info!("Connected to database: {}", connection_info);
                 }
 
-                let conn_config = connection_info.parse::<ConnConfig>()
-                    .map_err(|e| anyhow!("Failed to parse connection string '{}': {}", connection_info, e))?;
+                let conn_config = connection_info.parse::<ConnConfig>().map_err(|e| {
+                    anyhow!(
+                        "Failed to parse connection string '{}': {}",
+                        connection_info,
+                        e
+                    )
+                })?;
 
                 Ok(DbConnection {
                     connection_info,
@@ -195,11 +205,15 @@ impl DbConnection {
 
         // TODO: Get the password from database, currently it only returns *****
         let sql = "SELECT usename, usecreatedb, usesuper, passwd FROM pg_user";
-        let stmt = self.client.prepare(sql)
+        let stmt = self
+            .client
+            .prepare(sql)
             .map_err(|e| anyhow!("Failed to prepare query for users: {}", e))?;
 
         debug!("executing: {}", sql);
-        let rows = self.client.query(&stmt, &[])
+        let rows = self
+            .client
+            .query(&stmt, &[])
             .map_err(|e| anyhow!("Failed to query users from pg_user: {}", e))?;
 
         for row in rows {
@@ -248,11 +262,15 @@ impl DbConnection {
             FROM db CROSS JOIN users u;
         "#;
 
-        let stmt = self.client.prepare(sql)
+        let stmt = self
+            .client
+            .prepare(sql)
             .map_err(|e| anyhow!("Failed to prepare query for database privileges: {}", e))?;
 
         debug!("executing: {}", sql);
-        let rows = self.client.query(&stmt, &[])
+        let rows = self
+            .client
+            .query(&stmt, &[])
             .map_err(|e| anyhow!("Failed to query database privileges: {}", e))?;
         for row in rows {
             let name: &str = row.get(0);
@@ -289,11 +307,15 @@ impl DbConnection {
               AND s.schemaname != 'information_schema';
         ";
 
-        let stmt = self.client.prepare(sql)
+        let stmt = self
+            .client
+            .prepare(sql)
             .map_err(|e| anyhow!("Failed to prepare query for schema privileges: {}", e))?;
 
         debug!("executing: {}", sql);
-        let rows = self.client.query(&stmt, &[])
+        let rows = self
+            .client
+            .query(&stmt, &[])
             .map_err(|e| anyhow!("Failed to query schema privileges: {}", e))?;
         let mut roles = vec![];
         for row in rows {
@@ -337,11 +359,15 @@ impl DbConnection {
                 AND t.schemaname != 'information_schema';
         ";
 
-        let stmt = self.client.prepare(sql)
+        let stmt = self
+            .client
+            .prepare(sql)
             .map_err(|e| anyhow!("Failed to prepare query for table privileges: {}", e))?;
 
         debug!("executing: {}", sql);
-        let rows = self.client.query(&stmt, &[])
+        let rows = self
+            .client
+            .query(&stmt, &[])
             .map_err(|e| anyhow!("Failed to query table privileges: {}", e))?;
         for row in rows {
             let name = row.get(0);
@@ -451,7 +477,8 @@ impl DbConnection {
             rows_affected += rows;
         }
 
-        rows_affected.try_into()
+        rows_affected
+            .try_into()
             .map_err(|e| anyhow!("Row count {} exceeds i64::MAX: {}", rows_affected, e))
     }
 }

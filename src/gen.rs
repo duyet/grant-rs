@@ -17,8 +17,7 @@ pub fn gen(target: &Path) -> Result<()> {
         return Ok(());
     }
 
-    fs::create_dir_all(&target)
-        .context(format!("Failed to create directory {:?}", &target))?;
+    fs::create_dir_all(&target).context(format!("Failed to create directory {:?}", &target))?;
     info!("creating path: {:?}", target);
 
     let config = Config::default();

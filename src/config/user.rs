@@ -134,7 +134,10 @@ mod tests {
         };
 
         let sql = user.to_sql_create().unwrap();
-        assert_eq!(sql, "CREATE USER test WITH PASSWORD '''; DROP TABLE users; --';");
+        assert_eq!(
+            sql,
+            "CREATE USER test WITH PASSWORD '''; DROP TABLE users; --';"
+        );
     }
 
     #[test]
