@@ -798,7 +798,10 @@ mod tests {
         );
 
         // Test sql drop user
-        assert_eq!(config.users[0].to_sql_drop().unwrap(), "DROP USER IF EXISTS duyet;");
+        assert_eq!(
+            config.users[0].to_sql_drop().unwrap(),
+            "DROP USER IF EXISTS duyet;"
+        );
     }
 
     // Test users config with revoke role by `-role_name`
