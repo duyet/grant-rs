@@ -55,6 +55,13 @@ impl Table {
 }
 
 impl RoleTableLevel {
+    /// Escape and quote a PostgreSQL identifier to prevent SQL injection
+    fn escape_identifier(ident: &str) -> String {
+        // PostgreSQL identifiers are quoted with double quotes
+        // Escape double quotes by doubling them
+        format!("\"{}\"", ident.replace("\"", "\"\""))
+    }
+
     /// Generate role table to sql.
     ///
     /// ```sql
@@ -77,20 +84,25 @@ impl RoleTableLevel {
             self.grants.join(", ")
         };
 
+        // escape schemas and user identifiers to prevent SQL injection
+        let escaped_schemas = self
+            .schemas
+            .iter()
+            .map(|s| Self::escape_identifier(s))
+            .collect::<Vec<_>>();
+        let escaped_user = Self::escape_identifier(user);
+
         // if `tables` only contains `ALL`
         if let Some(table_named_all) = tables.iter().find(|t| t.name == "ALL") {
+            let schema_list = escaped_schemas.join(", ");
             let sql = match table_named_all.sign.as_str() {
                 "+" => format!(
                     "GRANT {} ON ALL TABLES IN SCHEMA {} TO {};",
-                    grants,
-                    self.schemas.join(", "),
-                    user
+                    grants, schema_list, escaped_user
                 ),
                 "-" => format!(
                     "REVOKE {} ON ALL TABLES IN SCHEMA {} FROM {};",
-                    grants,
-                    self.schemas.join(", "),
-                    user
+                    grants, schema_list, escaped_user
                 ),
                 _ => "".to_string(),
             };
@@ -111,18 +123,34 @@ impl RoleTableLevel {
                 .iter()
                 .flat_map(|t| {
                     if t.name.contains('.') {
-                        vec![t.name.clone()]
+                        // For schema-qualified names, escape each part separately
+                        let parts: Vec<&str> = t.name.split('.').collect();
+                        if parts.len() == 2 {
+                            vec![format!(
+                                "{}.{}",
+                                Self::escape_identifier(parts[0]),
+                                Self::escape_identifier(parts[1])
+                            )]
+                        } else {
+                            vec![Self::escape_identifier(&t.name)]
+                        }
                     } else {
                         self.schemas
                             .iter()
-                            .map(|s| format!("{}.{}", s, &t.name))
+                            .map(|s| {
+                                format!(
+                                    "{}.{}",
+                                    Self::escape_identifier(s),
+                                    Self::escape_identifier(&t.name)
+                                )
+                            })
                             .collect::<Vec<_>>()
                     }
                 })
                 .collect::<Vec<String>>()
                 .join(", ");
 
-            let sql = format!("GRANT {} ON {} TO {};", grants, _with_schema, user);
+            let sql = format!("GRANT {} ON {} TO {};", grants, _with_schema, escaped_user);
             sqls.push(sql);
 
             // remove all tables start with `+`
@@ -140,18 +168,37 @@ impl RoleTableLevel {
                 .iter()
                 .flat_map(|t| {
                     if t.name.contains('.') {
-                        vec![t.name.clone()]
+                        // For schema-qualified names, escape each part separately
+                        let parts: Vec<&str> = t.name.split('.').collect();
+                        if parts.len() == 2 {
+                            vec![format!(
+                                "{}.{}",
+                                Self::escape_identifier(parts[0]),
+                                Self::escape_identifier(parts[1])
+                            )]
+                        } else {
+                            vec![Self::escape_identifier(&t.name)]
+                        }
                     } else {
                         self.schemas
                             .iter()
-                            .map(|s| format!("{}.{}", s, &t.name))
+                            .map(|s| {
+                                format!(
+                                    "{}.{}",
+                                    Self::escape_identifier(s),
+                                    Self::escape_identifier(&t.name)
+                                )
+                            })
                             .collect::<Vec<_>>()
                     }
                 })
                 .collect::<Vec<String>>()
                 .join(", ");
 
-            let sql = format!("REVOKE {} ON {} FROM {};", grants, _with_schema, user);
+            let sql = format!(
+                "REVOKE {} ON {} FROM {};",
+                grants, _with_schema, escaped_user
+            );
             sqls.push(sql);
         }
 
@@ -220,7 +267,10 @@ mod tests {
             schemas: vec!["public".to_string()],
             tables: vec!["test".to_string()],
         };
-        assert_eq!(role.to_sql("test"), "GRANT SELECT ON public.test TO test;");
+        assert_eq!(
+            role.to_sql("test"),
+            "GRANT SELECT ON \"public\".\"test\" TO \"test\";"
+        );
 
         let role = RoleTableLevel {
             name: "test".to_string(),
@@ -230,7 +280,7 @@ mod tests {
         };
         assert_eq!(
             role.to_sql("test"),
-            "GRANT SELECT, INSERT ON public.test TO test;"
+            "GRANT SELECT, INSERT ON \"public\".\"test\" TO \"test\";"
         );
 
         let role = RoleTableLevel {
@@ -241,7 +291,7 @@ mod tests {
         };
         assert_eq!(
             role.to_sql("test"),
-            "GRANT SELECT, INSERT ON public.test, test.test TO test;"
+            "GRANT SELECT, INSERT ON \"public\".\"test\", \"test\".\"test\" TO \"test\";"
         );
 
         let role = RoleTableLevel {
@@ -252,7 +302,7 @@ mod tests {
         };
         assert_eq!(
             role.to_sql("test"),
-            "GRANT ALL PRIVILEGES ON public.test TO test;"
+            "GRANT ALL PRIVILEGES ON \"public\".\"test\" TO \"test\";"
         );
 
         let role = RoleTableLevel {
@@ -263,7 +313,7 @@ mod tests {
         };
         assert_eq!(
             role.to_sql("test"),
-            "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA public TO test;"
+            "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA \"public\" TO \"test\";"
         );
 
         let role = RoleTableLevel {
@@ -274,7 +324,7 @@ mod tests {
         };
         assert_eq!(
             role.to_sql("test"),
-            "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public, test TO test;"
+            "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA \"public\", \"test\" TO \"test\";"
         );
 
         let role = RoleTableLevel {
@@ -285,7 +335,7 @@ mod tests {
         };
         assert_eq!(
             role.to_sql("test"),
-            "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA public, test TO test;"
+            "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA \"public\", \"test\" TO \"test\";"
         );
 
         let role = RoleTableLevel {
@@ -296,7 +346,7 @@ mod tests {
         };
         assert_eq!(
             role.to_sql("test"),
-            "GRANT SELECT, INSERT ON public.test, test.test, test.test2 TO test;"
+            "GRANT SELECT, INSERT ON \"public\".\"test\", \"test\".\"test\", \"test\".\"test2\" TO \"test\";"
         );
 
         let role = RoleTableLevel {
@@ -307,7 +357,7 @@ mod tests {
         };
         assert_eq!(
             role.to_sql("test"),
-            "GRANT SELECT, INSERT ON public.test, test.test TO test; REVOKE SELECT, INSERT ON test.test2 FROM test;"
+            "GRANT SELECT, INSERT ON \"public\".\"test\", \"test\".\"test\" TO \"test\"; REVOKE SELECT, INSERT ON \"test\".\"test2\" FROM \"test\";"
         );
 
         let role = RoleTableLevel {
@@ -318,7 +368,7 @@ mod tests {
         };
         assert_eq!(
             role.to_sql("test"),
-            "GRANT SELECT, INSERT ON public.test, test.test TO test; REVOKE SELECT, INSERT ON public.test2, test.test2 FROM test;"
+            "GRANT SELECT, INSERT ON \"public\".\"test\", \"test\".\"test\" TO \"test\"; REVOKE SELECT, INSERT ON \"public\".\"test2\", \"test\".\"test2\" FROM \"test\";"
         );
 
         let role = RoleTableLevel {
@@ -329,7 +379,7 @@ mod tests {
         };
         assert_eq!(
             role.to_sql("test"),
-            "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA public, test TO test; REVOKE SELECT, INSERT ON test.test2 FROM test;"
+            "GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA \"public\", \"test\" TO \"test\"; REVOKE SELECT, INSERT ON \"test\".\"test2\" FROM \"test\";"
         );
     }
 }

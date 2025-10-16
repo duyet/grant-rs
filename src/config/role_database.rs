@@ -25,6 +25,13 @@ pub struct RoleDatabaseLevel {
 }
 
 impl RoleDatabaseLevel {
+    /// Escape and quote a PostgreSQL identifier to prevent SQL injection
+    fn escape_identifier(ident: &str) -> String {
+        // PostgreSQL identifiers are quoted with double quotes
+        // Escape double quotes by doubling them
+        format!("\"{}\"", ident.replace("\"", "\"\""))
+    }
+
     /// Generate role database to SQL.
     ///
     /// ```sql
@@ -40,12 +47,19 @@ impl RoleDatabaseLevel {
             self.grants.join(", ")
         };
 
+        // escape database and user identifiers to prevent SQL injection
+        let escaped_databases = self
+            .databases
+            .iter()
+            .map(|db| Self::escape_identifier(db))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let escaped_user = Self::escape_identifier(user);
+
         // grant on databases to user
         let sql = format!(
             "GRANT {} ON DATABASE {} TO {};",
-            grants,
-            self.databases.join(", "),
-            user
+            grants, escaped_databases, escaped_user
         );
 
         sql
@@ -99,7 +113,21 @@ mod tests {
         assert!(role.validate().is_ok());
         assert_eq!(
             role.to_sql("user"),
-            "GRANT CREATE, TEMP ON DATABASE db1, db2 TO user;"
+            "GRANT CREATE, TEMP ON DATABASE \"db1\", \"db2\" TO \"user\";"
         );
+    }
+
+    #[test]
+    fn test_sql_injection_prevention() {
+        let role = RoleDatabaseLevel {
+            name: "test".to_string(),
+            grants: vec!["CREATE".to_string()],
+            databases: vec!["db1\"; DROP DATABASE postgres; --".to_string()],
+        };
+
+        let sql = role.to_sql("user\"; DROP USER postgres; --");
+        // Verify the injection is properly escaped
+        assert!(sql.contains("\"db1\"\"; DROP DATABASE postgres; --\""));
+        assert!(sql.contains("\"user\"\"; DROP USER postgres; --\""));
     }
 }

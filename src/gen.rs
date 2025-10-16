@@ -3,7 +3,7 @@ use ansi_term::Colour::Green;
 use anyhow::{Context, Result};
 use log::info;
 use md5::compute;
-use rand::{rngs::OsRng, RngCore};
+use rand::{thread_rng, Rng};
 use std::fs;
 use std::path::Path;
 
@@ -17,8 +17,7 @@ pub fn gen(target: &Path) -> Result<()> {
         return Ok(());
     }
 
-    fs::create_dir_all(&target)
-        .context(format!("Failed to create directory {:?}", &target))?;
+    fs::create_dir_all(&target).context(format!("Failed to create directory {:?}", &target))?;
     info!("creating path: {:?}", target);
 
     let config = Config::default();
@@ -55,11 +54,11 @@ pub fn gen_password(
                   0123456789)(*&^%#!~"
             };
 
-            // Use OsRng for cryptographically secure random number generation
-            let mut rng = OsRng;
+            // Use thread_rng for random number generation
+            let mut rng = thread_rng();
             let password: String = (0..length)
                 .map(|_| {
-                    let idx = (rng.next_u32() as usize) % chars.len();
+                    let idx = rng.gen_range(0..chars.len());
                     chars[idx] as char
                 })
                 .collect();
