@@ -336,7 +336,7 @@
 <a href=#336 id=336 data-nosnippet>336</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_databases()[<span class="number">2</span>], <span class="string">"db3"</span>);
 <a href=#337 id=337 data-nosnippet>337</a>        <span class="macro">assert_eq!</span>(
 <a href=#338 id=338 data-nosnippet>338</a>            config.roles[<span class="number">0</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#339 id=339 data-nosnippet>339</a>            <span class="string">"GRANT CREATE, TEMP ON DATABASE db1, db2, db3 TO duyet;"</span>.to_string()
+<a href=#339 id=339 data-nosnippet>339</a>            <span class="string">"GRANT CREATE, TEMP ON DATABASE \"db1\", \"db2\", \"db3\" TO \"duyet\";"</span>.to_string()
 <a href=#340 id=340 data-nosnippet>340</a>        );
 <a href=#341 id=341 data-nosnippet>341</a>
 <a href=#342 id=342 data-nosnippet>342</a>        <span class="comment">// Test role 2
@@ -350,7 +350,7 @@
 <a href=#350 id=350 data-nosnippet>350</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_databases()[<span class="number">2</span>], <span class="string">"db3"</span>);
 <a href=#351 id=351 data-nosnippet>351</a>        <span class="macro">assert_eq!</span>(
 <a href=#352 id=352 data-nosnippet>352</a>            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#353 id=353 data-nosnippet>353</a>            <span class="string">"GRANT ALL PRIVILEGES ON DATABASE db1, db2, db3 TO duyet;"</span>.to_string()
+<a href=#353 id=353 data-nosnippet>353</a>            <span class="string">"GRANT ALL PRIVILEGES ON DATABASE \"db1\", \"db2\", \"db3\" TO \"duyet\";"</span>.to_string()
 <a href=#354 id=354 data-nosnippet>354</a>        );
 <a href=#355 id=355 data-nosnippet>355</a>    }
 <a href=#356 id=356 data-nosnippet>356</a>
@@ -430,476 +430,481 @@
 <a href=#430 id=430 data-nosnippet>430</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">2</span>], <span class="string">"schema3"</span>);
 <a href=#431 id=431 data-nosnippet>431</a>        <span class="macro">assert_eq!</span>(
 <a href=#432 id=432 data-nosnippet>432</a>            config.roles[<span class="number">0</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#433 id=433 data-nosnippet>433</a>            <span class="string">"GRANT CREATE, USAGE ON SCHEMA schema1, schema2, schema3 TO duyet;"</span>.to_string()
-<a href=#434 id=434 data-nosnippet>434</a>        );
-<a href=#435 id=435 data-nosnippet>435</a>
-<a href=#436 id=436 data-nosnippet>436</a>        <span class="comment">// Test role 2
-<a href=#437 id=437 data-nosnippet>437</a>        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_name(), <span class="string">"role_schema_level_2"</span>);
-<a href=#438 id=438 data-nosnippet>438</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_level(), RoleLevelType::Schema);
-<a href=#439 id=439 data-nosnippet>439</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants().len(), <span class="number">1</span>);
-<a href=#440 id=440 data-nosnippet>440</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants()[<span class="number">0</span>], <span class="string">"ALL"</span>);
-<a href=#441 id=441 data-nosnippet>441</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas().len(), <span class="number">3</span>);
-<a href=#442 id=442 data-nosnippet>442</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">0</span>], <span class="string">"schema1"</span>);
-<a href=#443 id=443 data-nosnippet>443</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">1</span>], <span class="string">"schema2"</span>);
-<a href=#444 id=444 data-nosnippet>444</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">2</span>], <span class="string">"schema3"</span>);
-<a href=#445 id=445 data-nosnippet>445</a>        <span class="macro">assert_eq!</span>(
-<a href=#446 id=446 data-nosnippet>446</a>            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#447 id=447 data-nosnippet>447</a>            <span class="string">"GRANT ALL PRIVILEGES ON SCHEMA schema1, schema2, schema3 TO duyet;"</span>.to_string()
-<a href=#448 id=448 data-nosnippet>448</a>        );
-<a href=#449 id=449 data-nosnippet>449</a>    }
-<a href=#450 id=450 data-nosnippet>450</a>
-<a href=#451 id=451 data-nosnippet>451</a>    <span class="comment">// Test config role type schema level with invalid grants
-<a href=#452 id=452 data-nosnippet>452</a>    </span><span class="attr">#[test]
-<a href=#453 id=453 data-nosnippet>453</a>    #[should_panic(expected = <span class="string">"invalid grant: invalid"</span>)]
-<a href=#454 id=454 data-nosnippet>454</a>    </span><span class="kw">fn </span>test_read_config_role_type_schema_level_invalid_grants() {
-<a href=#455 id=455 data-nosnippet>455</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
-<a href=#456 id=456 data-nosnippet>456</a>                 connection:
-<a href=#457 id=457 data-nosnippet>457</a>                   type: postgres
-<a href=#458 id=458 data-nosnippet>458</a>                   url: postgres://localhost:5432/postgres
-<a href=#459 id=459 data-nosnippet>459</a>                 roles:
-<a href=#460 id=460 data-nosnippet>460</a>                 - type: schema
-<a href=#461 id=461 data-nosnippet>461</a>                   name: role_schema_level
-<a href=#462 id=462 data-nosnippet>462</a>                   grants:
-<a href=#463 id=463 data-nosnippet>463</a>                   - invalid
-<a href=#464 id=464 data-nosnippet>464</a>                   schemas:
-<a href=#465 id=465 data-nosnippet>465</a>                   - schema1
-<a href=#466 id=466 data-nosnippet>466</a>                   - schema2
-<a href=#467 id=467 data-nosnippet>467</a>                   - schema3
-<a href=#468 id=468 data-nosnippet>468</a>                 users: []
-<a href=#469 id=469 data-nosnippet>469</a>             "</span>};
-<a href=#470 id=470 data-nosnippet>470</a>
-<a href=#471 id=471 data-nosnippet>471</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
-<a href=#472 id=472 data-nosnippet>472</a>        file.write(_text.as_bytes())
-<a href=#473 id=473 data-nosnippet>473</a>            .expect(<span class="string">"failed to write to temp file"</span>);
-<a href=#474 id=474 data-nosnippet>474</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
-<a href=#475 id=475 data-nosnippet>475</a>
-<a href=#476 id=476 data-nosnippet>476</a>        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
-<a href=#477 id=477 data-nosnippet>477</a>    }
-<a href=#478 id=478 data-nosnippet>478</a>
-<a href=#479 id=479 data-nosnippet>479</a>    <span class="comment">// Test config with one role table level
-<a href=#480 id=480 data-nosnippet>480</a>    </span><span class="attr">#[test]
-<a href=#481 id=481 data-nosnippet>481</a>    </span><span class="kw">fn </span>test_read_config_one_role_table_level() {
-<a href=#482 id=482 data-nosnippet>482</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
-<a href=#483 id=483 data-nosnippet>483</a>                 connection:
-<a href=#484 id=484 data-nosnippet>484</a>                   type: postgres
-<a href=#485 id=485 data-nosnippet>485</a>                   url: postgres://localhost:5432/postgres
-<a href=#486 id=486 data-nosnippet>486</a>                 roles:
-<a href=#487 id=487 data-nosnippet>487</a>                 - type: table
-<a href=#488 id=488 data-nosnippet>488</a>                   name: role_table_level_1
-<a href=#489 id=489 data-nosnippet>489</a>                   grants:
-<a href=#490 id=490 data-nosnippet>490</a>                     - SELECT
-<a href=#491 id=491 data-nosnippet>491</a>                     - INSERT
-<a href=#492 id=492 data-nosnippet>492</a>                   schemas:
-<a href=#493 id=493 data-nosnippet>493</a>                     - schema1
-<a href=#494 id=494 data-nosnippet>494</a>                   tables:
-<a href=#495 id=495 data-nosnippet>495</a>                     - table1
-<a href=#496 id=496 data-nosnippet>496</a>                     - table2
-<a href=#497 id=497 data-nosnippet>497</a>                     - table3
-<a href=#498 id=498 data-nosnippet>498</a>                 - type: table
-<a href=#499 id=499 data-nosnippet>499</a>                   name: role_table_level_2
-<a href=#500 id=500 data-nosnippet>500</a>                   grants:
-<a href=#501 id=501 data-nosnippet>501</a>                     - ALL
-<a href=#502 id=502 data-nosnippet>502</a>                   schemas:
-<a href=#503 id=503 data-nosnippet>503</a>                     - schema1
-<a href=#504 id=504 data-nosnippet>504</a>                   tables:
-<a href=#505 id=505 data-nosnippet>505</a>                     - table1
-<a href=#506 id=506 data-nosnippet>506</a>                     - table2
-<a href=#507 id=507 data-nosnippet>507</a>                     - table3
-<a href=#508 id=508 data-nosnippet>508</a>                 users: []
-<a href=#509 id=509 data-nosnippet>509</a>             "</span>};
-<a href=#510 id=510 data-nosnippet>510</a>
-<a href=#511 id=511 data-nosnippet>511</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
-<a href=#512 id=512 data-nosnippet>512</a>        file.write(_text.as_bytes())
-<a href=#513 id=513 data-nosnippet>513</a>            .expect(<span class="string">"failed to write to temp file"</span>);
-<a href=#514 id=514 data-nosnippet>514</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
-<a href=#515 id=515 data-nosnippet>515</a>
-<a href=#516 id=516 data-nosnippet>516</a>        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
-<a href=#517 id=517 data-nosnippet>517</a>        <span class="macro">assert_eq!</span>(config.roles.len(), <span class="number">2</span>);
-<a href=#518 id=518 data-nosnippet>518</a>
-<a href=#519 id=519 data-nosnippet>519</a>        <span class="comment">// Test role 1
-<a href=#520 id=520 data-nosnippet>520</a>        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_name(), <span class="string">"role_table_level_1"</span>);
-<a href=#521 id=521 data-nosnippet>521</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_level(), RoleLevelType::Table);
-<a href=#522 id=522 data-nosnippet>522</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants().len(), <span class="number">2</span>);
-<a href=#523 id=523 data-nosnippet>523</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">0</span>], <span class="string">"SELECT"</span>);
-<a href=#524 id=524 data-nosnippet>524</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">1</span>], <span class="string">"INSERT"</span>);
-<a href=#525 id=525 data-nosnippet>525</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas().len(), <span class="number">1</span>);
-<a href=#526 id=526 data-nosnippet>526</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">0</span>], <span class="string">"schema1"</span>);
-<a href=#527 id=527 data-nosnippet>527</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables().len(), <span class="number">3</span>);
-<a href=#528 id=528 data-nosnippet>528</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">0</span>], <span class="string">"table1"</span>);
-<a href=#529 id=529 data-nosnippet>529</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">1</span>], <span class="string">"table2"</span>);
-<a href=#530 id=530 data-nosnippet>530</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">2</span>], <span class="string">"table3"</span>);
-<a href=#531 id=531 data-nosnippet>531</a>        <span class="macro">assert_eq!</span>(
-<a href=#532 id=532 data-nosnippet>532</a>            config.roles[<span class="number">0</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#533 id=533 data-nosnippet>533</a>            <span class="string">"GRANT SELECT, INSERT ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
-<a href=#534 id=534 data-nosnippet>534</a>        </span>);
-<a href=#535 id=535 data-nosnippet>535</a>
-<a href=#536 id=536 data-nosnippet>536</a>        <span class="comment">// Test role 2
-<a href=#537 id=537 data-nosnippet>537</a>        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_name(), <span class="string">"role_table_level_2"</span>);
-<a href=#538 id=538 data-nosnippet>538</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_level(), RoleLevelType::Table);
-<a href=#539 id=539 data-nosnippet>539</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants().len(), <span class="number">1</span>);
-<a href=#540 id=540 data-nosnippet>540</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants()[<span class="number">0</span>], <span class="string">"ALL"</span>);
-<a href=#541 id=541 data-nosnippet>541</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas().len(), <span class="number">1</span>);
-<a href=#542 id=542 data-nosnippet>542</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">0</span>], <span class="string">"schema1"</span>);
-<a href=#543 id=543 data-nosnippet>543</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables().len(), <span class="number">3</span>);
-<a href=#544 id=544 data-nosnippet>544</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">0</span>], <span class="string">"table1"</span>);
-<a href=#545 id=545 data-nosnippet>545</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">1</span>], <span class="string">"table2"</span>);
-<a href=#546 id=546 data-nosnippet>546</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">2</span>], <span class="string">"table3"</span>);
-<a href=#547 id=547 data-nosnippet>547</a>        <span class="macro">assert_eq!</span>(
-<a href=#548 id=548 data-nosnippet>548</a>            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#549 id=549 data-nosnippet>549</a>            <span class="string">"GRANT ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
-<a href=#550 id=550 data-nosnippet>550</a>                </span>.to_string()
-<a href=#551 id=551 data-nosnippet>551</a>        );
-<a href=#552 id=552 data-nosnippet>552</a>    }
-<a href=#553 id=553 data-nosnippet>553</a>
-<a href=#554 id=554 data-nosnippet>554</a>    <span class="comment">// Test config role type table level with table name is `ALL`
-<a href=#555 id=555 data-nosnippet>555</a>    </span><span class="attr">#[test]
-<a href=#556 id=556 data-nosnippet>556</a>    </span><span class="kw">fn </span>test_read_config_role_type_table_level_all_tables() {
-<a href=#557 id=557 data-nosnippet>557</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
-<a href=#558 id=558 data-nosnippet>558</a>                 connection:
-<a href=#559 id=559 data-nosnippet>559</a>                   type: postgres
-<a href=#560 id=560 data-nosnippet>560</a>                   url: postgres://localhost:5432/postgres
-<a href=#561 id=561 data-nosnippet>561</a>                 roles:
-<a href=#562 id=562 data-nosnippet>562</a>                 - type: table
-<a href=#563 id=563 data-nosnippet>563</a>                   name: role_table_level_1
-<a href=#564 id=564 data-nosnippet>564</a>                   grants:
-<a href=#565 id=565 data-nosnippet>565</a>                     - SELECT
-<a href=#566 id=566 data-nosnippet>566</a>                   schemas:
-<a href=#567 id=567 data-nosnippet>567</a>                     - schema1
-<a href=#568 id=568 data-nosnippet>568</a>                   tables:
-<a href=#569 id=569 data-nosnippet>569</a>                     - ALL
-<a href=#570 id=570 data-nosnippet>570</a>                 - type: table
-<a href=#571 id=571 data-nosnippet>571</a>                   name: role_table_level_2
-<a href=#572 id=572 data-nosnippet>572</a>                   grants:
-<a href=#573 id=573 data-nosnippet>573</a>                     - SELECT
-<a href=#574 id=574 data-nosnippet>574</a>                   schemas:
-<a href=#575 id=575 data-nosnippet>575</a>                     - schema1
-<a href=#576 id=576 data-nosnippet>576</a>                   tables:
-<a href=#577 id=577 data-nosnippet>577</a>                     - ALL
-<a href=#578 id=578 data-nosnippet>578</a>                     - another_table_should_be_included_in_all_too
-<a href=#579 id=579 data-nosnippet>579</a>                 - type: table
-<a href=#580 id=580 data-nosnippet>580</a>                   name: role_table_level_3
-<a href=#581 id=581 data-nosnippet>581</a>                   grants:
-<a href=#582 id=582 data-nosnippet>582</a>                     - SELECT
-<a href=#583 id=583 data-nosnippet>583</a>                   schemas:
-<a href=#584 id=584 data-nosnippet>584</a>                     - schema1
-<a href=#585 id=585 data-nosnippet>585</a>                   tables:
-<a href=#586 id=586 data-nosnippet>586</a>                     - ALL
-<a href=#587 id=587 data-nosnippet>587</a>                     - -but_excluded_me
-<a href=#588 id=588 data-nosnippet>588</a>                 - type: table
-<a href=#589 id=589 data-nosnippet>589</a>                   name: role_table_level_4
-<a href=#590 id=590 data-nosnippet>590</a>                   grants:
-<a href=#591 id=591 data-nosnippet>591</a>                     - SELECT
-<a href=#592 id=592 data-nosnippet>592</a>                   schemas:
-<a href=#593 id=593 data-nosnippet>593</a>                     - schema1
-<a href=#594 id=594 data-nosnippet>594</a>                   tables:
-<a href=#595 id=595 data-nosnippet>595</a>                     - table_a
-<a href=#596 id=596 data-nosnippet>596</a>                     - -table_b
-<a href=#597 id=597 data-nosnippet>597</a>                 - type: table
-<a href=#598 id=598 data-nosnippet>598</a>                   name: role_table_level_5
-<a href=#599 id=599 data-nosnippet>599</a>                   grants:
-<a href=#600 id=600 data-nosnippet>600</a>                     - SELECT
-<a href=#601 id=601 data-nosnippet>601</a>                   schemas:
-<a href=#602 id=602 data-nosnippet>602</a>                     - schema1
-<a href=#603 id=603 data-nosnippet>603</a>                   tables:
-<a href=#604 id=604 data-nosnippet>604</a>                     - -table_a
-<a href=#605 id=605 data-nosnippet>605</a>                     - -table_b
-<a href=#606 id=606 data-nosnippet>606</a>                 - type: table
-<a href=#607 id=607 data-nosnippet>607</a>                   name: role_table_level_6
-<a href=#608 id=608 data-nosnippet>608</a>                   grants:
-<a href=#609 id=609 data-nosnippet>609</a>                     - SELECT
-<a href=#610 id=610 data-nosnippet>610</a>                   schemas:
-<a href=#611 id=611 data-nosnippet>611</a>                     - schema1
-<a href=#612 id=612 data-nosnippet>612</a>                   tables:
-<a href=#613 id=613 data-nosnippet>613</a>                     - -ALL
-<a href=#614 id=614 data-nosnippet>614</a>                 users: []
-<a href=#615 id=615 data-nosnippet>615</a>             "</span>};
-<a href=#616 id=616 data-nosnippet>616</a>
-<a href=#617 id=617 data-nosnippet>617</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
-<a href=#618 id=618 data-nosnippet>618</a>        file.write(_text.as_bytes())
-<a href=#619 id=619 data-nosnippet>619</a>            .expect(<span class="string">"failed to write to temp file"</span>);
-<a href=#620 id=620 data-nosnippet>620</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
-<a href=#621 id=621 data-nosnippet>621</a>
-<a href=#622 id=622 data-nosnippet>622</a>        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
-<a href=#623 id=623 data-nosnippet>623</a>        <span class="macro">assert_eq!</span>(config.roles.len(), <span class="number">6</span>);
-<a href=#624 id=624 data-nosnippet>624</a>
-<a href=#625 id=625 data-nosnippet>625</a>        <span class="macro">assert_eq!</span>(
-<a href=#626 id=626 data-nosnippet>626</a>            config.roles[<span class="number">0</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#627 id=627 data-nosnippet>627</a>            <span class="string">"GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;"
-<a href=#628 id=628 data-nosnippet>628</a>        </span>);
-<a href=#629 id=629 data-nosnippet>629</a>        <span class="macro">assert_eq!</span>(
-<a href=#630 id=630 data-nosnippet>630</a>            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#631 id=631 data-nosnippet>631</a>            <span class="string">"GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;"
-<a href=#632 id=632 data-nosnippet>632</a>        </span>);
-<a href=#633 id=633 data-nosnippet>633</a>        <span class="macro">assert_eq!</span>(
-<a href=#634 id=634 data-nosnippet>634</a>            config.roles[<span class="number">2</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#635 id=635 data-nosnippet>635</a>            <span class="string">"GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet; REVOKE SELECT ON schema1.but_excluded_me FROM duyet;"
-<a href=#636 id=636 data-nosnippet>636</a>        </span>);
-<a href=#637 id=637 data-nosnippet>637</a>        <span class="macro">assert_eq!</span>(
-<a href=#638 id=638 data-nosnippet>638</a>            config.roles[<span class="number">3</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#639 id=639 data-nosnippet>639</a>            <span class="string">"GRANT SELECT ON schema1.table_a TO duyet; REVOKE SELECT ON schema1.table_b FROM duyet;"
-<a href=#640 id=640 data-nosnippet>640</a>        </span>);
-<a href=#641 id=641 data-nosnippet>641</a>        <span class="macro">assert_eq!</span>(
-<a href=#642 id=642 data-nosnippet>642</a>            config.roles[<span class="number">4</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#643 id=643 data-nosnippet>643</a>            <span class="string">"REVOKE SELECT ON schema1.table_a, schema1.table_b FROM duyet;"
-<a href=#644 id=644 data-nosnippet>644</a>        </span>);
-<a href=#645 id=645 data-nosnippet>645</a>        <span class="macro">assert_eq!</span>(
-<a href=#646 id=646 data-nosnippet>646</a>            config.roles[<span class="number">5</span>].to_sql(<span class="string">"duyet"</span>),
-<a href=#647 id=647 data-nosnippet>647</a>            <span class="string">"REVOKE SELECT ON ALL TABLES IN SCHEMA schema1 FROM duyet;"
-<a href=#648 id=648 data-nosnippet>648</a>        </span>);
-<a href=#649 id=649 data-nosnippet>649</a>    }
-<a href=#650 id=650 data-nosnippet>650</a>
-<a href=#651 id=651 data-nosnippet>651</a>    <span class="comment">// Test config role type table level with invalid grants
-<a href=#652 id=652 data-nosnippet>652</a>    </span><span class="attr">#[test]
-<a href=#653 id=653 data-nosnippet>653</a>    #[should_panic(expected = <span class="string">"role.grants invalid"</span>)]
-<a href=#654 id=654 data-nosnippet>654</a>    </span><span class="kw">fn </span>test_read_config_role_type_table_level_invalid_grants() {
-<a href=#655 id=655 data-nosnippet>655</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
-<a href=#656 id=656 data-nosnippet>656</a>                 connection:
-<a href=#657 id=657 data-nosnippet>657</a>                   type: postgres
-<a href=#658 id=658 data-nosnippet>658</a>                   url: postgres://localhost:5432/postgres
-<a href=#659 id=659 data-nosnippet>659</a>                 roles:
-<a href=#660 id=660 data-nosnippet>660</a>                 - type: table
-<a href=#661 id=661 data-nosnippet>661</a>                   name: role_table_level
-<a href=#662 id=662 data-nosnippet>662</a>                   grants:
-<a href=#663 id=663 data-nosnippet>663</a>                   - invalid
-<a href=#664 id=664 data-nosnippet>664</a>                   schemas:
-<a href=#665 id=665 data-nosnippet>665</a>                   - schema1
-<a href=#666 id=666 data-nosnippet>666</a>                   tables:
-<a href=#667 id=667 data-nosnippet>667</a>                   - table1
-<a href=#668 id=668 data-nosnippet>668</a>                   - table2
-<a href=#669 id=669 data-nosnippet>669</a>                   - table3
-<a href=#670 id=670 data-nosnippet>670</a>                 users: []
-<a href=#671 id=671 data-nosnippet>671</a>             "</span>};
-<a href=#672 id=672 data-nosnippet>672</a>
-<a href=#673 id=673 data-nosnippet>673</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
-<a href=#674 id=674 data-nosnippet>674</a>        file.write(_text.as_bytes())
-<a href=#675 id=675 data-nosnippet>675</a>            .expect(<span class="string">"failed to write to temp file"</span>);
-<a href=#676 id=676 data-nosnippet>676</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
-<a href=#677 id=677 data-nosnippet>677</a>
-<a href=#678 id=678 data-nosnippet>678</a>        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
-<a href=#679 id=679 data-nosnippet>679</a>    }
-<a href=#680 id=680 data-nosnippet>680</a>
-<a href=#681 id=681 data-nosnippet>681</a>    <span class="comment">// Test two role duplicated name error
-<a href=#682 id=682 data-nosnippet>682</a>    </span><span class="attr">#[test]
-<a href=#683 id=683 data-nosnippet>683</a>    #[should_panic(expected = <span class="string">"duplicated role name: role_table_level"</span>)]
-<a href=#684 id=684 data-nosnippet>684</a>    </span><span class="kw">fn </span>test_read_config_two_role_duplicated_name() {
-<a href=#685 id=685 data-nosnippet>685</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
-<a href=#686 id=686 data-nosnippet>686</a>                 connection:
-<a href=#687 id=687 data-nosnippet>687</a>                   type: postgres
-<a href=#688 id=688 data-nosnippet>688</a>                   url: postgres://localhost:5432/postgres
-<a href=#689 id=689 data-nosnippet>689</a>                 roles:
-<a href=#690 id=690 data-nosnippet>690</a>                 - type: table
-<a href=#691 id=691 data-nosnippet>691</a>                   name: role_table_level
-<a href=#692 id=692 data-nosnippet>692</a>                   grants:
-<a href=#693 id=693 data-nosnippet>693</a>                   - SELECT
-<a href=#694 id=694 data-nosnippet>694</a>                   - INSERT
-<a href=#695 id=695 data-nosnippet>695</a>                   schemas:
-<a href=#696 id=696 data-nosnippet>696</a>                   - schema1
-<a href=#697 id=697 data-nosnippet>697</a>                   tables:
-<a href=#698 id=698 data-nosnippet>698</a>                   - table1
-<a href=#699 id=699 data-nosnippet>699</a>                   - table2
-<a href=#700 id=700 data-nosnippet>700</a>                   - table3
-<a href=#701 id=701 data-nosnippet>701</a>                 - type: table
-<a href=#702 id=702 data-nosnippet>702</a>                   name: role_table_level
-<a href=#703 id=703 data-nosnippet>703</a>                   grants:
-<a href=#704 id=704 data-nosnippet>704</a>                   - ALL
-<a href=#705 id=705 data-nosnippet>705</a>                   schemas:
-<a href=#706 id=706 data-nosnippet>706</a>                   - schema1
-<a href=#707 id=707 data-nosnippet>707</a>                   tables:
-<a href=#708 id=708 data-nosnippet>708</a>                   - table1
-<a href=#709 id=709 data-nosnippet>709</a>                   - table2
-<a href=#710 id=710 data-nosnippet>710</a>                   - table3
-<a href=#711 id=711 data-nosnippet>711</a>                 users: []
-<a href=#712 id=712 data-nosnippet>712</a>             "</span>};
-<a href=#713 id=713 data-nosnippet>713</a>
-<a href=#714 id=714 data-nosnippet>714</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
-<a href=#715 id=715 data-nosnippet>715</a>        file.write(_text.as_bytes())
-<a href=#716 id=716 data-nosnippet>716</a>            .expect(<span class="string">"failed to write to temp file"</span>);
-<a href=#717 id=717 data-nosnippet>717</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
-<a href=#718 id=718 data-nosnippet>718</a>
-<a href=#719 id=719 data-nosnippet>719</a>        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
-<a href=#720 id=720 data-nosnippet>720</a>    }
-<a href=#721 id=721 data-nosnippet>721</a>
-<a href=#722 id=722 data-nosnippet>722</a>    <span class="comment">// Test users config
-<a href=#723 id=723 data-nosnippet>723</a>    </span><span class="attr">#[test]
-<a href=#724 id=724 data-nosnippet>724</a>    </span><span class="kw">fn </span>test_read_config_users() {
-<a href=#725 id=725 data-nosnippet>725</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
-<a href=#726 id=726 data-nosnippet>726</a>                 connection:
-<a href=#727 id=727 data-nosnippet>727</a>                   type: postgres
-<a href=#728 id=728 data-nosnippet>728</a>                   url: postgres://postgres:postgres@localhost:5432/postgres
-<a href=#729 id=729 data-nosnippet>729</a>                 roles:
-<a href=#730 id=730 data-nosnippet>730</a>                 - type: database
-<a href=#731 id=731 data-nosnippet>731</a>                   name: role_database_level
-<a href=#732 id=732 data-nosnippet>732</a>                   grants:
-<a href=#733 id=733 data-nosnippet>733</a>                   - CREATE
-<a href=#734 id=734 data-nosnippet>734</a>                   - TEMP
-<a href=#735 id=735 data-nosnippet>735</a>                   databases:
-<a href=#736 id=736 data-nosnippet>736</a>                   - db1
-<a href=#737 id=737 data-nosnippet>737</a>                   - db2
-<a href=#738 id=738 data-nosnippet>738</a>                   - db3
-<a href=#739 id=739 data-nosnippet>739</a>                 - type: schema
-<a href=#740 id=740 data-nosnippet>740</a>                   name: role_schema_level
-<a href=#741 id=741 data-nosnippet>741</a>                   grants:
-<a href=#742 id=742 data-nosnippet>742</a>                   - ALL
-<a href=#743 id=743 data-nosnippet>743</a>                   schemas:
-<a href=#744 id=744 data-nosnippet>744</a>                   - schema1
-<a href=#745 id=745 data-nosnippet>745</a>                   - schema2
-<a href=#746 id=746 data-nosnippet>746</a>                   - schema3
-<a href=#747 id=747 data-nosnippet>747</a>                 - type: table
-<a href=#748 id=748 data-nosnippet>748</a>                   name: role_table_level
-<a href=#749 id=749 data-nosnippet>749</a>                   grants:
-<a href=#750 id=750 data-nosnippet>750</a>                   - SELECT
-<a href=#751 id=751 data-nosnippet>751</a>                   - INSERT
-<a href=#752 id=752 data-nosnippet>752</a>                   schemas:
-<a href=#753 id=753 data-nosnippet>753</a>                   - schema1
-<a href=#754 id=754 data-nosnippet>754</a>                   tables:
-<a href=#755 id=755 data-nosnippet>755</a>                   - table1
-<a href=#756 id=756 data-nosnippet>756</a>                   - table2
-<a href=#757 id=757 data-nosnippet>757</a>                   - table3
-<a href=#758 id=758 data-nosnippet>758</a>                 users:
-<a href=#759 id=759 data-nosnippet>759</a>                 - name: duyet
-<a href=#760 id=760 data-nosnippet>760</a>                   password: 123456
-<a href=#761 id=761 data-nosnippet>761</a>                   roles:
-<a href=#762 id=762 data-nosnippet>762</a>                   - role_database_level
-<a href=#763 id=763 data-nosnippet>763</a>                   - role_schema_level
-<a href=#764 id=764 data-nosnippet>764</a>                   - role_table_level
-<a href=#765 id=765 data-nosnippet>765</a>                 - name: duyet_without_password
-<a href=#766 id=766 data-nosnippet>766</a>                   roles:
-<a href=#767 id=767 data-nosnippet>767</a>                   - role_database_level
-<a href=#768 id=768 data-nosnippet>768</a>                   - role_schema_level
-<a href=#769 id=769 data-nosnippet>769</a>                   - role_table_level
-<a href=#770 id=770 data-nosnippet>770</a>             "</span>};
-<a href=#771 id=771 data-nosnippet>771</a>
-<a href=#772 id=772 data-nosnippet>772</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
-<a href=#773 id=773 data-nosnippet>773</a>        file.write(_text.as_bytes())
-<a href=#774 id=774 data-nosnippet>774</a>            .expect(<span class="string">"failed to write to temp file"</span>);
-<a href=#775 id=775 data-nosnippet>775</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
-<a href=#776 id=776 data-nosnippet>776</a>
-<a href=#777 id=777 data-nosnippet>777</a>        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
-<a href=#778 id=778 data-nosnippet>778</a>        <span class="macro">assert_eq!</span>(config.users.len(), <span class="number">2</span>);
-<a href=#779 id=779 data-nosnippet>779</a>
-<a href=#780 id=780 data-nosnippet>780</a>        <span class="comment">// Test user 1
-<a href=#781 id=781 data-nosnippet>781</a>        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_name(), <span class="string">"duyet"</span>);
-<a href=#782 id=782 data-nosnippet>782</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_password(), <span class="string">"123456"</span>);
-<a href=#783 id=783 data-nosnippet>783</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles().len(), <span class="number">3</span>);
-<a href=#784 id=784 data-nosnippet>784</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">0</span>], <span class="string">"role_database_level"</span>);
-<a href=#785 id=785 data-nosnippet>785</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">1</span>], <span class="string">"role_schema_level"</span>);
-<a href=#786 id=786 data-nosnippet>786</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">2</span>], <span class="string">"role_table_level"</span>);
-<a href=#787 id=787 data-nosnippet>787</a>
-<a href=#788 id=788 data-nosnippet>788</a>        <span class="comment">// Test sql create user
-<a href=#789 id=789 data-nosnippet>789</a>        </span><span class="macro">assert_eq!</span>(
-<a href=#790 id=790 data-nosnippet>790</a>            config.users[<span class="number">0</span>].to_sql_create().unwrap(),
-<a href=#791 id=791 data-nosnippet>791</a>            <span class="string">"CREATE USER duyet WITH PASSWORD '123456';"
-<a href=#792 id=792 data-nosnippet>792</a>        </span>);
-<a href=#793 id=793 data-nosnippet>793</a>
-<a href=#794 id=794 data-nosnippet>794</a>        <span class="comment">// Test sql create user without password
-<a href=#795 id=795 data-nosnippet>795</a>        </span><span class="macro">assert_eq!</span>(
-<a href=#796 id=796 data-nosnippet>796</a>            config.users[<span class="number">1</span>].to_sql_create().unwrap(),
-<a href=#797 id=797 data-nosnippet>797</a>            <span class="string">"CREATE USER duyet_without_password;"
-<a href=#798 id=798 data-nosnippet>798</a>        </span>);
-<a href=#799 id=799 data-nosnippet>799</a>
-<a href=#800 id=800 data-nosnippet>800</a>        <span class="comment">// Test sql drop user
-<a href=#801 id=801 data-nosnippet>801</a>        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].to_sql_drop().unwrap(), <span class="string">"DROP USER IF EXISTS duyet;"</span>);
-<a href=#802 id=802 data-nosnippet>802</a>    }
-<a href=#803 id=803 data-nosnippet>803</a>
-<a href=#804 id=804 data-nosnippet>804</a>    <span class="comment">// Test users config with revoke role by `-role_name`
-<a href=#805 id=805 data-nosnippet>805</a>    </span><span class="attr">#[test]
-<a href=#806 id=806 data-nosnippet>806</a>    </span><span class="kw">fn </span>test_read_config_users_exclude_role_by_minus_role_name() {
-<a href=#807 id=807 data-nosnippet>807</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
-<a href=#808 id=808 data-nosnippet>808</a>             connection:
-<a href=#809 id=809 data-nosnippet>809</a>               type: postgres
-<a href=#810 id=810 data-nosnippet>810</a>               url: postgres://postgres:postgres@localhost:5432/postgres
-<a href=#811 id=811 data-nosnippet>811</a>             roles:
-<a href=#812 id=812 data-nosnippet>812</a>             - type: database
-<a href=#813 id=813 data-nosnippet>813</a>               name: role_database_level
-<a href=#814 id=814 data-nosnippet>814</a>               grants:
-<a href=#815 id=815 data-nosnippet>815</a>               - CREATE
-<a href=#816 id=816 data-nosnippet>816</a>               - TEMP
-<a href=#817 id=817 data-nosnippet>817</a>               databases:
-<a href=#818 id=818 data-nosnippet>818</a>               - db1
-<a href=#819 id=819 data-nosnippet>819</a>               - db2
-<a href=#820 id=820 data-nosnippet>820</a>               - db3
-<a href=#821 id=821 data-nosnippet>821</a>             - type: schema
-<a href=#822 id=822 data-nosnippet>822</a>               name: role_schema_level
-<a href=#823 id=823 data-nosnippet>823</a>               grants:
-<a href=#824 id=824 data-nosnippet>824</a>               - ALL
-<a href=#825 id=825 data-nosnippet>825</a>               schemas:
-<a href=#826 id=826 data-nosnippet>826</a>               - schema1
-<a href=#827 id=827 data-nosnippet>827</a>               - schema2
-<a href=#828 id=828 data-nosnippet>828</a>               - schema3
-<a href=#829 id=829 data-nosnippet>829</a>             - type: table
-<a href=#830 id=830 data-nosnippet>830</a>               name: role_table_level
-<a href=#831 id=831 data-nosnippet>831</a>               grants:
-<a href=#832 id=832 data-nosnippet>832</a>               - SELECT
-<a href=#833 id=833 data-nosnippet>833</a>               - INSERT
-<a href=#834 id=834 data-nosnippet>834</a>               schemas:
-<a href=#835 id=835 data-nosnippet>835</a>               - schema1
-<a href=#836 id=836 data-nosnippet>836</a>               tables:
-<a href=#837 id=837 data-nosnippet>837</a>               - table1
-<a href=#838 id=838 data-nosnippet>838</a>               - table2
-<a href=#839 id=839 data-nosnippet>839</a>               - table3
-<a href=#840 id=840 data-nosnippet>840</a>             users:
-<a href=#841 id=841 data-nosnippet>841</a>             - name: duyet
-<a href=#842 id=842 data-nosnippet>842</a>               password: 123456
-<a href=#843 id=843 data-nosnippet>843</a>               roles:
-<a href=#844 id=844 data-nosnippet>844</a>               - -role_database_level
-<a href=#845 id=845 data-nosnippet>845</a>               - -role_schema_level
-<a href=#846 id=846 data-nosnippet>846</a>               - -role_table_level
-<a href=#847 id=847 data-nosnippet>847</a>             - name: duyet_without_password
+<a href=#433 id=433 data-nosnippet>433</a>            <span class="string">"GRANT CREATE, USAGE ON SCHEMA \"schema1\", \"schema2\", \"schema3\" TO \"duyet\";"
+<a href=#434 id=434 data-nosnippet>434</a>                </span>.to_string()
+<a href=#435 id=435 data-nosnippet>435</a>        );
+<a href=#436 id=436 data-nosnippet>436</a>
+<a href=#437 id=437 data-nosnippet>437</a>        <span class="comment">// Test role 2
+<a href=#438 id=438 data-nosnippet>438</a>        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_name(), <span class="string">"role_schema_level_2"</span>);
+<a href=#439 id=439 data-nosnippet>439</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_level(), RoleLevelType::Schema);
+<a href=#440 id=440 data-nosnippet>440</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants().len(), <span class="number">1</span>);
+<a href=#441 id=441 data-nosnippet>441</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants()[<span class="number">0</span>], <span class="string">"ALL"</span>);
+<a href=#442 id=442 data-nosnippet>442</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas().len(), <span class="number">3</span>);
+<a href=#443 id=443 data-nosnippet>443</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">0</span>], <span class="string">"schema1"</span>);
+<a href=#444 id=444 data-nosnippet>444</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">1</span>], <span class="string">"schema2"</span>);
+<a href=#445 id=445 data-nosnippet>445</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">2</span>], <span class="string">"schema3"</span>);
+<a href=#446 id=446 data-nosnippet>446</a>        <span class="macro">assert_eq!</span>(
+<a href=#447 id=447 data-nosnippet>447</a>            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
+<a href=#448 id=448 data-nosnippet>448</a>            <span class="string">"GRANT ALL PRIVILEGES ON SCHEMA \"schema1\", \"schema2\", \"schema3\" TO \"duyet\";"
+<a href=#449 id=449 data-nosnippet>449</a>                </span>.to_string()
+<a href=#450 id=450 data-nosnippet>450</a>        );
+<a href=#451 id=451 data-nosnippet>451</a>    }
+<a href=#452 id=452 data-nosnippet>452</a>
+<a href=#453 id=453 data-nosnippet>453</a>    <span class="comment">// Test config role type schema level with invalid grants
+<a href=#454 id=454 data-nosnippet>454</a>    </span><span class="attr">#[test]
+<a href=#455 id=455 data-nosnippet>455</a>    #[should_panic(expected = <span class="string">"invalid grant: invalid"</span>)]
+<a href=#456 id=456 data-nosnippet>456</a>    </span><span class="kw">fn </span>test_read_config_role_type_schema_level_invalid_grants() {
+<a href=#457 id=457 data-nosnippet>457</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
+<a href=#458 id=458 data-nosnippet>458</a>                 connection:
+<a href=#459 id=459 data-nosnippet>459</a>                   type: postgres
+<a href=#460 id=460 data-nosnippet>460</a>                   url: postgres://localhost:5432/postgres
+<a href=#461 id=461 data-nosnippet>461</a>                 roles:
+<a href=#462 id=462 data-nosnippet>462</a>                 - type: schema
+<a href=#463 id=463 data-nosnippet>463</a>                   name: role_schema_level
+<a href=#464 id=464 data-nosnippet>464</a>                   grants:
+<a href=#465 id=465 data-nosnippet>465</a>                   - invalid
+<a href=#466 id=466 data-nosnippet>466</a>                   schemas:
+<a href=#467 id=467 data-nosnippet>467</a>                   - schema1
+<a href=#468 id=468 data-nosnippet>468</a>                   - schema2
+<a href=#469 id=469 data-nosnippet>469</a>                   - schema3
+<a href=#470 id=470 data-nosnippet>470</a>                 users: []
+<a href=#471 id=471 data-nosnippet>471</a>             "</span>};
+<a href=#472 id=472 data-nosnippet>472</a>
+<a href=#473 id=473 data-nosnippet>473</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
+<a href=#474 id=474 data-nosnippet>474</a>        file.write(_text.as_bytes())
+<a href=#475 id=475 data-nosnippet>475</a>            .expect(<span class="string">"failed to write to temp file"</span>);
+<a href=#476 id=476 data-nosnippet>476</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
+<a href=#477 id=477 data-nosnippet>477</a>
+<a href=#478 id=478 data-nosnippet>478</a>        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
+<a href=#479 id=479 data-nosnippet>479</a>    }
+<a href=#480 id=480 data-nosnippet>480</a>
+<a href=#481 id=481 data-nosnippet>481</a>    <span class="comment">// Test config with one role table level
+<a href=#482 id=482 data-nosnippet>482</a>    </span><span class="attr">#[test]
+<a href=#483 id=483 data-nosnippet>483</a>    </span><span class="kw">fn </span>test_read_config_one_role_table_level() {
+<a href=#484 id=484 data-nosnippet>484</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
+<a href=#485 id=485 data-nosnippet>485</a>                 connection:
+<a href=#486 id=486 data-nosnippet>486</a>                   type: postgres
+<a href=#487 id=487 data-nosnippet>487</a>                   url: postgres://localhost:5432/postgres
+<a href=#488 id=488 data-nosnippet>488</a>                 roles:
+<a href=#489 id=489 data-nosnippet>489</a>                 - type: table
+<a href=#490 id=490 data-nosnippet>490</a>                   name: role_table_level_1
+<a href=#491 id=491 data-nosnippet>491</a>                   grants:
+<a href=#492 id=492 data-nosnippet>492</a>                     - SELECT
+<a href=#493 id=493 data-nosnippet>493</a>                     - INSERT
+<a href=#494 id=494 data-nosnippet>494</a>                   schemas:
+<a href=#495 id=495 data-nosnippet>495</a>                     - schema1
+<a href=#496 id=496 data-nosnippet>496</a>                   tables:
+<a href=#497 id=497 data-nosnippet>497</a>                     - table1
+<a href=#498 id=498 data-nosnippet>498</a>                     - table2
+<a href=#499 id=499 data-nosnippet>499</a>                     - table3
+<a href=#500 id=500 data-nosnippet>500</a>                 - type: table
+<a href=#501 id=501 data-nosnippet>501</a>                   name: role_table_level_2
+<a href=#502 id=502 data-nosnippet>502</a>                   grants:
+<a href=#503 id=503 data-nosnippet>503</a>                     - ALL
+<a href=#504 id=504 data-nosnippet>504</a>                   schemas:
+<a href=#505 id=505 data-nosnippet>505</a>                     - schema1
+<a href=#506 id=506 data-nosnippet>506</a>                   tables:
+<a href=#507 id=507 data-nosnippet>507</a>                     - table1
+<a href=#508 id=508 data-nosnippet>508</a>                     - table2
+<a href=#509 id=509 data-nosnippet>509</a>                     - table3
+<a href=#510 id=510 data-nosnippet>510</a>                 users: []
+<a href=#511 id=511 data-nosnippet>511</a>             "</span>};
+<a href=#512 id=512 data-nosnippet>512</a>
+<a href=#513 id=513 data-nosnippet>513</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
+<a href=#514 id=514 data-nosnippet>514</a>        file.write(_text.as_bytes())
+<a href=#515 id=515 data-nosnippet>515</a>            .expect(<span class="string">"failed to write to temp file"</span>);
+<a href=#516 id=516 data-nosnippet>516</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
+<a href=#517 id=517 data-nosnippet>517</a>
+<a href=#518 id=518 data-nosnippet>518</a>        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
+<a href=#519 id=519 data-nosnippet>519</a>        <span class="macro">assert_eq!</span>(config.roles.len(), <span class="number">2</span>);
+<a href=#520 id=520 data-nosnippet>520</a>
+<a href=#521 id=521 data-nosnippet>521</a>        <span class="comment">// Test role 1
+<a href=#522 id=522 data-nosnippet>522</a>        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_name(), <span class="string">"role_table_level_1"</span>);
+<a href=#523 id=523 data-nosnippet>523</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_level(), RoleLevelType::Table);
+<a href=#524 id=524 data-nosnippet>524</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants().len(), <span class="number">2</span>);
+<a href=#525 id=525 data-nosnippet>525</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">0</span>], <span class="string">"SELECT"</span>);
+<a href=#526 id=526 data-nosnippet>526</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_grants()[<span class="number">1</span>], <span class="string">"INSERT"</span>);
+<a href=#527 id=527 data-nosnippet>527</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas().len(), <span class="number">1</span>);
+<a href=#528 id=528 data-nosnippet>528</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_schemas()[<span class="number">0</span>], <span class="string">"schema1"</span>);
+<a href=#529 id=529 data-nosnippet>529</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables().len(), <span class="number">3</span>);
+<a href=#530 id=530 data-nosnippet>530</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">0</span>], <span class="string">"table1"</span>);
+<a href=#531 id=531 data-nosnippet>531</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">1</span>], <span class="string">"table2"</span>);
+<a href=#532 id=532 data-nosnippet>532</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">0</span>].get_tables()[<span class="number">2</span>], <span class="string">"table3"</span>);
+<a href=#533 id=533 data-nosnippet>533</a>        <span class="macro">assert_eq!</span>(
+<a href=#534 id=534 data-nosnippet>534</a>            config.roles[<span class="number">0</span>].to_sql(<span class="string">"duyet"</span>),
+<a href=#535 id=535 data-nosnippet>535</a>            <span class="string">"GRANT SELECT, INSERT ON \"schema1\".\"table1\", \"schema1\".\"table2\", \"schema1\".\"table3\" TO \"duyet\";"
+<a href=#536 id=536 data-nosnippet>536</a>        </span>);
+<a href=#537 id=537 data-nosnippet>537</a>
+<a href=#538 id=538 data-nosnippet>538</a>        <span class="comment">// Test role 2
+<a href=#539 id=539 data-nosnippet>539</a>        </span><span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_name(), <span class="string">"role_table_level_2"</span>);
+<a href=#540 id=540 data-nosnippet>540</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_level(), RoleLevelType::Table);
+<a href=#541 id=541 data-nosnippet>541</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants().len(), <span class="number">1</span>);
+<a href=#542 id=542 data-nosnippet>542</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_grants()[<span class="number">0</span>], <span class="string">"ALL"</span>);
+<a href=#543 id=543 data-nosnippet>543</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas().len(), <span class="number">1</span>);
+<a href=#544 id=544 data-nosnippet>544</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_schemas()[<span class="number">0</span>], <span class="string">"schema1"</span>);
+<a href=#545 id=545 data-nosnippet>545</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables().len(), <span class="number">3</span>);
+<a href=#546 id=546 data-nosnippet>546</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">0</span>], <span class="string">"table1"</span>);
+<a href=#547 id=547 data-nosnippet>547</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">1</span>], <span class="string">"table2"</span>);
+<a href=#548 id=548 data-nosnippet>548</a>        <span class="macro">assert_eq!</span>(config.roles[<span class="number">1</span>].get_tables()[<span class="number">2</span>], <span class="string">"table3"</span>);
+<a href=#549 id=549 data-nosnippet>549</a>        <span class="macro">assert_eq!</span>(
+<a href=#550 id=550 data-nosnippet>550</a>            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
+<a href=#551 id=551 data-nosnippet>551</a>            <span class="string">"GRANT ALL PRIVILEGES ON \"schema1\".\"table1\", \"schema1\".\"table2\", \"schema1\".\"table3\" TO \"duyet\";"
+<a href=#552 id=552 data-nosnippet>552</a>                </span>.to_string()
+<a href=#553 id=553 data-nosnippet>553</a>        );
+<a href=#554 id=554 data-nosnippet>554</a>    }
+<a href=#555 id=555 data-nosnippet>555</a>
+<a href=#556 id=556 data-nosnippet>556</a>    <span class="comment">// Test config role type table level with table name is `ALL`
+<a href=#557 id=557 data-nosnippet>557</a>    </span><span class="attr">#[test]
+<a href=#558 id=558 data-nosnippet>558</a>    </span><span class="kw">fn </span>test_read_config_role_type_table_level_all_tables() {
+<a href=#559 id=559 data-nosnippet>559</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
+<a href=#560 id=560 data-nosnippet>560</a>                 connection:
+<a href=#561 id=561 data-nosnippet>561</a>                   type: postgres
+<a href=#562 id=562 data-nosnippet>562</a>                   url: postgres://localhost:5432/postgres
+<a href=#563 id=563 data-nosnippet>563</a>                 roles:
+<a href=#564 id=564 data-nosnippet>564</a>                 - type: table
+<a href=#565 id=565 data-nosnippet>565</a>                   name: role_table_level_1
+<a href=#566 id=566 data-nosnippet>566</a>                   grants:
+<a href=#567 id=567 data-nosnippet>567</a>                     - SELECT
+<a href=#568 id=568 data-nosnippet>568</a>                   schemas:
+<a href=#569 id=569 data-nosnippet>569</a>                     - schema1
+<a href=#570 id=570 data-nosnippet>570</a>                   tables:
+<a href=#571 id=571 data-nosnippet>571</a>                     - ALL
+<a href=#572 id=572 data-nosnippet>572</a>                 - type: table
+<a href=#573 id=573 data-nosnippet>573</a>                   name: role_table_level_2
+<a href=#574 id=574 data-nosnippet>574</a>                   grants:
+<a href=#575 id=575 data-nosnippet>575</a>                     - SELECT
+<a href=#576 id=576 data-nosnippet>576</a>                   schemas:
+<a href=#577 id=577 data-nosnippet>577</a>                     - schema1
+<a href=#578 id=578 data-nosnippet>578</a>                   tables:
+<a href=#579 id=579 data-nosnippet>579</a>                     - ALL
+<a href=#580 id=580 data-nosnippet>580</a>                     - another_table_should_be_included_in_all_too
+<a href=#581 id=581 data-nosnippet>581</a>                 - type: table
+<a href=#582 id=582 data-nosnippet>582</a>                   name: role_table_level_3
+<a href=#583 id=583 data-nosnippet>583</a>                   grants:
+<a href=#584 id=584 data-nosnippet>584</a>                     - SELECT
+<a href=#585 id=585 data-nosnippet>585</a>                   schemas:
+<a href=#586 id=586 data-nosnippet>586</a>                     - schema1
+<a href=#587 id=587 data-nosnippet>587</a>                   tables:
+<a href=#588 id=588 data-nosnippet>588</a>                     - ALL
+<a href=#589 id=589 data-nosnippet>589</a>                     - -but_excluded_me
+<a href=#590 id=590 data-nosnippet>590</a>                 - type: table
+<a href=#591 id=591 data-nosnippet>591</a>                   name: role_table_level_4
+<a href=#592 id=592 data-nosnippet>592</a>                   grants:
+<a href=#593 id=593 data-nosnippet>593</a>                     - SELECT
+<a href=#594 id=594 data-nosnippet>594</a>                   schemas:
+<a href=#595 id=595 data-nosnippet>595</a>                     - schema1
+<a href=#596 id=596 data-nosnippet>596</a>                   tables:
+<a href=#597 id=597 data-nosnippet>597</a>                     - table_a
+<a href=#598 id=598 data-nosnippet>598</a>                     - -table_b
+<a href=#599 id=599 data-nosnippet>599</a>                 - type: table
+<a href=#600 id=600 data-nosnippet>600</a>                   name: role_table_level_5
+<a href=#601 id=601 data-nosnippet>601</a>                   grants:
+<a href=#602 id=602 data-nosnippet>602</a>                     - SELECT
+<a href=#603 id=603 data-nosnippet>603</a>                   schemas:
+<a href=#604 id=604 data-nosnippet>604</a>                     - schema1
+<a href=#605 id=605 data-nosnippet>605</a>                   tables:
+<a href=#606 id=606 data-nosnippet>606</a>                     - -table_a
+<a href=#607 id=607 data-nosnippet>607</a>                     - -table_b
+<a href=#608 id=608 data-nosnippet>608</a>                 - type: table
+<a href=#609 id=609 data-nosnippet>609</a>                   name: role_table_level_6
+<a href=#610 id=610 data-nosnippet>610</a>                   grants:
+<a href=#611 id=611 data-nosnippet>611</a>                     - SELECT
+<a href=#612 id=612 data-nosnippet>612</a>                   schemas:
+<a href=#613 id=613 data-nosnippet>613</a>                     - schema1
+<a href=#614 id=614 data-nosnippet>614</a>                   tables:
+<a href=#615 id=615 data-nosnippet>615</a>                     - -ALL
+<a href=#616 id=616 data-nosnippet>616</a>                 users: []
+<a href=#617 id=617 data-nosnippet>617</a>             "</span>};
+<a href=#618 id=618 data-nosnippet>618</a>
+<a href=#619 id=619 data-nosnippet>619</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
+<a href=#620 id=620 data-nosnippet>620</a>        file.write(_text.as_bytes())
+<a href=#621 id=621 data-nosnippet>621</a>            .expect(<span class="string">"failed to write to temp file"</span>);
+<a href=#622 id=622 data-nosnippet>622</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
+<a href=#623 id=623 data-nosnippet>623</a>
+<a href=#624 id=624 data-nosnippet>624</a>        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
+<a href=#625 id=625 data-nosnippet>625</a>        <span class="macro">assert_eq!</span>(config.roles.len(), <span class="number">6</span>);
+<a href=#626 id=626 data-nosnippet>626</a>
+<a href=#627 id=627 data-nosnippet>627</a>        <span class="macro">assert_eq!</span>(
+<a href=#628 id=628 data-nosnippet>628</a>            config.roles[<span class="number">0</span>].to_sql(<span class="string">"duyet"</span>),
+<a href=#629 id=629 data-nosnippet>629</a>            <span class="string">"GRANT SELECT ON ALL TABLES IN SCHEMA \"schema1\" TO \"duyet\";"
+<a href=#630 id=630 data-nosnippet>630</a>        </span>);
+<a href=#631 id=631 data-nosnippet>631</a>        <span class="macro">assert_eq!</span>(
+<a href=#632 id=632 data-nosnippet>632</a>            config.roles[<span class="number">1</span>].to_sql(<span class="string">"duyet"</span>),
+<a href=#633 id=633 data-nosnippet>633</a>            <span class="string">"GRANT SELECT ON ALL TABLES IN SCHEMA \"schema1\" TO \"duyet\";"
+<a href=#634 id=634 data-nosnippet>634</a>        </span>);
+<a href=#635 id=635 data-nosnippet>635</a>        <span class="macro">assert_eq!</span>(
+<a href=#636 id=636 data-nosnippet>636</a>            config.roles[<span class="number">2</span>].to_sql(<span class="string">"duyet"</span>),
+<a href=#637 id=637 data-nosnippet>637</a>            <span class="string">"GRANT SELECT ON ALL TABLES IN SCHEMA \"schema1\" TO \"duyet\"; REVOKE SELECT ON \"schema1\".\"but_excluded_me\" FROM \"duyet\";"
+<a href=#638 id=638 data-nosnippet>638</a>        </span>);
+<a href=#639 id=639 data-nosnippet>639</a>        <span class="macro">assert_eq!</span>(
+<a href=#640 id=640 data-nosnippet>640</a>            config.roles[<span class="number">3</span>].to_sql(<span class="string">"duyet"</span>),
+<a href=#641 id=641 data-nosnippet>641</a>            <span class="string">"GRANT SELECT ON \"schema1\".\"table_a\" TO \"duyet\"; REVOKE SELECT ON \"schema1\".\"table_b\" FROM \"duyet\";"
+<a href=#642 id=642 data-nosnippet>642</a>        </span>);
+<a href=#643 id=643 data-nosnippet>643</a>        <span class="macro">assert_eq!</span>(
+<a href=#644 id=644 data-nosnippet>644</a>            config.roles[<span class="number">4</span>].to_sql(<span class="string">"duyet"</span>),
+<a href=#645 id=645 data-nosnippet>645</a>            <span class="string">"REVOKE SELECT ON \"schema1\".\"table_a\", \"schema1\".\"table_b\" FROM \"duyet\";"
+<a href=#646 id=646 data-nosnippet>646</a>        </span>);
+<a href=#647 id=647 data-nosnippet>647</a>        <span class="macro">assert_eq!</span>(
+<a href=#648 id=648 data-nosnippet>648</a>            config.roles[<span class="number">5</span>].to_sql(<span class="string">"duyet"</span>),
+<a href=#649 id=649 data-nosnippet>649</a>            <span class="string">"REVOKE SELECT ON ALL TABLES IN SCHEMA \"schema1\" FROM \"duyet\";"
+<a href=#650 id=650 data-nosnippet>650</a>        </span>);
+<a href=#651 id=651 data-nosnippet>651</a>    }
+<a href=#652 id=652 data-nosnippet>652</a>
+<a href=#653 id=653 data-nosnippet>653</a>    <span class="comment">// Test config role type table level with invalid grants
+<a href=#654 id=654 data-nosnippet>654</a>    </span><span class="attr">#[test]
+<a href=#655 id=655 data-nosnippet>655</a>    #[should_panic(expected = <span class="string">"role.grants invalid"</span>)]
+<a href=#656 id=656 data-nosnippet>656</a>    </span><span class="kw">fn </span>test_read_config_role_type_table_level_invalid_grants() {
+<a href=#657 id=657 data-nosnippet>657</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
+<a href=#658 id=658 data-nosnippet>658</a>                 connection:
+<a href=#659 id=659 data-nosnippet>659</a>                   type: postgres
+<a href=#660 id=660 data-nosnippet>660</a>                   url: postgres://localhost:5432/postgres
+<a href=#661 id=661 data-nosnippet>661</a>                 roles:
+<a href=#662 id=662 data-nosnippet>662</a>                 - type: table
+<a href=#663 id=663 data-nosnippet>663</a>                   name: role_table_level
+<a href=#664 id=664 data-nosnippet>664</a>                   grants:
+<a href=#665 id=665 data-nosnippet>665</a>                   - invalid
+<a href=#666 id=666 data-nosnippet>666</a>                   schemas:
+<a href=#667 id=667 data-nosnippet>667</a>                   - schema1
+<a href=#668 id=668 data-nosnippet>668</a>                   tables:
+<a href=#669 id=669 data-nosnippet>669</a>                   - table1
+<a href=#670 id=670 data-nosnippet>670</a>                   - table2
+<a href=#671 id=671 data-nosnippet>671</a>                   - table3
+<a href=#672 id=672 data-nosnippet>672</a>                 users: []
+<a href=#673 id=673 data-nosnippet>673</a>             "</span>};
+<a href=#674 id=674 data-nosnippet>674</a>
+<a href=#675 id=675 data-nosnippet>675</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
+<a href=#676 id=676 data-nosnippet>676</a>        file.write(_text.as_bytes())
+<a href=#677 id=677 data-nosnippet>677</a>            .expect(<span class="string">"failed to write to temp file"</span>);
+<a href=#678 id=678 data-nosnippet>678</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
+<a href=#679 id=679 data-nosnippet>679</a>
+<a href=#680 id=680 data-nosnippet>680</a>        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
+<a href=#681 id=681 data-nosnippet>681</a>    }
+<a href=#682 id=682 data-nosnippet>682</a>
+<a href=#683 id=683 data-nosnippet>683</a>    <span class="comment">// Test two role duplicated name error
+<a href=#684 id=684 data-nosnippet>684</a>    </span><span class="attr">#[test]
+<a href=#685 id=685 data-nosnippet>685</a>    #[should_panic(expected = <span class="string">"duplicated role name: role_table_level"</span>)]
+<a href=#686 id=686 data-nosnippet>686</a>    </span><span class="kw">fn </span>test_read_config_two_role_duplicated_name() {
+<a href=#687 id=687 data-nosnippet>687</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
+<a href=#688 id=688 data-nosnippet>688</a>                 connection:
+<a href=#689 id=689 data-nosnippet>689</a>                   type: postgres
+<a href=#690 id=690 data-nosnippet>690</a>                   url: postgres://localhost:5432/postgres
+<a href=#691 id=691 data-nosnippet>691</a>                 roles:
+<a href=#692 id=692 data-nosnippet>692</a>                 - type: table
+<a href=#693 id=693 data-nosnippet>693</a>                   name: role_table_level
+<a href=#694 id=694 data-nosnippet>694</a>                   grants:
+<a href=#695 id=695 data-nosnippet>695</a>                   - SELECT
+<a href=#696 id=696 data-nosnippet>696</a>                   - INSERT
+<a href=#697 id=697 data-nosnippet>697</a>                   schemas:
+<a href=#698 id=698 data-nosnippet>698</a>                   - schema1
+<a href=#699 id=699 data-nosnippet>699</a>                   tables:
+<a href=#700 id=700 data-nosnippet>700</a>                   - table1
+<a href=#701 id=701 data-nosnippet>701</a>                   - table2
+<a href=#702 id=702 data-nosnippet>702</a>                   - table3
+<a href=#703 id=703 data-nosnippet>703</a>                 - type: table
+<a href=#704 id=704 data-nosnippet>704</a>                   name: role_table_level
+<a href=#705 id=705 data-nosnippet>705</a>                   grants:
+<a href=#706 id=706 data-nosnippet>706</a>                   - ALL
+<a href=#707 id=707 data-nosnippet>707</a>                   schemas:
+<a href=#708 id=708 data-nosnippet>708</a>                   - schema1
+<a href=#709 id=709 data-nosnippet>709</a>                   tables:
+<a href=#710 id=710 data-nosnippet>710</a>                   - table1
+<a href=#711 id=711 data-nosnippet>711</a>                   - table2
+<a href=#712 id=712 data-nosnippet>712</a>                   - table3
+<a href=#713 id=713 data-nosnippet>713</a>                 users: []
+<a href=#714 id=714 data-nosnippet>714</a>             "</span>};
+<a href=#715 id=715 data-nosnippet>715</a>
+<a href=#716 id=716 data-nosnippet>716</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
+<a href=#717 id=717 data-nosnippet>717</a>        file.write(_text.as_bytes())
+<a href=#718 id=718 data-nosnippet>718</a>            .expect(<span class="string">"failed to write to temp file"</span>);
+<a href=#719 id=719 data-nosnippet>719</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
+<a href=#720 id=720 data-nosnippet>720</a>
+<a href=#721 id=721 data-nosnippet>721</a>        Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
+<a href=#722 id=722 data-nosnippet>722</a>    }
+<a href=#723 id=723 data-nosnippet>723</a>
+<a href=#724 id=724 data-nosnippet>724</a>    <span class="comment">// Test users config
+<a href=#725 id=725 data-nosnippet>725</a>    </span><span class="attr">#[test]
+<a href=#726 id=726 data-nosnippet>726</a>    </span><span class="kw">fn </span>test_read_config_users() {
+<a href=#727 id=727 data-nosnippet>727</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
+<a href=#728 id=728 data-nosnippet>728</a>                 connection:
+<a href=#729 id=729 data-nosnippet>729</a>                   type: postgres
+<a href=#730 id=730 data-nosnippet>730</a>                   url: postgres://postgres:postgres@localhost:5432/postgres
+<a href=#731 id=731 data-nosnippet>731</a>                 roles:
+<a href=#732 id=732 data-nosnippet>732</a>                 - type: database
+<a href=#733 id=733 data-nosnippet>733</a>                   name: role_database_level
+<a href=#734 id=734 data-nosnippet>734</a>                   grants:
+<a href=#735 id=735 data-nosnippet>735</a>                   - CREATE
+<a href=#736 id=736 data-nosnippet>736</a>                   - TEMP
+<a href=#737 id=737 data-nosnippet>737</a>                   databases:
+<a href=#738 id=738 data-nosnippet>738</a>                   - db1
+<a href=#739 id=739 data-nosnippet>739</a>                   - db2
+<a href=#740 id=740 data-nosnippet>740</a>                   - db3
+<a href=#741 id=741 data-nosnippet>741</a>                 - type: schema
+<a href=#742 id=742 data-nosnippet>742</a>                   name: role_schema_level
+<a href=#743 id=743 data-nosnippet>743</a>                   grants:
+<a href=#744 id=744 data-nosnippet>744</a>                   - ALL
+<a href=#745 id=745 data-nosnippet>745</a>                   schemas:
+<a href=#746 id=746 data-nosnippet>746</a>                   - schema1
+<a href=#747 id=747 data-nosnippet>747</a>                   - schema2
+<a href=#748 id=748 data-nosnippet>748</a>                   - schema3
+<a href=#749 id=749 data-nosnippet>749</a>                 - type: table
+<a href=#750 id=750 data-nosnippet>750</a>                   name: role_table_level
+<a href=#751 id=751 data-nosnippet>751</a>                   grants:
+<a href=#752 id=752 data-nosnippet>752</a>                   - SELECT
+<a href=#753 id=753 data-nosnippet>753</a>                   - INSERT
+<a href=#754 id=754 data-nosnippet>754</a>                   schemas:
+<a href=#755 id=755 data-nosnippet>755</a>                   - schema1
+<a href=#756 id=756 data-nosnippet>756</a>                   tables:
+<a href=#757 id=757 data-nosnippet>757</a>                   - table1
+<a href=#758 id=758 data-nosnippet>758</a>                   - table2
+<a href=#759 id=759 data-nosnippet>759</a>                   - table3
+<a href=#760 id=760 data-nosnippet>760</a>                 users:
+<a href=#761 id=761 data-nosnippet>761</a>                 - name: duyet
+<a href=#762 id=762 data-nosnippet>762</a>                   password: 123456
+<a href=#763 id=763 data-nosnippet>763</a>                   roles:
+<a href=#764 id=764 data-nosnippet>764</a>                   - role_database_level
+<a href=#765 id=765 data-nosnippet>765</a>                   - role_schema_level
+<a href=#766 id=766 data-nosnippet>766</a>                   - role_table_level
+<a href=#767 id=767 data-nosnippet>767</a>                 - name: duyet_without_password
+<a href=#768 id=768 data-nosnippet>768</a>                   roles:
+<a href=#769 id=769 data-nosnippet>769</a>                   - role_database_level
+<a href=#770 id=770 data-nosnippet>770</a>                   - role_schema_level
+<a href=#771 id=771 data-nosnippet>771</a>                   - role_table_level
+<a href=#772 id=772 data-nosnippet>772</a>             "</span>};
+<a href=#773 id=773 data-nosnippet>773</a>
+<a href=#774 id=774 data-nosnippet>774</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
+<a href=#775 id=775 data-nosnippet>775</a>        file.write(_text.as_bytes())
+<a href=#776 id=776 data-nosnippet>776</a>            .expect(<span class="string">"failed to write to temp file"</span>);
+<a href=#777 id=777 data-nosnippet>777</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
+<a href=#778 id=778 data-nosnippet>778</a>
+<a href=#779 id=779 data-nosnippet>779</a>        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
+<a href=#780 id=780 data-nosnippet>780</a>        <span class="macro">assert_eq!</span>(config.users.len(), <span class="number">2</span>);
+<a href=#781 id=781 data-nosnippet>781</a>
+<a href=#782 id=782 data-nosnippet>782</a>        <span class="comment">// Test user 1
+<a href=#783 id=783 data-nosnippet>783</a>        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_name(), <span class="string">"duyet"</span>);
+<a href=#784 id=784 data-nosnippet>784</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_password(), <span class="string">"123456"</span>);
+<a href=#785 id=785 data-nosnippet>785</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles().len(), <span class="number">3</span>);
+<a href=#786 id=786 data-nosnippet>786</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">0</span>], <span class="string">"role_database_level"</span>);
+<a href=#787 id=787 data-nosnippet>787</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">1</span>], <span class="string">"role_schema_level"</span>);
+<a href=#788 id=788 data-nosnippet>788</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles()[<span class="number">2</span>], <span class="string">"role_table_level"</span>);
+<a href=#789 id=789 data-nosnippet>789</a>
+<a href=#790 id=790 data-nosnippet>790</a>        <span class="comment">// Test sql create user
+<a href=#791 id=791 data-nosnippet>791</a>        </span><span class="macro">assert_eq!</span>(
+<a href=#792 id=792 data-nosnippet>792</a>            config.users[<span class="number">0</span>].to_sql_create().unwrap(),
+<a href=#793 id=793 data-nosnippet>793</a>            <span class="string">"CREATE USER duyet WITH PASSWORD '123456';"
+<a href=#794 id=794 data-nosnippet>794</a>        </span>);
+<a href=#795 id=795 data-nosnippet>795</a>
+<a href=#796 id=796 data-nosnippet>796</a>        <span class="comment">// Test sql create user without password
+<a href=#797 id=797 data-nosnippet>797</a>        </span><span class="macro">assert_eq!</span>(
+<a href=#798 id=798 data-nosnippet>798</a>            config.users[<span class="number">1</span>].to_sql_create().unwrap(),
+<a href=#799 id=799 data-nosnippet>799</a>            <span class="string">"CREATE USER duyet_without_password;"
+<a href=#800 id=800 data-nosnippet>800</a>        </span>);
+<a href=#801 id=801 data-nosnippet>801</a>
+<a href=#802 id=802 data-nosnippet>802</a>        <span class="comment">// Test sql drop user
+<a href=#803 id=803 data-nosnippet>803</a>        </span><span class="macro">assert_eq!</span>(
+<a href=#804 id=804 data-nosnippet>804</a>            config.users[<span class="number">0</span>].to_sql_drop().unwrap(),
+<a href=#805 id=805 data-nosnippet>805</a>            <span class="string">"DROP USER IF EXISTS duyet;"
+<a href=#806 id=806 data-nosnippet>806</a>        </span>);
+<a href=#807 id=807 data-nosnippet>807</a>    }
+<a href=#808 id=808 data-nosnippet>808</a>
+<a href=#809 id=809 data-nosnippet>809</a>    <span class="comment">// Test users config with revoke role by `-role_name`
+<a href=#810 id=810 data-nosnippet>810</a>    </span><span class="attr">#[test]
+<a href=#811 id=811 data-nosnippet>811</a>    </span><span class="kw">fn </span>test_read_config_users_exclude_role_by_minus_role_name() {
+<a href=#812 id=812 data-nosnippet>812</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
+<a href=#813 id=813 data-nosnippet>813</a>             connection:
+<a href=#814 id=814 data-nosnippet>814</a>               type: postgres
+<a href=#815 id=815 data-nosnippet>815</a>               url: postgres://postgres:postgres@localhost:5432/postgres
+<a href=#816 id=816 data-nosnippet>816</a>             roles:
+<a href=#817 id=817 data-nosnippet>817</a>             - type: database
+<a href=#818 id=818 data-nosnippet>818</a>               name: role_database_level
+<a href=#819 id=819 data-nosnippet>819</a>               grants:
+<a href=#820 id=820 data-nosnippet>820</a>               - CREATE
+<a href=#821 id=821 data-nosnippet>821</a>               - TEMP
+<a href=#822 id=822 data-nosnippet>822</a>               databases:
+<a href=#823 id=823 data-nosnippet>823</a>               - db1
+<a href=#824 id=824 data-nosnippet>824</a>               - db2
+<a href=#825 id=825 data-nosnippet>825</a>               - db3
+<a href=#826 id=826 data-nosnippet>826</a>             - type: schema
+<a href=#827 id=827 data-nosnippet>827</a>               name: role_schema_level
+<a href=#828 id=828 data-nosnippet>828</a>               grants:
+<a href=#829 id=829 data-nosnippet>829</a>               - ALL
+<a href=#830 id=830 data-nosnippet>830</a>               schemas:
+<a href=#831 id=831 data-nosnippet>831</a>               - schema1
+<a href=#832 id=832 data-nosnippet>832</a>               - schema2
+<a href=#833 id=833 data-nosnippet>833</a>               - schema3
+<a href=#834 id=834 data-nosnippet>834</a>             - type: table
+<a href=#835 id=835 data-nosnippet>835</a>               name: role_table_level
+<a href=#836 id=836 data-nosnippet>836</a>               grants:
+<a href=#837 id=837 data-nosnippet>837</a>               - SELECT
+<a href=#838 id=838 data-nosnippet>838</a>               - INSERT
+<a href=#839 id=839 data-nosnippet>839</a>               schemas:
+<a href=#840 id=840 data-nosnippet>840</a>               - schema1
+<a href=#841 id=841 data-nosnippet>841</a>               tables:
+<a href=#842 id=842 data-nosnippet>842</a>               - table1
+<a href=#843 id=843 data-nosnippet>843</a>               - table2
+<a href=#844 id=844 data-nosnippet>844</a>               - table3
+<a href=#845 id=845 data-nosnippet>845</a>             users:
+<a href=#846 id=846 data-nosnippet>846</a>             - name: duyet
+<a href=#847 id=847 data-nosnippet>847</a>               password: 123456
 <a href=#848 id=848 data-nosnippet>848</a>               roles:
-<a href=#849 id=849 data-nosnippet>849</a>               - role_database_level
-<a href=#850 id=850 data-nosnippet>850</a>               - role_schema_level
-<a href=#851 id=851 data-nosnippet>851</a>               - role_table_level
-<a href=#852 id=852 data-nosnippet>852</a>        "</span>};
-<a href=#853 id=853 data-nosnippet>853</a>
-<a href=#854 id=854 data-nosnippet>854</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
-<a href=#855 id=855 data-nosnippet>855</a>        file.write(_text.as_bytes())
-<a href=#856 id=856 data-nosnippet>856</a>            .expect(<span class="string">"failed to write to temp file"</span>);
-<a href=#857 id=857 data-nosnippet>857</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
+<a href=#849 id=849 data-nosnippet>849</a>               - -role_database_level
+<a href=#850 id=850 data-nosnippet>850</a>               - -role_schema_level
+<a href=#851 id=851 data-nosnippet>851</a>               - -role_table_level
+<a href=#852 id=852 data-nosnippet>852</a>             - name: duyet_without_password
+<a href=#853 id=853 data-nosnippet>853</a>               roles:
+<a href=#854 id=854 data-nosnippet>854</a>               - role_database_level
+<a href=#855 id=855 data-nosnippet>855</a>               - role_schema_level
+<a href=#856 id=856 data-nosnippet>856</a>               - role_table_level
+<a href=#857 id=857 data-nosnippet>857</a>        "</span>};
 <a href=#858 id=858 data-nosnippet>858</a>
-<a href=#859 id=859 data-nosnippet>859</a>        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
-<a href=#860 id=860 data-nosnippet>860</a>        <span class="macro">assert_eq!</span>(config.users.len(), <span class="number">2</span>);
-<a href=#861 id=861 data-nosnippet>861</a>
-<a href=#862 id=862 data-nosnippet>862</a>        <span class="comment">// Test user 1
-<a href=#863 id=863 data-nosnippet>863</a>        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_name(), <span class="string">"duyet"</span>);
-<a href=#864 id=864 data-nosnippet>864</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_password(), <span class="string">"123456"</span>);
-<a href=#865 id=865 data-nosnippet>865</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles().len(), <span class="number">3</span>);
-<a href=#866 id=866 data-nosnippet>866</a>    }
-<a href=#867 id=867 data-nosnippet>867</a>
-<a href=#868 id=868 data-nosnippet>868</a>    <span class="doccomment">/// Test find role by name, name can contains `-` in case of exclude role
-<a href=#869 id=869 data-nosnippet>869</a>    </span><span class="attr">#[test]
-<a href=#870 id=870 data-nosnippet>870</a>    </span><span class="kw">fn </span>test_find_role_by_name() {
-<a href=#871 id=871 data-nosnippet>871</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
-<a href=#872 id=872 data-nosnippet>872</a>             connection:
-<a href=#873 id=873 data-nosnippet>873</a>               type: postgres
-<a href=#874 id=874 data-nosnippet>874</a>               url: postgres://postgres:postgres@localhost:5432/postgres
-<a href=#875 id=875 data-nosnippet>875</a>             roles:
-<a href=#876 id=876 data-nosnippet>876</a>             - type: database
-<a href=#877 id=877 data-nosnippet>877</a>               name: role_database_level
-<a href=#878 id=878 data-nosnippet>878</a>               grants:
-<a href=#879 id=879 data-nosnippet>879</a>               - CREATE
-<a href=#880 id=880 data-nosnippet>880</a>               databases:
-<a href=#881 id=881 data-nosnippet>881</a>               - db1
-<a href=#882 id=882 data-nosnippet>882</a>             users: []
-<a href=#883 id=883 data-nosnippet>883</a>        "</span>};
-<a href=#884 id=884 data-nosnippet>884</a>
-<a href=#885 id=885 data-nosnippet>885</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
-<a href=#886 id=886 data-nosnippet>886</a>        file.write(_text.as_bytes())
-<a href=#887 id=887 data-nosnippet>887</a>            .expect(<span class="string">"failed to write to temp file"</span>);
-<a href=#888 id=888 data-nosnippet>888</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
+<a href=#859 id=859 data-nosnippet>859</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
+<a href=#860 id=860 data-nosnippet>860</a>        file.write(_text.as_bytes())
+<a href=#861 id=861 data-nosnippet>861</a>            .expect(<span class="string">"failed to write to temp file"</span>);
+<a href=#862 id=862 data-nosnippet>862</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
+<a href=#863 id=863 data-nosnippet>863</a>
+<a href=#864 id=864 data-nosnippet>864</a>        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
+<a href=#865 id=865 data-nosnippet>865</a>        <span class="macro">assert_eq!</span>(config.users.len(), <span class="number">2</span>);
+<a href=#866 id=866 data-nosnippet>866</a>
+<a href=#867 id=867 data-nosnippet>867</a>        <span class="comment">// Test user 1
+<a href=#868 id=868 data-nosnippet>868</a>        </span><span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_name(), <span class="string">"duyet"</span>);
+<a href=#869 id=869 data-nosnippet>869</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_password(), <span class="string">"123456"</span>);
+<a href=#870 id=870 data-nosnippet>870</a>        <span class="macro">assert_eq!</span>(config.users[<span class="number">0</span>].get_roles().len(), <span class="number">3</span>);
+<a href=#871 id=871 data-nosnippet>871</a>    }
+<a href=#872 id=872 data-nosnippet>872</a>
+<a href=#873 id=873 data-nosnippet>873</a>    <span class="doccomment">/// Test find role by name, name can contains `-` in case of exclude role
+<a href=#874 id=874 data-nosnippet>874</a>    </span><span class="attr">#[test]
+<a href=#875 id=875 data-nosnippet>875</a>    </span><span class="kw">fn </span>test_find_role_by_name() {
+<a href=#876 id=876 data-nosnippet>876</a>        <span class="kw">let </span>_text = <span class="macro">indoc!</span> {<span class="string">"
+<a href=#877 id=877 data-nosnippet>877</a>             connection:
+<a href=#878 id=878 data-nosnippet>878</a>               type: postgres
+<a href=#879 id=879 data-nosnippet>879</a>               url: postgres://postgres:postgres@localhost:5432/postgres
+<a href=#880 id=880 data-nosnippet>880</a>             roles:
+<a href=#881 id=881 data-nosnippet>881</a>             - type: database
+<a href=#882 id=882 data-nosnippet>882</a>               name: role_database_level
+<a href=#883 id=883 data-nosnippet>883</a>               grants:
+<a href=#884 id=884 data-nosnippet>884</a>               - CREATE
+<a href=#885 id=885 data-nosnippet>885</a>               databases:
+<a href=#886 id=886 data-nosnippet>886</a>               - db1
+<a href=#887 id=887 data-nosnippet>887</a>             users: []
+<a href=#888 id=888 data-nosnippet>888</a>        "</span>};
 <a href=#889 id=889 data-nosnippet>889</a>
-<a href=#890 id=890 data-nosnippet>890</a>        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
-<a href=#891 id=891 data-nosnippet>891</a>
-<a href=#892 id=892 data-nosnippet>892</a>        <span class="macro">assert!</span>(config
-<a href=#893 id=893 data-nosnippet>893</a>            .roles
-<a href=#894 id=894 data-nosnippet>894</a>            .iter()
-<a href=#895 id=895 data-nosnippet>895</a>            .find(|r| r.find(<span class="string">"role_database_level"</span>))
-<a href=#896 id=896 data-nosnippet>896</a>            .is_some());
-<a href=#897 id=897 data-nosnippet>897</a>
-<a href=#898 id=898 data-nosnippet>898</a>        <span class="comment">// Test find role by name with `-`
-<a href=#899 id=899 data-nosnippet>899</a>        </span><span class="macro">assert!</span>(config
-<a href=#900 id=900 data-nosnippet>900</a>            .roles
-<a href=#901 id=901 data-nosnippet>901</a>            .iter()
-<a href=#902 id=902 data-nosnippet>902</a>            .find(|r| r.find(<span class="string">"-role_database_level"</span>))
-<a href=#903 id=903 data-nosnippet>903</a>            .is_some());
-<a href=#904 id=904 data-nosnippet>904</a>    }
-<a href=#905 id=905 data-nosnippet>905</a>}</code></pre></div></section></main></body></html>
+<a href=#890 id=890 data-nosnippet>890</a>        <span class="kw">let </span><span class="kw-2">mut </span>file = NamedTempFile::new().expect(<span class="string">"failed to create temp file"</span>);
+<a href=#891 id=891 data-nosnippet>891</a>        file.write(_text.as_bytes())
+<a href=#892 id=892 data-nosnippet>892</a>            .expect(<span class="string">"failed to write to temp file"</span>);
+<a href=#893 id=893 data-nosnippet>893</a>        <span class="kw">let </span>path = PathBuf::from(file.path().to_str().unwrap());
+<a href=#894 id=894 data-nosnippet>894</a>
+<a href=#895 id=895 data-nosnippet>895</a>        <span class="kw">let </span>config = Config::new(<span class="kw-2">&amp;</span>path).expect(<span class="string">"failed to parse config"</span>);
+<a href=#896 id=896 data-nosnippet>896</a>
+<a href=#897 id=897 data-nosnippet>897</a>        <span class="macro">assert!</span>(config
+<a href=#898 id=898 data-nosnippet>898</a>            .roles
+<a href=#899 id=899 data-nosnippet>899</a>            .iter()
+<a href=#900 id=900 data-nosnippet>900</a>            .find(|r| r.find(<span class="string">"role_database_level"</span>))
+<a href=#901 id=901 data-nosnippet>901</a>            .is_some());
+<a href=#902 id=902 data-nosnippet>902</a>
+<a href=#903 id=903 data-nosnippet>903</a>        <span class="comment">// Test find role by name with `-`
+<a href=#904 id=904 data-nosnippet>904</a>        </span><span class="macro">assert!</span>(config
+<a href=#905 id=905 data-nosnippet>905</a>            .roles
+<a href=#906 id=906 data-nosnippet>906</a>            .iter()
+<a href=#907 id=907 data-nosnippet>907</a>            .find(|r| r.find(<span class="string">"-role_database_level"</span>))
+<a href=#908 id=908 data-nosnippet>908</a>            .is_some());
+<a href=#909 id=909 data-nosnippet>909</a>    }
+<a href=#910 id=910 data-nosnippet>910</a>}</code></pre></div></section></main></body></html>
