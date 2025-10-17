@@ -336,7 +336,7 @@ mod tests {
         assert_eq!(config.roles[0].get_databases()[2], "db3");
         assert_eq!(
             config.roles[0].to_sql("duyet"),
-            "GRANT CREATE, TEMP ON DATABASE db1, db2, db3 TO duyet;".to_string()
+            "GRANT CREATE, TEMP ON DATABASE \"db1\", \"db2\", \"db3\" TO \"duyet\";".to_string()
         );
 
         // Test role 2
@@ -350,7 +350,7 @@ mod tests {
         assert_eq!(config.roles[1].get_databases()[2], "db3");
         assert_eq!(
             config.roles[1].to_sql("duyet"),
-            "GRANT ALL PRIVILEGES ON DATABASE db1, db2, db3 TO duyet;".to_string()
+            "GRANT ALL PRIVILEGES ON DATABASE \"db1\", \"db2\", \"db3\" TO \"duyet\";".to_string()
         );
     }
 
@@ -430,7 +430,8 @@ mod tests {
         assert_eq!(config.roles[0].get_schemas()[2], "schema3");
         assert_eq!(
             config.roles[0].to_sql("duyet"),
-            "GRANT CREATE, USAGE ON SCHEMA schema1, schema2, schema3 TO duyet;".to_string()
+            "GRANT CREATE, USAGE ON SCHEMA \"schema1\", \"schema2\", \"schema3\" TO \"duyet\";"
+                .to_string()
         );
 
         // Test role 2
@@ -444,7 +445,8 @@ mod tests {
         assert_eq!(config.roles[1].get_schemas()[2], "schema3");
         assert_eq!(
             config.roles[1].to_sql("duyet"),
-            "GRANT ALL PRIVILEGES ON SCHEMA schema1, schema2, schema3 TO duyet;".to_string()
+            "GRANT ALL PRIVILEGES ON SCHEMA \"schema1\", \"schema2\", \"schema3\" TO \"duyet\";"
+                .to_string()
         );
     }
 
@@ -530,7 +532,7 @@ mod tests {
         assert_eq!(config.roles[0].get_tables()[2], "table3");
         assert_eq!(
             config.roles[0].to_sql("duyet"),
-            "GRANT SELECT, INSERT ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
+            "GRANT SELECT, INSERT ON \"schema1\".\"table1\", \"schema1\".\"table2\", \"schema1\".\"table3\" TO \"duyet\";"
         );
 
         // Test role 2
@@ -546,7 +548,7 @@ mod tests {
         assert_eq!(config.roles[1].get_tables()[2], "table3");
         assert_eq!(
             config.roles[1].to_sql("duyet"),
-            "GRANT ALL PRIVILEGES ON schema1.table1, schema1.table2, schema1.table3 TO duyet;"
+            "GRANT ALL PRIVILEGES ON \"schema1\".\"table1\", \"schema1\".\"table2\", \"schema1\".\"table3\" TO \"duyet\";"
                 .to_string()
         );
     }
@@ -624,27 +626,27 @@ mod tests {
 
         assert_eq!(
             config.roles[0].to_sql("duyet"),
-            "GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;"
+            "GRANT SELECT ON ALL TABLES IN SCHEMA \"schema1\" TO \"duyet\";"
         );
         assert_eq!(
             config.roles[1].to_sql("duyet"),
-            "GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet;"
+            "GRANT SELECT ON ALL TABLES IN SCHEMA \"schema1\" TO \"duyet\";"
         );
         assert_eq!(
             config.roles[2].to_sql("duyet"),
-            "GRANT SELECT ON ALL TABLES IN SCHEMA schema1 TO duyet; REVOKE SELECT ON schema1.but_excluded_me FROM duyet;"
+            "GRANT SELECT ON ALL TABLES IN SCHEMA \"schema1\" TO \"duyet\"; REVOKE SELECT ON \"schema1\".\"but_excluded_me\" FROM \"duyet\";"
         );
         assert_eq!(
             config.roles[3].to_sql("duyet"),
-            "GRANT SELECT ON schema1.table_a TO duyet; REVOKE SELECT ON schema1.table_b FROM duyet;"
+            "GRANT SELECT ON \"schema1\".\"table_a\" TO \"duyet\"; REVOKE SELECT ON \"schema1\".\"table_b\" FROM \"duyet\";"
         );
         assert_eq!(
             config.roles[4].to_sql("duyet"),
-            "REVOKE SELECT ON schema1.table_a, schema1.table_b FROM duyet;"
+            "REVOKE SELECT ON \"schema1\".\"table_a\", \"schema1\".\"table_b\" FROM \"duyet\";"
         );
         assert_eq!(
             config.roles[5].to_sql("duyet"),
-            "REVOKE SELECT ON ALL TABLES IN SCHEMA schema1 FROM duyet;"
+            "REVOKE SELECT ON ALL TABLES IN SCHEMA \"schema1\" FROM \"duyet\";"
         );
     }
 

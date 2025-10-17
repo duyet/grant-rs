@@ -497,8 +497,11 @@ impl std::str::FromStr for DbConnection {
     /// client.query("SELECT 1", &[]).unwrap();
     /// ```
     fn from_str(connection_info: &str) -> Result<Self> {
-        let client = Client::connect(connection_info, NoTls).unwrap();
-        let conn_config = connection_info.parse::<ConnConfig>().unwrap();
+        let client = Client::connect(connection_info, NoTls)
+            .map_err(|e| anyhow!("Failed to connect to database: {}", e))?;
+        let conn_config = connection_info
+            .parse::<ConnConfig>()
+            .map_err(|e| anyhow!("Failed to parse connection string: {}", e))?;
 
         Ok(Self {
             connection_info: connection_info.to_owned(),

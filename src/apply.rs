@@ -1,7 +1,7 @@
 use crate::config::{Config, Role, User as UserInConfig};
 use crate::connection::{DbConnection, User};
 use ansi_term::Colour::{Green, Purple, Red};
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use ascii_table::AsciiTable;
 use log::{error, info};
 use std::path::Path;
@@ -90,14 +90,22 @@ fn create_or_update_users(
                     let sql = user.to_sql_update()?;
 
                     if dryrun {
-                        info!("{}: {}", Purple.paint("Dry-run"), Purple.paint(&sql));
+                        info!(
+                            "{}: {}",
+                            Purple.paint("Dry-run"),
+                            Purple.paint(sanitize_sql_for_logging(&sql))
+                        );
                         summary.push(vec![
                             user.name.to_string(),
                             Green.paint("would update password").to_string(),
                         ]);
                     } else {
                         conn.execute(&sql, &[])?;
-                        info!("{}: {}", Green.paint("Success"), Purple.paint(&sql));
+                        info!(
+                            "{}: {}",
+                            Green.paint("Success"),
+                            Purple.paint(sanitize_sql_for_logging(&sql))
+                        );
                         summary.push(vec![user.name.clone(), "password updated".to_string()]);
                     }
                 } else {
@@ -114,15 +122,26 @@ fn create_or_update_users(
                 let sql = user.to_sql_create()?;
 
                 if dryrun {
-                    info!("{}: {}", Purple.paint("Dry-run"), &sql);
+                    info!(
+                        "{}: {}",
+                        Purple.paint("Dry-run"),
+                        sanitize_sql_for_logging(&sql)
+                    );
                     summary.push(vec![
                         user.name.clone(),
-                        format!("would create (dryrun) {}", sql),
+                        format!("would create (dryrun) {}", sanitize_sql_for_logging(&sql)),
                     ]);
                 } else {
                     conn.execute(&sql, &[])?;
-                    info!("{}: {}", Green.paint("Success"), &sql);
-                    summary.push(vec![user.name.clone(), format!("created {}", sql)]);
+                    info!(
+                        "{}: {}",
+                        Green.paint("Success"),
+                        sanitize_sql_for_logging(&sql)
+                    );
+                    summary.push(vec![
+                        user.name.clone(),
+                        format!("created {}", sanitize_sql_for_logging(&sql)),
+                    ]);
                 }
             }
         }
@@ -194,21 +213,26 @@ fn create_or_update_privileges(
             };
 
             if !dryrun {
-                let nrows = conn.execute(&sql, &[]).unwrap_or_else(|e| {
-                    error!("{}: {}", Red.paint("Error"), sql);
-                    error!("  -> {}: {}", Red.paint("Error details"), e);
-                    status = "error".to_string();
-
-                    -1
-                });
-
-                if nrows > -1 {
-                    info!(
-                        "{}: {} {}",
-                        Green.paint("Success"),
-                        Purple.paint(sql),
-                        format!("(updated {} row(s))", nrows)
-                    );
+                match conn.execute(&sql, &[]) {
+                    Ok(nrows) => {
+                        info!(
+                            "{}: {} {}",
+                            Green.paint("Success"),
+                            Purple.paint(&sql),
+                            format!("(updated {} row(s))", nrows)
+                        );
+                        status = "updated".to_string();
+                    }
+                    Err(e) => {
+                        error!("{}: {}", Red.paint("Error"), sql);
+                        error!("  -> {}: {}", Red.paint("Error details"), e);
+                        status = "error".to_string();
+                        // Propagate the error instead of silently continuing
+                        return Err(e).context(format!(
+                            "Failed to execute privilege grant for user '{}' role '{}'",
+                            user.name, role_name
+                        ));
+                    }
                 }
             } else {
                 info!("{}: {}", Purple.paint("Dry-run"), sql);
@@ -234,6 +258,59 @@ fn create_or_update_privileges(
     print_summary(summary);
 
     Ok(())
+}
+
+/// Sanitize SQL for logging to prevent password leakage
+/// Replace password values with [REDACTED]
+fn sanitize_sql_for_logging(sql: &str) -> String {
+    // Simple pattern: look for "PASSWORD '" and replace content until next "'"
+    let mut result = String::new();
+    let bytes = sql.as_bytes();
+    let mut i = 0;
+
+    while i < bytes.len() {
+        // Check for PASSWORD keyword (case-insensitive)
+        if i + 8 < bytes.len()
+            && &bytes[i..i + 8].to_ascii_uppercase() == b"PASSWORD"
+            && (i == 0 || !bytes[i - 1].is_ascii_alphanumeric())
+        {
+            result.push_str("PASSWORD");
+            i += 8;
+
+            // Skip whitespace
+            while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+                result.push(bytes[i] as char);
+                i += 1;
+            }
+
+            // Replace quoted password with [REDACTED]
+            if i < bytes.len() && bytes[i] == b'\'' {
+                result.push('\'');
+                i += 1;
+
+                // Skip content until next unescaped quote
+                while i < bytes.len() {
+                    if bytes[i] == b'\'' {
+                        // Check for escaped quote (doubled single quote)
+                        if i + 1 < bytes.len() && bytes[i + 1] == b'\'' {
+                            i += 2; // Skip both quotes
+                            continue;
+                        }
+                        // Found closing quote
+                        result.push_str("[REDACTED]'");
+                        i += 1;
+                        break;
+                    }
+                    i += 1;
+                }
+            }
+        } else {
+            result.push(bytes[i] as char);
+            i += 1;
+        }
+    }
+
+    result
 }
 
 /// Print summary table

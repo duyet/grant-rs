@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::connection::{DbConnection, UserDatabaseRole, UserSchemaRole, UserTableRole};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use ascii_table::AsciiTable;
 use indoc::indoc;
 use log::info;
@@ -9,11 +9,15 @@ pub fn inspect(config: &Config) -> Result<()> {
     let mut conn = DbConnection::new(config)?;
 
     let users_in_db = conn.get_users()?;
+    let current_db_name = conn
+        .get_current_database()
+        .map(|s| s.to_string())
+        .ok_or_else(|| anyhow!("Could not determine current database"))?;
+
     let user_database_privileges = conn
-        .get_user_database_privileges()
-        .unwrap()
+        .get_user_database_privileges()?
         .into_iter()
-        .filter(|p| p.database_name == conn.get_current_database().unwrap())
+        .filter(|p| p.database_name == current_db_name)
         .collect::<Vec<_>>();
     let user_schema_privileges = conn.get_user_schema_privileges()?;
     let user_table_privileges = conn.get_user_table_privileges()?;
