@@ -187,15 +187,34 @@
 //! cargo test
 //! ```
 //!
-//! # TODO
+//! # Features
 //!
-//! - [x] Support reading connection info from environment variables
-//! - [ ] Support store encrypted password in Git
-//! - [x] Support Postgres and Redshift
-//! - [ ] Support change password
-//! - [ ] Visuallization (who can see what?)
-//! - [ ] Apply show more detail about diff changes
-//! - [ ] Inspect show more detail about user privileges
+//! - [x] GitOps-style declarative configuration (YAML)
+//! - [x] Support for PostgreSQL and Redshift
+//! - [x] Three privilege levels: DATABASE, SCHEMA, TABLE
+//! - [x] User lifecycle management (create, update, delete with `--delete-users`)
+//! - [x] Environment variable substitution in connection strings
+//! - [x] Dry-run mode for safe testing
+//! - [x] SQL injection prevention with identifier escaping
+//! - [x] Configuration validation
+//! - [x] Database inspection tools
+//! - [x] Password generation (including MD5 for Redshift)
+//!
+//! # Current Limitations
+//!
+//! - Privileges are **not automatically revoked** when removed from config
+//!   - Use `--delete-users` to fully reset user privileges, or
+//!   - Manually revoke using SQL before re-applying
+//! - Superusers are never automatically deleted (safety measure)
+//! - No built-in visualization of privilege relationships
+//!
+//! # Roadmap
+//!
+//! - [ ] Add `--revoke-unmanaged-privileges` flag for automatic privilege cleanup
+//! - [ ] Support for encrypted password storage in Git
+//! - [ ] Enhanced diff reporting in apply command
+//! - [ ] Privilege visualization (who can see what?)
+//! - [ ] Support for row-level security policies
 //!
 //! # LICENSE
 //!

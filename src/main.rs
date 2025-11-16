@@ -48,11 +48,16 @@ fn main() -> Result<()> {
             inspect::inspect(&value)?;
         }
 
-        Command::Apply { file, dryrun, all } => {
+        Command::Apply {
+            file,
+            dryrun,
+            all,
+            delete_users,
+        } => {
             if all {
-                apply::apply_all(&file, dryrun)?;
+                apply::apply_all(&file, dryrun, delete_users)?;
             } else {
-                apply::apply(&file, dryrun)?;
+                apply::apply(&file, dryrun, delete_users)?;
             }
         }
     }

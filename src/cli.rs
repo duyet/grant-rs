@@ -50,6 +50,11 @@ pub enum Command {
         /// Apply all files in the current folder or target folder (if --file is a folder)
         #[structopt(short, long)]
         all: bool,
+
+        /// Delete database users that exist in DB but not in config (GitOps mode)
+        /// WARNING: This is a destructive operation. Users will be permanently deleted.
+        #[structopt(long)]
+        delete_users: bool,
     },
 
     /// Validate a configuration file or
