@@ -86,7 +86,11 @@ impl RoleTableLevel {
             .collect::<Vec<_>>();
         let escaped_user = escape_identifier(user);
 
-        // if `tables` contains `ALL`, process it first
+        // Check if `ALL` is present and track whether we should skip individual table processing
+        let has_all_grant = tables.iter().any(|t| t.name == "ALL" && t.sign == "+");
+        let has_all_revoke = tables.iter().any(|t| t.name == "ALL" && t.sign == "-");
+
+        // If `tables` contains `ALL`, process it
         if let Some(table_named_all) = tables.iter().find(|t| t.name == "ALL") {
             let schema_list = escaped_schemas.join(", ");
             let sql = match table_named_all.sign.as_str() {
@@ -103,48 +107,47 @@ impl RoleTableLevel {
             sqls.push(sql);
         }
 
-        // grant on specific tables with sign `+` (excluding `ALL`)
-        let grant_tables = tables
-            .iter()
-            .filter(|x| x.sign == "+" && x.name != "ALL")
-            .collect::<Vec<_>>();
-        if !grant_tables.is_empty() {
-            let _with_schema = grant_tables
+        // Grant on specific tables with sign `+` (only if ALL+ wasn't specified)
+        // When ALL+ exists, individual + tables are already included
+        if !has_all_grant {
+            let grant_tables = tables
                 .iter()
-                .flat_map(|t| {
-                    if t.name.contains('.') {
-                        // For schema-qualified names, escape each part separately
-                        let parts: Vec<&str> = t.name.split('.').collect();
-                        if parts.len() == 2 {
-                            vec![format!(
-                                "{}.{}",
-                                escape_identifier(parts[0]),
-                                escape_identifier(parts[1])
-                            )]
-                        } else {
-                            vec![escape_identifier(&t.name)]
-                        }
-                    } else {
-                        self.schemas
-                            .iter()
-                            .map(|s| {
-                                format!(
+                .filter(|x| x.sign == "+" && x.name != "ALL")
+                .collect::<Vec<_>>();
+            if !grant_tables.is_empty() {
+                let _with_schema = grant_tables
+                    .iter()
+                    .flat_map(|t| {
+                        if t.name.contains('.') {
+                            // For schema-qualified names, escape each part separately
+                            let parts: Vec<&str> = t.name.split('.').collect();
+                            if parts.len() == 2 {
+                                vec![format!(
                                     "{}.{}",
-                                    escape_identifier(s),
-                                    escape_identifier(&t.name)
-                                )
-                            })
-                            .collect::<Vec<_>>()
-                    }
-                })
-                .collect::<Vec<String>>()
-                .join(", ");
+                                    escape_identifier(parts[0]),
+                                    escape_identifier(parts[1])
+                                )]
+                            } else {
+                                vec![escape_identifier(&t.name)]
+                            }
+                        } else {
+                            self.schemas
+                                .iter()
+                                .map(|s| {
+                                    format!("{}.{}", escape_identifier(s), escape_identifier(&t.name))
+                                })
+                                .collect::<Vec<_>>()
+                        }
+                    })
+                    .collect::<Vec<String>>()
+                    .join(", ");
 
-            let sql = format!("GRANT {} ON {} TO {};", grants, _with_schema, escaped_user);
-            sqls.push(sql);
+                let sql = format!("GRANT {} ON {} TO {};", grants, _with_schema, escaped_user);
+                sqls.push(sql);
+            }
         }
 
-        // revoke on specific tables with sign `-` (excluding `ALL`)
+        // Revoke on specific tables with sign `-` (excluding `ALL`)
         let revoke_tables = tables
             .iter()
             .filter(|x| x.sign == "-" && x.name != "ALL")
@@ -169,11 +172,7 @@ impl RoleTableLevel {
                         self.schemas
                             .iter()
                             .map(|s| {
-                                format!(
-                                    "{}.{}",
-                                    escape_identifier(s),
-                                    escape_identifier(&t.name)
-                                )
+                                format!("{}.{}", escape_identifier(s), escape_identifier(&t.name))
                             })
                             .collect::<Vec<_>>()
                     }

@@ -65,7 +65,10 @@ mod tests {
     #[test]
     fn test_escape_identifier_with_quotes() {
         assert_eq!(escape_identifier("my\"table"), "\"my\"\"table\"");
-        assert_eq!(escape_identifier("\"already\"quoted\""), "\"\"\"already\"\"quoted\"\"\"");
+        assert_eq!(
+            escape_identifier("\"already\"quoted\""),
+            "\"\"\"already\"\"quoted\"\"\""
+        );
     }
 
     #[test]

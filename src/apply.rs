@@ -213,11 +213,7 @@ fn create_or_update_users(
                 let sql = format!("DROP USER IF EXISTS {};", escape_identifier(&user.name));
 
                 if dryrun {
-                    info!(
-                        "{}: {}",
-                        Purple.paint("Dry-run"),
-                        Red.paint(&sql)
-                    );
+                    info!("{}: {}", Purple.paint("Dry-run"), Red.paint(&sql));
                     summary.push(vec![
                         user.name.clone(),
                         Red.paint("would delete").to_string(),
@@ -225,15 +221,8 @@ fn create_or_update_users(
                 } else {
                     match conn.execute(&sql, &[]) {
                         Ok(_) => {
-                            info!(
-                                "{}: {}",
-                                Green.paint("Success"),
-                                Purple.paint(&sql)
-                            );
-                            summary.push(vec![
-                                user.name.clone(),
-                                Red.paint("deleted").to_string(),
-                            ]);
+                            info!("{}: {}", Green.paint("Success"), Purple.paint(&sql));
+                            summary.push(vec![user.name.clone(), Red.paint("deleted").to_string()]);
                         }
                         Err(e) => {
                             error!("{}: {}", Red.paint("Error"), sql);
@@ -251,7 +240,9 @@ fn create_or_update_users(
                 // User exists in DB but not in config, and delete_users is false
                 summary.push(vec![
                     user.name.clone(),
-                    Yellow.paint("not in config (use --delete-users to remove)").to_string(),
+                    Yellow
+                        .paint("not in config (use --delete-users to remove)")
+                        .to_string(),
                 ]);
             }
         }
