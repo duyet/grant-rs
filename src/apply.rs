@@ -5,6 +5,7 @@ use anyhow::{anyhow, Context, Result};
 use ascii_table::AsciiTable;
 use log::{error, info};
 use std::path::Path;
+use walkdir::WalkDir;
 
 /// Read the config from the given path and apply it to the database.
 /// If the dryrun flag is set, the changes will not be applied.
@@ -24,10 +25,9 @@ pub fn apply(target: &Path, dryrun: bool) -> Result<()> {
     let mut conn = DbConnection::new(&config)?;
 
     let users_in_db = conn.get_users()?;
-    let users_in_config = config.users.clone();
 
     // Apply users changes (new users, update password)
-    create_or_update_users(&mut conn, &users_in_db, &users_in_config, dryrun)?;
+    create_or_update_users(&mut conn, &users_in_db, &config.users, dryrun)?;
 
     // Apply roles privileges to cluster (database role, schema role, table role)
     create_or_update_privileges(&mut conn, &config, dryrun)?;
@@ -39,15 +39,15 @@ pub fn apply(target: &Path, dryrun: bool) -> Result<()> {
 pub fn apply_all(target: &Path, dryrun: bool) -> Result<()> {
     let target = target.to_path_buf();
 
-    // Scan recursively for config files (.yaml for .yml) in target directory
+    // Scan recursively for config files (.yaml or .yml) in target directory
     let mut config_files = Vec::new();
-    for entry in std::fs::read_dir(target)? {
+    for entry in WalkDir::new(&target) {
         let entry = entry?;
         let path = entry.path();
         if path.is_file() {
             if let Some(ext) = path.extension() {
                 if ext == "yaml" || ext == "yml" {
-                    config_files.push(path);
+                    config_files.push(path.to_path_buf());
                 }
             }
         }

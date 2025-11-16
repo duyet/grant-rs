@@ -4,6 +4,7 @@ pub mod role;
 mod role_database;
 mod role_schema;
 mod role_table;
+pub mod sql_utils;
 pub mod user;
 
 pub use config_base::Config;

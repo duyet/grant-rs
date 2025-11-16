@@ -28,9 +28,9 @@ pub fn inspect(config: &Config) -> Result<()> {
             vec![
                 u.name.clone(),
                 u.user_super.to_string(),
-                get_user_database_privileges(&user_database_privileges, &u.name).unwrap(),
-                get_user_schema_privileges(&user_schema_privileges, &u.name).unwrap(),
-                get_user_table_privileges(&user_table_privileges, &u.name).unwrap(),
+                get_user_database_privileges(&user_database_privileges, &u.name),
+                get_user_schema_privileges(&user_schema_privileges, &u.name),
+                get_user_table_privileges(&user_table_privileges, &u.name),
             ]
         })
         .collect::<Vec<_>>();
@@ -94,34 +94,30 @@ pub fn inspect(config: &Config) -> Result<()> {
 }
 
 /// Get current user database privileges
-fn get_user_database_privileges(privileges: &[UserDatabaseRole], user: &str) -> Result<String> {
-    let privileges = privileges
+fn get_user_database_privileges(privileges: &[UserDatabaseRole], user: &str) -> String {
+    privileges
         .iter()
         .filter(|p| p.name == *user) // is current user
         .filter(|p| p.has_create || p.has_temp) // has at least create or temp
         .map(|p| p.perm_to_string(true))
         .collect::<Vec<_>>()
-        .join(", ");
-
-    Ok(privileges)
+        .join(", ")
 }
 
 /// Get current user schema privileges
-fn get_user_schema_privileges(privileges: &[UserSchemaRole], user: &str) -> Result<String> {
-    let privileges = privileges
+fn get_user_schema_privileges(privileges: &[UserSchemaRole], user: &str) -> String {
+    privileges
         .iter()
         .filter(|p| p.name == *user)
         .filter(|p| p.has_create || p.has_usage)
         .map(|p| p.perm_to_string(true))
         .collect::<Vec<_>>()
-        .join(", ");
-
-    Ok(privileges)
+        .join(", ")
 }
 
 /// Get current user schema.table privileges
-fn get_user_table_privileges(privileges: &[UserTableRole], user: &str) -> Result<String> {
-    let privileges = privileges
+fn get_user_table_privileges(privileges: &[UserTableRole], user: &str) -> String {
+    privileges
         .iter()
         .filter(|p| p.name == *user) // is current user
         .filter(|p| {
@@ -129,7 +125,5 @@ fn get_user_table_privileges(privileges: &[UserTableRole], user: &str) -> Result
         }) // has at least create or select
         .map(|p| p.perm_to_string(true))
         .collect::<Vec<_>>()
-        .join(", ");
-
-    Ok(privileges)
+        .join(", ")
 }

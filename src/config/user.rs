@@ -1,3 +1,4 @@
+use super::sql_utils::escape_sql_string;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
@@ -12,11 +13,6 @@ pub struct User {
 }
 
 impl User {
-    /// Escape single quotes in a string for SQL safety
-    fn escape_sql_string(s: &str) -> String {
-        s.replace("'", "''")
-    }
-
     /// Validate and format username for SQL (must be valid identifier)
     fn format_username(name: &str) -> Result<String> {
         if name.is_empty() {
@@ -39,7 +35,7 @@ impl User {
     pub fn to_sql_create(&self) -> Result<String> {
         let username = Self::format_username(&self.name)?;
         let password = match &self.password {
-            Some(p) => format!(" WITH PASSWORD '{}'", Self::escape_sql_string(p)),
+            Some(p) => format!(" WITH PASSWORD '{}'", escape_sql_string(p)),
             None => "".to_string(),
         };
 
@@ -49,7 +45,7 @@ impl User {
     pub fn to_sql_update(&self) -> Result<String> {
         let username = Self::format_username(&self.name)?;
         let password = match &self.password {
-            Some(p) => format!(" WITH PASSWORD '{}'", Self::escape_sql_string(p)),
+            Some(p) => format!(" WITH PASSWORD '{}'", escape_sql_string(p)),
             None => "".to_string(),
         };
 

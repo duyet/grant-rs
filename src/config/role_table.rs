@@ -1,4 +1,5 @@
 use super::role::RoleValidate;
+use super::sql_utils::escape_identifier;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -55,13 +56,6 @@ impl Table {
 }
 
 impl RoleTableLevel {
-    /// Escape and quote a PostgreSQL identifier to prevent SQL injection
-    fn escape_identifier(ident: &str) -> String {
-        // PostgreSQL identifiers are quoted with double quotes
-        // Escape double quotes by doubling them
-        format!("\"{}\"", ident.replace("\"", "\"\""))
-    }
-
     /// Generate role table to sql.
     ///
     /// ```sql
@@ -88,11 +82,11 @@ impl RoleTableLevel {
         let escaped_schemas = self
             .schemas
             .iter()
-            .map(|s| Self::escape_identifier(s))
+            .map(|s| escape_identifier(s))
             .collect::<Vec<_>>();
-        let escaped_user = Self::escape_identifier(user);
+        let escaped_user = escape_identifier(user);
 
-        // if `tables` only contains `ALL`
+        // if `tables` contains `ALL`, process it first
         if let Some(table_named_all) = tables.iter().find(|t| t.name == "ALL") {
             let schema_list = escaped_schemas.join(", ");
             let sql = match table_named_all.sign.as_str() {
@@ -107,17 +101,13 @@ impl RoleTableLevel {
                 _ => "".to_string(),
             };
             sqls.push(sql);
-
-            // remove name `ALL` and all tables start with `+`
-            for table in tables.clone() {
-                if table.name == "ALL" || table.sign == "+" {
-                    tables.retain(|x| x != &table);
-                }
-            }
         }
 
-        // grant on tables sign `+`
-        let grant_tables = tables.iter().filter(|x| x.sign == "+").collect::<Vec<_>>();
+        // grant on specific tables with sign `+` (excluding `ALL`)
+        let grant_tables = tables
+            .iter()
+            .filter(|x| x.sign == "+" && x.name != "ALL")
+            .collect::<Vec<_>>();
         if !grant_tables.is_empty() {
             let _with_schema = grant_tables
                 .iter()
@@ -128,11 +118,11 @@ impl RoleTableLevel {
                         if parts.len() == 2 {
                             vec![format!(
                                 "{}.{}",
-                                Self::escape_identifier(parts[0]),
-                                Self::escape_identifier(parts[1])
+                                escape_identifier(parts[0]),
+                                escape_identifier(parts[1])
                             )]
                         } else {
-                            vec![Self::escape_identifier(&t.name)]
+                            vec![escape_identifier(&t.name)]
                         }
                     } else {
                         self.schemas
@@ -140,8 +130,8 @@ impl RoleTableLevel {
                             .map(|s| {
                                 format!(
                                     "{}.{}",
-                                    Self::escape_identifier(s),
-                                    Self::escape_identifier(&t.name)
+                                    escape_identifier(s),
+                                    escape_identifier(&t.name)
                                 )
                             })
                             .collect::<Vec<_>>()
@@ -152,17 +142,13 @@ impl RoleTableLevel {
 
             let sql = format!("GRANT {} ON {} TO {};", grants, _with_schema, escaped_user);
             sqls.push(sql);
-
-            // remove all tables start with `+`
-            for table in tables.clone() {
-                if table.sign == "+" {
-                    tables.retain(|x| x != &table);
-                }
-            }
         }
 
-        // revoke on tables start with `-`
-        let revoke_tables = tables.iter().filter(|x| x.sign == "-").collect::<Vec<_>>();
+        // revoke on specific tables with sign `-` (excluding `ALL`)
+        let revoke_tables = tables
+            .iter()
+            .filter(|x| x.sign == "-" && x.name != "ALL")
+            .collect::<Vec<_>>();
         if !revoke_tables.is_empty() {
             let _with_schema = revoke_tables
                 .iter()
@@ -173,11 +159,11 @@ impl RoleTableLevel {
                         if parts.len() == 2 {
                             vec![format!(
                                 "{}.{}",
-                                Self::escape_identifier(parts[0]),
-                                Self::escape_identifier(parts[1])
+                                escape_identifier(parts[0]),
+                                escape_identifier(parts[1])
                             )]
                         } else {
-                            vec![Self::escape_identifier(&t.name)]
+                            vec![escape_identifier(&t.name)]
                         }
                     } else {
                         self.schemas
@@ -185,8 +171,8 @@ impl RoleTableLevel {
                             .map(|s| {
                                 format!(
                                     "{}.{}",
-                                    Self::escape_identifier(s),
-                                    Self::escape_identifier(&t.name)
+                                    escape_identifier(s),
+                                    escape_identifier(&t.name)
                                 )
                             })
                             .collect::<Vec<_>>()
