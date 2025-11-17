@@ -176,11 +176,7 @@ impl RoleTableLevel {
                         self.schemas
                             .iter()
                             .map(|s| {
-                                format!(
-                                    "{}.{}",
-                                    escape_identifier(s),
-                                    escape_identifier(&t.name)
-                                )
+                                format!("{}.{}", escape_identifier(s), escape_identifier(&t.name))
                             })
                             .collect::<Vec<_>>()
                     }

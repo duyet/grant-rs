@@ -12,7 +12,7 @@
 /// # Examples
 ///
 /// ```
-/// use grant_rs::config::sql_utils::escape_identifier;
+/// use grant::config::sql_utils::escape_identifier;
 ///
 /// assert_eq!(escape_identifier("users"), "\"users\"");
 /// assert_eq!(escape_identifier("my\"table"), "\"my\"\"table\"");
@@ -37,7 +37,7 @@ pub fn escape_identifier(ident: &str) -> String {
 /// # Examples
 ///
 /// ```
-/// use grant_rs::config::sql_utils::escape_sql_string;
+/// use grant::config::sql_utils::escape_sql_string;
 ///
 /// assert_eq!(escape_sql_string("password"), "password");
 /// assert_eq!(escape_sql_string("pass'word"), "pass''word");
