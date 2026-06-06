@@ -515,21 +515,23 @@ impl std::str::FromStr for DbConnection {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::sql_utils::{escape_identifier, escape_sql_string};
     use rand::{thread_rng, Rng};
     use std::str::FromStr;
 
     fn drop_user(db: &mut DbConnection, name: &str) {
-        let sql = &format!("DROP USER IF EXISTS {}", name);
-        db.execute(sql, &[]).unwrap();
+        let sql = format!("DROP USER IF EXISTS {}", escape_identifier(name));
+        db.execute(&sql, &[]).unwrap();
     }
 
     fn create_user(db: &mut DbConnection, user: &User) {
-        let mut sql = format!("CREATE USER {} ", user.name);
+        let mut sql = format!("CREATE USER {} ", escape_identifier(&user.name));
         if user.user_createdb {
             sql += "CREATEDB"
         }
         if !user.password.is_empty() {
-            sql += &format!(" PASSWORD '{}'", user.password)
+            let escaped_password = escape_sql_string(&user.password);
+            sql += &format!(" PASSWORD '{}'", escaped_password)
         }
 
         db.execute(&sql, &[]).unwrap();

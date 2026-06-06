@@ -34,11 +34,22 @@ pub fn validate_target(target: &Path) -> Result<()> {
             }
         }
 
-        for file in files {
-            // Validate but not panic
-            validate_file(&file).unwrap_or_else(|e| {
+        // Collect all validation errors
+        let mut errors = vec![];
+        for file in &files {
+            if let Err(e) = validate_file(file) {
                 println!("{}", e);
-            });
+                errors.push(file.clone());
+            }
+        }
+
+        // Return error if any files failed validation
+        if !errors.is_empty() {
+            return Err(anyhow!(
+                "{} - {} file(s) failed validation",
+                Red.paint("Failed"),
+                errors.len()
+            ));
         }
 
         return Ok(());

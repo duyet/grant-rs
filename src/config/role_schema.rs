@@ -1,4 +1,5 @@
 use super::role::RoleValidate;
+use super::sql_utils::escape_identifier;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -27,13 +28,6 @@ pub struct RoleSchemaLevel {
 }
 
 impl RoleSchemaLevel {
-    /// Escape and quote a PostgreSQL identifier to prevent SQL injection
-    fn escape_identifier(ident: &str) -> String {
-        // PostgreSQL identifiers are quoted with double quotes
-        // Escape double quotes by doubling them
-        format!("\"{}\"", ident.replace("\"", "\"\""))
-    }
-
     /// Generate role schema to sql.
     ///
     /// ```sql
@@ -53,10 +47,10 @@ impl RoleSchemaLevel {
         let escaped_schemas = self
             .schemas
             .iter()
-            .map(|s| Self::escape_identifier(s))
+            .map(|s| escape_identifier(s))
             .collect::<Vec<_>>()
             .join(", ");
-        let escaped_user = Self::escape_identifier(user);
+        let escaped_user = escape_identifier(user);
 
         // grant on schemas to user
         let sql = format!(
