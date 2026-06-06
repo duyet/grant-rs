@@ -1,9 +1,9 @@
 (function() {
-    var implementors = Object.fromEntries([["grant",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.90.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"grant/config/role/enum.RoleLevelType.html\" title=\"enum grant::config::role::RoleLevelType\">RoleLevelType</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.90.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"struct\" href=\"grant/config/config_base/struct.Config.html\" title=\"struct grant::config::config_base::Config\">Config</a>"]]]]);
+    const implementors = Object.fromEntries([["grant",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.96.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"grant/config/role/enum.RoleLevelType.html\" title=\"enum grant::config::role::RoleLevelType\">RoleLevelType</a>",0],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.96.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"struct\" href=\"grant/config/config_base/struct.Config.html\" title=\"struct grant::config::config_base::Config\">Config</a>",0]]]]);
     if (window.register_implementors) {
         window.register_implementors(implementors);
     } else {
         window.pending_implementors = implementors;
     }
 })()
-//{"start":57,"fragment_lengths":[582]}
+//{"start":59,"fragment_lengths":[586]}

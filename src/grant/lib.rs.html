@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="grant" data-themes="" data-resource-suffix="" data-rustdoc-version="1.90.0 (1159e78c4 2025-09-14)" data-channel="1.90.0" data-search-js="search-fa3e91e5.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-68b7e25d.js"></script><script defer src="../../static.files/src-script-813739b1.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-eebb9057.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">grant/</div>lib.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! An open-source project that aims to manage Redshift database roles and privileges in GitOps style, written in Rust.
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-17e0aaed.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="grant" data-themes="" data-resource-suffix="" data-rustdoc-version="1.96.0 (ac68faa20 2026-05-25)" data-channel="1.96.0" data-search-js="search-b5634cc7.js" data-stringdex-js="stringdex-2da4960a.js" data-settings-js="settings-170eb4bf.js" ><script src="../../static.files/storage-41dd4d93.js"></script><script defer src="../../static.files/src-script-813739b1.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5013f961.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">grant/</div>lib.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! An open-source project that aims to manage Redshift database roles and privileges in GitOps style, written in Rust.
 <a href=#2 id=2 data-nosnippet>2</a>//!
 <a href=#3 id=3 data-nosnippet>3</a>//! [**Home**](https://github.com/duyet/grant.rs) | [**Documentation**](https://docs.rs/grant)
 <a href=#4 id=4 data-nosnippet>4</a>//!
@@ -187,33 +187,53 @@
 <a href=#187 id=187 data-nosnippet>187</a>//! cargo test
 <a href=#188 id=188 data-nosnippet>188</a>//! ```
 <a href=#189 id=189 data-nosnippet>189</a>//!
-<a href=#190 id=190 data-nosnippet>190</a>//! # TODO
+<a href=#190 id=190 data-nosnippet>190</a>//! # Features
 <a href=#191 id=191 data-nosnippet>191</a>//!
-<a href=#192 id=192 data-nosnippet>192</a>//! - [x] Support reading connection info from environment variables
-<a href=#193 id=193 data-nosnippet>193</a>//! - [ ] Support store encrypted password in Git
-<a href=#194 id=194 data-nosnippet>194</a>//! - [x] Support Postgres and Redshift
-<a href=#195 id=195 data-nosnippet>195</a>//! - [ ] Support change password
-<a href=#196 id=196 data-nosnippet>196</a>//! - [ ] Visuallization (who can see what?)
-<a href=#197 id=197 data-nosnippet>197</a>//! - [ ] Apply show more detail about diff changes
-<a href=#198 id=198 data-nosnippet>198</a>//! - [ ] Inspect show more detail about user privileges
-<a href=#199 id=199 data-nosnippet>199</a>//!
-<a href=#200 id=200 data-nosnippet>200</a>//! # LICENSE
-<a href=#201 id=201 data-nosnippet>201</a>//!
-<a href=#202 id=202 data-nosnippet>202</a>//! MIT
-<a href=#203 id=203 data-nosnippet>203</a>
-<a href=#204 id=204 data-nosnippet>204</a></span><span class="kw">pub mod </span>apply;
-<a href=#205 id=205 data-nosnippet>205</a><span class="kw">pub mod </span>cli;
-<a href=#206 id=206 data-nosnippet>206</a><span class="kw">pub mod </span>config;
-<a href=#207 id=207 data-nosnippet>207</a><span class="kw">pub mod </span>connection;
-<a href=#208 id=208 data-nosnippet>208</a><span class="kw">pub mod </span>gen;
-<a href=#209 id=209 data-nosnippet>209</a><span class="kw">pub mod </span>inspect;
-<a href=#210 id=210 data-nosnippet>210</a><span class="kw">pub mod </span>validate;
-<a href=#211 id=211 data-nosnippet>211</a>
-<a href=#212 id=212 data-nosnippet>212</a><span class="kw">pub use </span>cli::Cli;
-<a href=#213 id=213 data-nosnippet>213</a><span class="kw">pub use </span>config::Config;
-<a href=#214 id=214 data-nosnippet>214</a><span class="kw">pub use </span>connection::DbConnection;
-<a href=#215 id=215 data-nosnippet>215</a>
-<a href=#216 id=216 data-nosnippet>216</a><span class="kw">pub use </span>apply::<span class="kw-2">*</span>;
-<a href=#217 id=217 data-nosnippet>217</a><span class="kw">pub use </span>gen::<span class="kw-2">*</span>;
-<a href=#218 id=218 data-nosnippet>218</a><span class="kw">pub use </span>inspect::<span class="kw-2">*</span>;
-<a href=#219 id=219 data-nosnippet>219</a><span class="kw">pub use </span>validate::<span class="kw-2">*</span>;</code></pre></div></section></main></body></html>
+<a href=#192 id=192 data-nosnippet>192</a>//! - [x] GitOps-style declarative configuration (YAML)
+<a href=#193 id=193 data-nosnippet>193</a>//! - [x] Support for PostgreSQL and Redshift
+<a href=#194 id=194 data-nosnippet>194</a>//! - [x] Three privilege levels: DATABASE, SCHEMA, TABLE
+<a href=#195 id=195 data-nosnippet>195</a>//! - [x] User lifecycle management (create, update, delete with `--delete-users`)
+<a href=#196 id=196 data-nosnippet>196</a>//! - [x] Environment variable substitution in connection strings
+<a href=#197 id=197 data-nosnippet>197</a>//! - [x] Dry-run mode for safe testing
+<a href=#198 id=198 data-nosnippet>198</a>//! - [x] SQL injection prevention with identifier escaping
+<a href=#199 id=199 data-nosnippet>199</a>//! - [x] Configuration validation
+<a href=#200 id=200 data-nosnippet>200</a>//! - [x] Database inspection tools
+<a href=#201 id=201 data-nosnippet>201</a>//! - [x] Password generation (including MD5 for Redshift)
+<a href=#202 id=202 data-nosnippet>202</a>//!
+<a href=#203 id=203 data-nosnippet>203</a>//! # Current Limitations
+<a href=#204 id=204 data-nosnippet>204</a>//!
+<a href=#205 id=205 data-nosnippet>205</a>//! - Privileges are **not automatically revoked** when removed from config
+<a href=#206 id=206 data-nosnippet>206</a>//!   - Use `--delete-users` to fully reset user privileges, or
+<a href=#207 id=207 data-nosnippet>207</a>//!   - Manually revoke using SQL before re-applying
+<a href=#208 id=208 data-nosnippet>208</a>//! - Superusers are never automatically deleted (safety measure)
+<a href=#209 id=209 data-nosnippet>209</a>//! - No built-in visualization of privilege relationships
+<a href=#210 id=210 data-nosnippet>210</a>//!
+<a href=#211 id=211 data-nosnippet>211</a>//! # Roadmap
+<a href=#212 id=212 data-nosnippet>212</a>//!
+<a href=#213 id=213 data-nosnippet>213</a>//! - [ ] Add `--revoke-unmanaged-privileges` flag for automatic privilege cleanup
+<a href=#214 id=214 data-nosnippet>214</a>//! - [ ] Support for encrypted password storage in Git
+<a href=#215 id=215 data-nosnippet>215</a>//! - [ ] Enhanced diff reporting in apply command
+<a href=#216 id=216 data-nosnippet>216</a>//! - [ ] Privilege visualization (who can see what?)
+<a href=#217 id=217 data-nosnippet>217</a>//! - [ ] Support for row-level security policies
+<a href=#218 id=218 data-nosnippet>218</a>//!
+<a href=#219 id=219 data-nosnippet>219</a>//! # LICENSE
+<a href=#220 id=220 data-nosnippet>220</a>//!
+<a href=#221 id=221 data-nosnippet>221</a>//! MIT
+<a href=#222 id=222 data-nosnippet>222</a>
+<a href=#223 id=223 data-nosnippet>223</a></span><span class="kw">pub mod </span>apply;
+<a href=#224 id=224 data-nosnippet>224</a><span class="kw">pub mod </span>cli;
+<a href=#225 id=225 data-nosnippet>225</a><span class="kw">pub mod </span>config;
+<a href=#226 id=226 data-nosnippet>226</a><span class="kw">pub mod </span>connection;
+<a href=#227 id=227 data-nosnippet>227</a><span class="kw">pub mod gen</span>;
+<a href=#228 id=228 data-nosnippet>228</a><span class="kw">pub mod </span>inspect;
+<a href=#229 id=229 data-nosnippet>229</a><span class="kw">pub mod </span>validate;
+<a href=#230 id=230 data-nosnippet>230</a>
+<a href=#231 id=231 data-nosnippet>231</a><span class="kw">pub use </span>cli::Cli;
+<a href=#232 id=232 data-nosnippet>232</a><span class="kw">pub use </span>config::Config;
+<a href=#233 id=233 data-nosnippet>233</a><span class="kw">pub use </span>connection::DbConnection;
+<a href=#234 id=234 data-nosnippet>234</a>
+<a href=#235 id=235 data-nosnippet>235</a><span class="kw">pub use </span>apply::<span class="kw-2">*</span>;
+<a href=#236 id=236 data-nosnippet>236</a><span class="kw">pub use gen</span>::<span class="kw-2">*</span>;
+<a href=#237 id=237 data-nosnippet>237</a><span class="kw">pub use </span>inspect::<span class="kw-2">*</span>;
+<a href=#238 id=238 data-nosnippet>238</a><span class="kw">pub use </span>validate::<span class="kw-2">*</span>;
+</code></pre></div></section></main></body></html>
